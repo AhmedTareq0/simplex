@@ -1,8 +1,15 @@
 import { Routes } from '@angular/router';
+import { authGuard, guestGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
+    path: 'auth',
+    canActivate: [guestGuard],
+    loadChildren: () => import('./auth/auth.routes').then((m) => m.authRoutes),
+  },
+  {
     path: '',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./layout/main-layout/main-layout.component').then((m) => m.MainLayoutComponent),
     children: [
@@ -10,7 +17,7 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadComponent: () =>
-          import('./features/dashboard/coming-soon.component').then((m) => m.ComingSoonComponent),
+          import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
       },
       {
         path: 'customer-support',
@@ -22,7 +29,7 @@ export const routes: Routes = [
       {
         path: 'chat',
         loadComponent: () =>
-          import('./features/chat/coming-soon.component').then((m) => m.ComingSoonComponent),
+          import('./features/chat/chat.component').then((m) => m.ChatComponent),
       },
       {
         path: 'settings',

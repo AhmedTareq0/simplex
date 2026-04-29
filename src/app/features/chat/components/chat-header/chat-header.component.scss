@@ -1,0 +1,54 @@
+.chat-header {
+  height: 60px;
+  background: #ededed;
+  display: flex;
+  padding: 8px 16px;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.14);
+
+  &__image {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    margin-right: 12px;
+    flex: 1;
+  }
+
+  &__name {
+    font-size: 16px;
+    font-weight: 500;
+    color: #111b21;
+  }
+
+  &__status {
+    font-size: 13px;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #54656f;
+    cursor: pointer;
+
+    svg {
+      padding: 8px;
+      border-radius: 50%;
+      transition: background 0.2s;
+       width: 32px;
+      height: 32px;
+
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.05);
+      }
+    }
+  }
+}

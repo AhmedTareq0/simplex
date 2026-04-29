@@ -1,12 +1,12 @@
 import { Component, ChangeDetectionStrategy, signal, input, output, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { IconComponent, AppIconName } from '../../shared/components/icon/icon.component';
+import { AuthLocalService } from '../../auth/services/auth-local.service';
 
 export interface SidebarItem {
   link: string;
   title: string;
   icon?: AppIconName;
-  comingSoon?: boolean;
 }
 
 @Component({
@@ -19,6 +19,7 @@ export interface SidebarItem {
 })
 export class SidebarComponent {
   private router = inject(Router);
+  private authService = inject(AuthLocalService);
 
   sidebarList = input.required<SidebarItem[]>();
   isMobileMenuOpen = input.required<boolean>();
@@ -35,7 +36,6 @@ export class SidebarComponent {
   }
 
   logout() {
-    localStorage.clear();
-    this.router.navigate(['/auth/login']);
+    this.authService.logout();
   }
 }

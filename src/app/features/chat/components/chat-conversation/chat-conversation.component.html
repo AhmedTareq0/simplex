@@ -1,0 +1,14 @@
+<div class="chat-conversation" [class.chat-conversation--active]="selected" (click)="onClick()">
+  <div class="chat-conversation__avatar">
+    <img [src]="imageUrl" alt="display picture" />
+  </div>
+  <div class="chat-conversation__content">
+    <div class="chat-conversation__row">
+      <span class="chat-conversation__name">{{ displayName }}</span>
+      <span *ngIf="timestamp" class="chat-conversation__timestamp">{{ timestamp }}</span>
+    </div>
+    <div class="chat-conversation__row">
+      <span class="chat-conversation__message">{{ messageText }}</span>
+    </div>
+  </div>
+</div>

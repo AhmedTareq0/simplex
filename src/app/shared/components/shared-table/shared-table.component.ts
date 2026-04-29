@@ -1,70 +1,26 @@
+import { Component, Input, ContentChild, TemplateRef, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ContentChild,
-  EventEmitter,
-  Input,
-  Output,
-  TemplateRef
-} from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { MenuItem } from 'primeng/api';
+import { TableModule } from 'primeng/table';
+import { MenuModule } from 'primeng/menu';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { MenuModule } from 'primeng/menu';
-import { SelectModule } from 'primeng/select';
-import { TableModule } from 'primeng/table';
 import { TooltipModule } from 'primeng/tooltip';
-
-import { AppIconName, IconComponent } from '../icon/icon.component';
-
-export type TableCellType = 'text' | 'number' | 'date' | 'status' | 'badge';
-export type TableFilterType = 'text' | 'dropdown';
+import { MenuItem } from 'primeng/api';
+import { SelectModule } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
+import { IconComponent } from '../icon/icon.component';
 
 export interface TableColumn {
   field: string;
   header: string;
-  type?: TableCellType;
-  filterable?: boolean;
-  filterType?: TableFilterType;
-  filterOptions?: Array<Record<string, unknown>>;
+  type?: 'text' | 'number' | 'date' | 'status' | 'badge';
+  filterable?: boolean; // إيقاف أو تشغيل الفلتر لهذا العمود
+  filterType?: 'text' | 'dropdown' | 'date' | 'boolean';
+  filterOptions?: any[];
   placeholder?: string;
-  align?: 'start' | 'center' | 'end';
-  formatter?: (value: unknown, row: Record<string, unknown>) => string;
+  color?: string;
+  formatter?: (value: any, row: any) => string;
 }
-
-export interface TableAction {
-  id: string;
-  label: string;
-  description?: string;
-  icon?: AppIconName;
-  variant?: 'default' | 'danger';
-  showIf?: (row: Record<string, unknown>) => boolean;
-  command?: (row: Record<string, unknown>) => void;
-}
-
-export interface TableLabels {
-  total: string;
-  searchPlaceholder: string;
-  filterTooltip: string;
-  printTooltip: string;
-  actionsHeader: string;
-  view: string;
-  edit: string;
-  delete: string;
-}
-
-const DEFAULT_LABELS: TableLabels = {
-  total: 'Total',
-  searchPlaceholder: 'Search…',
-  filterTooltip: 'Toggle filters',
-  printTooltip: 'Print table',
-  actionsHeader: 'Actions',
-  view: 'View',
-  edit: 'Edit',
-  delete: 'Delete'
-};
 
 @Component({
   selector: 'app-shared-table',
@@ -81,150 +37,98 @@ const DEFAULT_LABELS: TableLabels = {
     IconComponent
   ],
   templateUrl: './shared-table.component.html',
-  styleUrls: ['./shared-table.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['./shared-table.component.scss']
 })
 export class SharedTableComponent {
-  @Input() data: Array<Record<string, unknown>> = [];
+  @Input() data: any[] = [];
   @Input() columns: TableColumn[] = [];
-  @Input() title = 'Data Table';
-  @Input() showToolbar = true;
-  @Input() showSearch = true;
-  @Input() showPrint = true;
-  @Input() showFilter = true;
-  @Input() showActions = true;
-  @Input() showPaginator = true;
-  @Input() rows = 10;
-  @Input() emptyMessage = 'No data available';
-  @Input() showView = false;
-  @Input() showEdit = false;
-  @Input() showDelete = false;
-  @Input() labels: Partial<TableLabels> = {};
-  @Input() rowActions: TableAction[] = [];
-  @Input() size: 'small' | 'normal' | 'large' = 'normal';
+  @Input() title: string = 'جدول البيانات';
+  @Input() showToolbar: boolean = true;
+  @Input() showSearch: boolean = true;
+  @Input() showPrint: boolean = true;
+  @Input() showFilter: boolean = true;
+  @Input() showActions: boolean = true;
+  @Input() showPaginator: boolean = true;
+  @Input() rows: number = 10;
+  @Input() emptyMessage: string = 'لا توجد بيانات';
 
-  @Output() view = new EventEmitter<Record<string, unknown>>();
-  @Output() edit = new EventEmitter<Record<string, unknown>>();
-  @Output() delete = new EventEmitter<Record<string, unknown>>();
-  @Output() action = new EventEmitter<{ id: string; row: Record<string, unknown> }>();
+  @Input() showView: boolean = true;
+  @Input() showEdit: boolean = true;
+  @Input() showDelete: boolean = true;
+  @Input() customActions: MenuItem[] = [];
+  
+  @Input() labels: any = {}; // To support the current dashboard passing labels
 
-  @ContentChild('bodyTpl') bodyTemplate?: TemplateRef<unknown>;
-  @ContentChild('filterTpl') filterTemplate?: TemplateRef<unknown>;
+  @Output() onView = new EventEmitter<any>();
+  @Output() onEdit = new EventEmitter<any>();
+  @Output() onDelete = new EventEmitter<any>();
+  @Output() onAction = new EventEmitter<{ type: string, data: any }>();
 
-  isFilterVisible = false;
+  @ContentChild('bodyTpl') bodyTemplate!: TemplateRef<any>;
+  @ContentChild('filterTpl') filterTemplate!: TemplateRef<any>;
 
-  get mergedLabels(): TableLabels {
-    return { ...DEFAULT_LABELS, ...this.labels };
-  }
+  public isFilterVisible: boolean = false;
+  private selectedRow: any;
+  private readonly colorPalette = ['#2563eb', '#4f46e5', '#7c3aed', '#db2777', '#059669', '#d97706'];
+  private activeMenu: any;
 
-  get tableStyleClass(): string {
-    const sizeClass =
-      this.size === 'small'
-        ? 'p-datatable-sm'
-        : this.size === 'large'
-          ? 'p-datatable-lg'
-          : '';
+  get filterFields(): string[] { return this.columns.map(c => c.field); }
 
-    return ['app-shared-table__prime', sizeClass].filter(Boolean).join(' ');
-  }
-
-  get filterFields(): string[] {
-    return this.columns.map((column) => column.field);
-  }
-
-  toggleFilters(): void {
+  toggleFilters() {
     this.isFilterVisible = !this.isFilterVisible;
   }
 
-  buildActionItems(row: Record<string, unknown>): MenuItem[] {
-    if (this.rowActions.length > 0) {
-      return this.rowActions
-        .filter((action) => (action.showIf ? action.showIf(row) : true))
-        .map((action) => ({
-          id: action.id,
-          label: action.label,
+  get actionItems(): MenuItem[] {
+    if (this.customActions && this.customActions.length > 0) {
+       return this.customActions
+         .filter(action => {
+           const actionAny = action as any;
+           if (typeof actionAny.showIf === 'function') {
+             return actionAny.showIf(this.selectedRow);
+           }
+           return action.visible !== false;
+         })
+         .map(action => ({
+          ...action,
           command: () => {
-            action.command?.(row);
-            this.action.emit({ id: action.id, row });
+             if (action.command) action.command({ item: action });
+             this.onAction.emit({ type: action.id || action.label || 'custom', data: this.selectedRow });
           }
-        }));
+       }));
     }
 
     const items: MenuItem[] = [];
-
-    if (this.showView) {
-      items.push({
-        id: 'view',
-        label: this.mergedLabels.view,
-        command: () => this.view.emit(row)
-      });
-    }
-
-    if (this.showEdit) {
-      items.push({
-        id: 'edit',
-        label: this.mergedLabels.edit,
-        command: () => this.edit.emit(row)
-      });
-    }
-
-    if (this.showDelete) {
-      items.push({
-        id: 'delete',
-        label: this.mergedLabels.delete,
-        command: () => this.delete.emit(row)
-      });
-    }
-
+    if (this.showView) items.push({ id: 'view', label: 'عرض التفاصيل', command: () => this.onView.emit(this.selectedRow) });
+    if (this.showEdit) items.push({ id: 'edit', label: 'تعديل السجل', command: () => this.onEdit.emit(this.selectedRow) });
+    if (this.showDelete) items.push({ id: 'delete', label: 'حذف السجل', command: () => this.onDelete.emit(this.selectedRow) });
     return items;
   }
 
-  getActionMeta(id: string): { icon: AppIconName; danger: boolean } {
-    switch (id) {
-      case 'delete':
-        return { icon: 'trash', danger: true };
-      case 'edit':
-        return { icon: 'pencil', danger: false };
-      case 'view':
-        return { icon: 'eye', danger: false };
-      default:
-        return { icon: 'moreVertical', danger: false };
-    }
+  getSubtext(item: MenuItem): string {
+    if (item.id === 'view') return 'رؤية كافة تفاصيل البيانات';
+    if (item.id === 'edit') return 'تعديل بيانات هذا السجل';
+    if (item.id === 'delete') return 'حذف السجل بشكل نهائي';
+    return item['description'] || 'إجراء إضافي على السجل';
   }
 
-  getCellValue(column: TableColumn, row: Record<string, unknown>): string {
-    const value = row[column.field];
-
-    if (column.formatter) {
-      return column.formatter(value, row);
-    }
-
-    if (value == null) {
-      return '—';
-    }
-
-    if (column.type === 'date') {
-      const date = value instanceof Date ? value : new Date(String(value));
-      return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleDateString();
-    }
-
-    return String(value);
-  }
-
-  getAlign(column: TableColumn): string {
-    switch (column.align) {
-      case 'center':
-        return 'center';
-      case 'end':
-        return 'end';
-      default:
-        return 'start';
+  setSelectedRow(row: any) { this.selectedRow = row; }
+  
+  closeActiveMenu() {
+    if (this.activeMenu) {
+      this.activeMenu.hide();
+      this.activeMenu = null;
     }
   }
-
-  printTable(): void {
-    if (typeof window !== 'undefined') {
-      window.print();
-    }
+  
+  setActiveMenu(menu: any) {
+    this.closeActiveMenu();
+    this.activeMenu = menu;
   }
+
+  onMenuHide() {
+    this.activeMenu = null;
+  }
+  
+  getColColor(index: number, isText: boolean): string { return this.colorPalette[index % this.colorPalette.length]; }
+  printTable() { window.print(); }
 }

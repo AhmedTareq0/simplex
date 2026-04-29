@@ -1,0 +1,73 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 100%;
+}
+
+:host ::ng-deep .layout-content__inner {
+  padding: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+:host ::ng-deep .layout-content {
+  overflow: hidden !important;
+}
+
+/* Direct override for layout-content__inner when chat page is active */
+.layout-content__inner.chat-page-active {
+  padding: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+@media (min-width: 768px) {
+  .layout-content__inner.chat-page-active {
+    padding: 0 !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .layout-content__inner.chat-page-active {
+    padding: 0 !important;
+  }
+}
+
+.chat-layout {
+  display: flex;
+  height: 94vh;
+  background: #fff;
+  overflow: hidden;
+
+  &__left {
+    min-width: 350px;
+    width: 30%;
+    max-width: 450px;
+    border-left: 1px solid rgba(0, 0, 0, 0.14);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+
+  &__right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border-left: 1px solid rgba(0, 0, 0, 0.14);
+  }
+}
+
+@media (max-width: 768px) {
+  .chat-layout {
+    &__left {
+      min-width: 100%;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    &__right {
+      display: none;
+    }
+  }
+}

@@ -1,0 +1,26 @@
+<div class="chat-layout">
+  <div class="chat-layout__left">
+    <app-chat-list
+      [users]="users()"
+      [currentUserId]="currentUserId"
+      [accountPicture]="accountPicture"
+      [lastMessages]="lastMessages()"
+      [selectedUserId]="selectedPerson()?.sub || ''"
+      (selectUser)="onSelectUser($event)"
+    />
+  </div>
+  <div class="chat-layout__right">
+    <ng-container *ngIf="selectedPerson(); else emptyChat">
+      <app-chat-box
+        [person]="selectedPerson()"
+        [messages]="messages()"
+        [currentUserId]="currentUserId"
+        [isOnline]="false"
+        [users]="users()"
+      />
+    </ng-container>
+    <ng-template #emptyChat>
+      <app-chat-empty />
+    </ng-template>
+  </div>
+</div>

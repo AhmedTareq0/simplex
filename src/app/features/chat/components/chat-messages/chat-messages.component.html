@@ -1,0 +1,18 @@
+<div class="chat-messages">
+  <div class="chat-messages__wrapper" #scrollContainer>
+    <div class="chat-messages__container">
+      <app-chat-message
+        *ngFor="let message of messages; let i = index"
+        [message]="message"
+        [isOwn]="isOwnMessage(message)"
+        [senderName]="getSenderInfo(message).name"
+        [senderPicture]="getSenderInfo(message).picture"
+        [showSenderInfo]="shouldShowSenderInfo(message, i)"
+      />
+    </div>
+  </div>
+  <app-chat-footer
+    (sendMessage)="onSendMessage($event)"
+    (sendFile)="onSendFile($event)"
+  />
+</div>

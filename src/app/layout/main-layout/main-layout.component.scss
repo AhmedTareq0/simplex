@@ -47,8 +47,30 @@
 .layout-content {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   background: var(--content-bg);
   position: relative;
+
+  /* Custom Scrollbar specifically for the content area */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--color-primary, #0ea5e9) 40%, transparent);
+    border-radius: 10px;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--color-primary, #0ea5e9) 70%, transparent);
+  }
+
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-primary, #0ea5e9) 40%, transparent) transparent;
 }
 
 .layout-content__glow {

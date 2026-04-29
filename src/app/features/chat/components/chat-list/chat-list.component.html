@@ -1,0 +1,16 @@
+<div class="chat-list">
+  <app-chat-list-header [accountPicture]="accountPicture" />
+  <app-chat-search (search)="onSearch($event)" />
+  <div class="chat-list__conversations">
+    <app-chat-conversation
+      *ngFor="let user of filteredUsers; let last = last"
+      [user]="user"
+      [lastMessage]="getLastMessage(user.sub)"
+      [selected]="user.sub === selectedUserId"
+      (select)="onSelectUser(user)"
+    />
+    <div *ngIf="filteredUsers.length === 0" class="chat-list__empty">
+      لم يتم العثور على محادثات
+    </div>
+  </div>
+</div>

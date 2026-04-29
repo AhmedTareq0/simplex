@@ -1,193 +1,151 @@
-<div class="overflow-hidden rounded-[var(--radius-2xl)] border border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-[var(--shadow-sm)]">
-  @if (showToolbar) {
-    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-      <div class="flex items-center gap-4">
-        <div class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--color-primary-50)] text-[var(--color-primary-700)]">
-          <app-icon name="table" />
-        </div>
+<div class="st-wrapper">
 
-        <div class="grid gap-[2px]">
-          <h3 class="m-0 text-lg font-[var(--font-weight-bold)] text-[var(--color-text-primary)]">{{ title }}</h3>
-          <p class="m-0 text-xs text-[var(--color-text-tertiary)]">{{ mergedLabels.total }}: {{ data.length }}</p>
-        </div>
+  <!-- ── Toolbar ─────────────────────────────────────────────── -->
+  <div class="st-toolbar" *ngIf="showToolbar">
+
+    <div class="st-toolbar__info">
+      <div class="st-toolbar__icon-box">
+        <app-icon name="table" size="sm" />
       </div>
-
-      <div class="flex flex-wrap items-center gap-3">
-        @if (showSearch) {
-          <div class="relative min-w-[min(20rem,100%)]">
-            <app-icon name="search" size="sm" class="absolute start-3 top-1/2 -translate-y-1/2 text-[var(--color-text-tertiary)]" />
-            <input
-              #searchInput
-              pInputText
-              type="text"
-              class="min-h-11 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-card-bg)] px-4 ps-10 text-[var(--color-text-primary)]"
-              [placeholder]="mergedLabels.searchPlaceholder"
-              (input)="dt.filterGlobal(searchInput.value, 'contains')"
-            />
-          </div>
-        }
-
-        @if (showFilter) {
-          <p-button
-            [text]="true"
-            [rounded]="true"
-            (click)="toggleFilters()"
-            [pTooltip]="mergedLabels.filterTooltip"
-            tooltipPosition="top"
-            [styleClass]="
-              '!w-10 !h-10 !min-h-0 !border ' +
-              (isFilterVisible
-                ? '!border-[var(--color-primary-200)] !bg-[var(--color-primary-50)] !text-[var(--color-primary-700)]'
-                : '!border-[var(--color-border)] !bg-[var(--color-card-bg)] !text-[var(--color-text-secondary)]')
-            "
-          >
-            <ng-template pTemplate="content">
-              <app-icon name="filter" size="sm" />
-            </ng-template>
-          </p-button>
-        }
-
-        @if (showPrint) {
-          <p-button
-            [text]="true"
-            [rounded]="true"
-            (click)="printTable()"
-            [pTooltip]="mergedLabels.printTooltip"
-            tooltipPosition="top"
-            styleClass="!w-10 !h-10 !min-h-0 !border !border-[var(--color-border)] !bg-[var(--color-card-bg)] !text-[var(--color-text-secondary)]"
-          >
-            <ng-template pTemplate="content">
-              <app-icon name="print" size="sm" />
-            </ng-template>
-          </p-button>
-        }
+      <div class="st-toolbar__text">
+        <h3 class="st-toolbar__title">{{ title }}</h3>
+        <p class="st-toolbar__count" *ngIf="data">الإجمالي {{ data.length }}</p>
       </div>
     </div>
-  }
 
-  <p-table
-    #dt
-    [value]="data"
-    [columns]="columns"
-    [globalFilterFields]="filterFields"
-    [rows]="rows"
-    [paginator]="showPaginator"
-    [rowsPerPageOptions]="[5, 10, 25, 50]"
-    [styleClass]="tableStyleClass"
-  >
-    <ng-template pTemplate="header" let-columns>
-      <tr>
-        @for (column of columns; track column.field) {
-          <th [style.text-align]="getAlign(column)">{{ column.header }}</th>
-        }
+    <div class="st-toolbar__actions">
+      <!-- Search -->
+      <div class="st-search" *ngIf="showSearch">
+        <span class="st-search__icon">
+          <app-icon name="search" size="sm" />
+        </span>
+        <input #searchInput type="text" class="st-search__input" placeholder="ابحث عن أي شيء..."
+          (input)="dt.filterGlobal($any($event.target).value, 'contains')" />
+      </div>
 
-        @if (showActions) {
-          <th class="w-px whitespace-nowrap text-center">{{ mergedLabels.actionsHeader }}</th>
-        }
-      </tr>
+      <!-- Filter Button -->
+      <button *ngIf="showFilter" class="st-btn-icon" [class.st-btn-icon--active]="isFilterVisible"
+        (click)="toggleFilters()" pTooltip="تصفية البيانات" tooltipPosition="top">
+        <app-icon name="filter" size="sm" />
+      </button>
 
-      @if (isFilterVisible) {
-        <tr class="bg-[var(--color-surface)]">
-          @for (column of columns; track column.field) {
-            <th>
-              @if (column.filterable) {
-                @if (filterTemplate) {
-                  <ng-container
-                    *ngTemplateOutlet="filterTemplate; context: { $implicit: column, table: dt }"
-                  />
-                } @else if (column.filterType === 'dropdown') {
-                  <p-select
-                    [options]="column.filterOptions || []"
-                    optionLabel="label"
-                    optionValue="value"
-                    [showClear]="true"
-                    appendTo="body"
-                    styleClass="app-shared-table__filter-select"
-                    (onChange)="dt.filter($event.value, column.field, 'equals')"
-                  />
-                } @else {
-                  <input
-                    #filterInput
-                    pInputText
-                    type="text"
-                    class="min-h-10 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] px-4 text-[var(--color-text-primary)]"
-                    [placeholder]="column.placeholder || column.header"
-                    (input)="dt.filter(filterInput.value, column.field, 'contains')"
-                  />
-                }
-              }
-            </th>
-          }
+      <!-- Print Button -->
+      <button *ngIf="showPrint" class="st-btn-icon" (click)="printTable()" pTooltip="طباعة البيانات"
+        tooltipPosition="top">
+        <app-icon name="print" size="sm" />
+      </button>
+    </div>
+  </div>
 
-          @if (showActions) {
-            <th></th>
-          }
+  <!-- ── Table ───────────────────────────────────────────────── -->
+  <div class="st-table-scroll">
+    <p-table #dt [value]="data" [columns]="columns" [globalFilterFields]="filterFields"
+      [tableStyle]="{ 'min-width': '40rem' }" [rows]="rows" [paginator]="showPaginator"
+      [rowsPerPageOptions]="[5, 10, 25, 50]" styleClass="st-prime-table" dir="rtl">
+      <!-- Header -->
+      <ng-template pTemplate="header" let-columns>
+        <tr class="st-header-row">
+          <th *ngFor="let col of columns" class="st-th">{{ col.header }}</th>
+          <th *ngIf="showActions" class="st-th st-th--actions">الإجراءات</th>
         </tr>
-      }
-    </ng-template>
 
-    <ng-template pTemplate="body" let-rowData let-columns="columns">
-      <tr>
-        @for (column of columns; track column.field) {
-          <td [style.text-align]="getAlign(column)">
-            @if (bodyTemplate) {
-              <ng-container
-                *ngTemplateOutlet="bodyTemplate; context: { $implicit: rowData, col: column }"
-              />
-            } @else {
-              <span>{{ getCellValue(column, rowData) }}</span>
-            }
+        <!-- Filter Row -->
+        <tr *ngIf="isFilterVisible" class="st-filter-row">
+          <th *ngFor="let col of columns" class="st-filter-cell">
+            <div *ngIf="col.filterable">
+              <ng-container *ngIf="filterTemplate; else autoFilters">
+                <ng-container *ngTemplateOutlet="filterTemplate; context: {$implicit: col, table: dt}"></ng-container>
+              </ng-container>
+              <ng-template #autoFilters>
+                <div [ngSwitch]="col.filterType">
+                  <p-select *ngSwitchCase="'dropdown'" [options]="col.filterOptions"
+                    (onChange)="dt.filter($event.value, col.field, 'equals')"
+                    [placeholder]="col.placeholder || 'اختر...'" [showClear]="true" appendTo="body"
+                    styleClass="st-filter-select" />
+                  <input *ngSwitchDefault pInputText type="text" class="st-filter-input"
+                    (input)="dt.filter($any($event.target).value, col.field, 'contains')"
+                    [placeholder]="col.placeholder || col.header" />
+                </div>
+              </ng-template>
+            </div>
+          </th>
+          <th *ngIf="showActions" class="st-filter-cell"></th>
+        </tr>
+      </ng-template>
+
+      <!-- Body -->
+      <ng-template pTemplate="body" let-rowData let-columns="columns">
+        <tr class="st-body-row">
+          <td *ngFor="let col of columns; let i = index" class="st-td">
+            <ng-container *ngIf="bodyTemplate; else defaultCell">
+              <ng-container *ngTemplateOutlet="bodyTemplate; context: {$implicit: rowData, col: col}"></ng-container>
+            </ng-container>
+            <ng-template #defaultCell>
+              <div [ngSwitch]="col.type">
+                <!-- Badge Type -->
+                <span *ngSwitchCase="'badge'" 
+                  class="st-badge" 
+                  [style.background-color]="col.color ? col.color + '15' : ''"
+                  [style.color]="col.color || ''"
+                  [style.border-color]="col.color ? col.color + '30' : ''">
+                  {{ col.formatter ? col.formatter(rowData[col.field], rowData) : rowData[col.field] }}
+                </span>
+
+                <!-- Status Type -->
+                <div *ngSwitchCase="'status'" class="st-status">
+                  <span class="st-status__dot" [style.background-color]="col.color || 'var(--color-primary)'"></span>
+                  <span class="st-status__text">{{ col.formatter ? col.formatter(rowData[col.field], rowData) : rowData[col.field] }}</span>
+                </div>
+
+                <!-- Default / Text Type -->
+                <span *ngSwitchDefault [class.st-td__primary]="i === 0">
+                  {{ col.formatter ? col.formatter(rowData[col.field], rowData) : rowData[col.field] }}
+                </span>
+              </div>
+            </ng-template>
           </td>
-        }
 
-        @if (showActions) {
-          <td class="w-px whitespace-nowrap text-center">
-            <p-button
-              [text]="true"
-              [rounded]="true"
-              (click)="rowMenu.toggle($event)"
-              styleClass="!w-10 !h-10 !min-h-0 !border !border-[var(--color-border)] !bg-[var(--color-card-bg)] !text-[var(--color-text-secondary)]"
-            >
-              <ng-template pTemplate="content">
+          <td *ngIf="showActions" class="st-td st-td--actions">
+            <div (click)="$event.stopPropagation()">
+              <button #btn type="button" class="st-action-btn"
+                (click)="menu.toggle($event); setSelectedRow(rowData); setActiveMenu(menu)">
                 <app-icon name="moreVertical" size="sm" />
-              </ng-template>
-            </p-button>
+              </button>
 
-            <p-menu
-              #rowMenu
-              [popup]="true"
-              [model]="buildActionItems(rowData)"
-              appendTo="body"
-              styleClass="app-shared-table__menu"
-            >
-              <ng-template pTemplate="item" let-item>
-                <button type="button" class="app-shared-table__menu-item" (click)="item.command?.()">
-                  <span
-                    class="app-shared-table__menu-icon"
-                    [class.app-shared-table__menu-icon--danger]="getActionMeta(item.id).danger"
-                  >
-                    <app-icon [name]="getActionMeta(item.id).icon" size="sm" />
-                  </span>
-                  <span class="app-shared-table__menu-label">{{ item.label }}</span>
-                </button>
-              </ng-template>
-            </p-menu>
+              <p-menu #menu [model]="actionItems" [popup]="true" appendTo="body" (onHide)="onMenuHide()"
+                styleClass="st-action-menu">
+                <ng-template pTemplate="item" let-item>
+                  <div class="st-menu-item" (click)="item.command?.({item: item})">
+                    <span class="st-menu-item__icon" [class.st-menu-item__icon--danger]="item.id === 'delete'">
+                      <app-icon *ngIf="item.id === 'view'" name="eye" size="sm" />
+                      <app-icon *ngIf="item.id === 'edit'" name="pencil" size="sm" />
+                      <app-icon *ngIf="item.id === 'delete'" name="trash" size="sm" />
+                    </span>
+                    <div class="st-menu-item__text">
+                      <span class="st-menu-item__label">{{ item.label }}</span>
+                      <span class="st-menu-item__sub">{{ getSubtext(item) }}</span>
+                    </div>
+                  </div>
+                </ng-template>
+              </p-menu>
+            </div>
           </td>
-        }
-      </tr>
-    </ng-template>
+        </tr>
+      </ng-template>
 
-    <ng-template pTemplate="emptymessage">
-      <tr>
-        <td [attr.colspan]="columns.length + (showActions ? 1 : 0)" class="px-5 py-10">
-          <div class="grid justify-items-center gap-3">
-            <span class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-surface)] text-[var(--color-text-tertiary)]">
-              <app-icon name="inbox" size="lg" />
-            </span>
-            <p class="m-0 text-[var(--color-text-secondary)]">{{ emptyMessage }}</p>
-          </div>
-        </td>
-      </tr>
-    </ng-template>
-  </p-table>
+      <!-- Empty State -->
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [attr.colspan]="columns.length + (showActions ? 1 : 0)">
+            <div class="st-empty">
+              <span class="st-empty__icon">
+                <app-icon name="inbox" size="lg" />
+              </span>
+              <p class="st-empty__msg">{{ emptyMessage }}</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
 </div>

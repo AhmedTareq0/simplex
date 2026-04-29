@@ -1,0 +1,19 @@
+.chat-list {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #fff;
+
+  &__conversations {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+  }
+
+  &__empty {
+    padding: 20px;
+    text-align: center;
+    color: #667781;
+    font-size: 14px;
+  }
+}
