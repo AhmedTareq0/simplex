@@ -1,0 +1,21 @@
+.m-0 {
+  margin: 0;
+}
+.mt-4 {
+  margin-top: var(--space-4);
+}
+.mb-4 {
+  margin-bottom: var(--space-4);
+}
+.mx-4 {
+  margin-inline: var(--space-4);
+}
+.py-4 {
+  padding-block: var(--space-4);
+}
+.px-4 {
+  padding-inline: var(--space-4);
+}
+.gap-4 {
+  gap: var(--space-4);
+}

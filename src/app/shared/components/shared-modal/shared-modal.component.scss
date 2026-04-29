@@ -1,0 +1,8 @@
+:host {
+  display: block;
+}
+
+:host ::ng-deep .app-shared-modal-mask {
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+}

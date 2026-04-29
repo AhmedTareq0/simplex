@@ -1,0 +1,116 @@
+:host {
+  display: inline-flex;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+}
+
+.app-button {
+  --button-bg: var(--color-primary);
+  --button-color: var(--color-text-inverted);
+  --button-border: transparent;
+  --button-shadow: var(--shadow-sm);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  min-block-size: 44px;
+  padding-inline: var(--space-5);
+  padding-block: var(--space-3);
+  border: var(--border-thin) solid var(--button-border);
+  border-radius: var(--radius-lg);
+  background: var(--button-bg);
+  color: var(--button-color);
+  font: inherit;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  box-shadow: var(--button-shadow);
+  cursor: pointer;
+  transition:
+    transform var(--transition-fast) var(--easing-default),
+    box-shadow var(--transition-medium) var(--easing-default),
+    background-color var(--transition-medium) var(--easing-default),
+    color var(--transition-medium) var(--easing-default),
+    border-color var(--transition-medium) var(--easing-default);
+}
+
+.app-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.app-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.app-button:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 3px;
+}
+
+.app-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.app-button__content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.app-button__label {
+  white-space: nowrap;
+}
+
+.app-button--block {
+  inline-size: 100%;
+}
+
+.app-button--sm {
+  min-block-size: 36px;
+  padding-inline: var(--space-4);
+  padding-block: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.app-button--md {
+  font-size: var(--text-base);
+}
+
+.app-button--lg {
+  min-block-size: 52px;
+  padding-inline: var(--space-6);
+  padding-block: var(--space-4);
+  font-size: var(--text-lg);
+}
+
+.app-button--primary {
+  --button-bg: var(--color-primary-500);
+  --button-color: var(--color-text-inverted);
+}
+
+.app-button--secondary {
+  --button-bg: var(--color-card-bg);
+  --button-color: var(--color-text-primary);
+  --button-border: var(--color-border);
+}
+
+.app-button--danger {
+  --button-bg: var(--color-danger);
+  --button-color: var(--color-text-inverted);
+}
+
+.app-button--success {
+  --button-bg: var(--color-accent-500);
+  --button-color: var(--color-text-inverted);
+}
+
+.app-button--ghost {
+  --button-bg: transparent;
+  --button-color: var(--color-text-primary);
+  --button-border: transparent;
+  --button-shadow: none;
+}

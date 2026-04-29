@@ -1,0 +1,78 @@
+:host {
+  display: block;
+}
+
+:host ::ng-deep .app-shared-table__prime .p-datatable-thead > tr > th {
+  background: var(--color-card-bg);
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  border-width: 0 0 var(--border-thin);
+  border-color: var(--color-border);
+  padding: var(--space-4) var(--space-5);
+}
+
+:host ::ng-deep .app-shared-table__prime .p-datatable-tbody > tr > td {
+  color: var(--color-text-secondary);
+  border-width: 0 0 var(--border-thin);
+  border-color: var(--color-border);
+  padding: var(--space-4) var(--space-5);
+}
+
+:host ::ng-deep .app-shared-table__prime .p-datatable-tbody > tr:hover > td {
+  background: color-mix(in srgb, var(--color-primary-50) 40%, white);
+}
+
+:host ::ng-deep .app-shared-table__prime .p-paginator {
+  border-width: 0;
+  border-block-start: var(--border-thin) solid var(--color-border);
+  background: var(--color-surface);
+}
+
+:host ::ng-deep .app-shared-table__filter-select {
+  inline-size: 100%;
+}
+
+:host ::ng-deep .app-shared-table__filter-select .p-select {
+  min-block-size: 42px;
+  border-radius: var(--radius-lg);
+  border-color: var(--color-border);
+}
+
+.app-shared-table__menu {
+  min-width: 12rem;
+}
+
+.app-shared-table__menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  inline-size: 100%;
+  padding: var(--space-3);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  text-align: start;
+}
+
+.app-shared-table__menu-item:hover {
+  background: var(--color-surface);
+}
+
+.app-shared-table__menu-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary-700);
+}
+
+.app-shared-table__menu-icon--danger {
+  color: var(--color-danger);
+}
+
+.app-shared-table__menu-label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+}

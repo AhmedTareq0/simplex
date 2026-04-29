@@ -1,0 +1,18 @@
+.scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary-500) var(--color-background);
+}
+
+.scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.scrollbar::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-primary-500);
+  border-radius: var(--radius-full);
+}

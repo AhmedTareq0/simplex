@@ -1,0 +1,84 @@
+:host {
+  display: block;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.layout-shell {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  background: var(--content-bg);
+  overflow: hidden;
+  position: relative;
+  font-family: var(--font-body);
+}
+
+.layout-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  z-index: calc(var(--z-fixed) - 1);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-slow) var(--easing-default);
+
+  &.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  @media (min-width: 1024px) {
+    display: none;
+  }
+}
+
+.layout-main {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.layout-content {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--content-bg);
+  position: relative;
+}
+
+.layout-content__glow {
+  position: absolute;
+  top: 0;
+  inset-inline-end: 0;
+  width: 500px;
+  height: 500px;
+  background: color-mix(in srgb, var(--color-primary-100) 20%, transparent);
+  border-radius: var(--radius-full);
+  filter: blur(100px);
+  margin-inline-end: -256px;
+  margin-top: -256px;
+  pointer-events: none;
+}
+
+.layout-content__inner {
+  max-width: 110rem;
+  margin: 0 auto;
+  padding: var(--space-4);
+  position: relative;
+  z-index: var(--z-default);
+  width: 100%;
+  min-height: 100%;
+
+  @media (min-width: 768px) {
+    padding: var(--space-6);
+  }
+
+  @media (min-width: 1024px) {
+    padding: var(--space-10);
+  }
+}

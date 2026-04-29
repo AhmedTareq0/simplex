@@ -1,0 +1,74 @@
+<!-- Sidebar Container -->
+<aside class="sidebar"
+  [class.expanded]="!isCollapsed()"
+  [class.collapsed]="isCollapsed()"
+  [class.mobile-hidden]="!isMobileMenuOpen()"
+  [class.mobile-visible]="isMobileMenuOpen()">
+
+  <!-- Collapse Toggle Button -->
+  <button (click)="toggleCollapse()"
+    class="sidebar__collapse-btn"
+    [class.rotated]="!isCollapsed()">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+    </svg>
+  </button>
+
+  <!-- Header (Logo) -->
+  <div class="sidebar__header">
+    <img src="logo.png.webp" alt="Simplex CNC Logo" class="sidebar__logo-img" />
+  </div>
+
+  <!-- Navigation -->
+  <nav class="sidebar__nav">
+    @for (item of sidebarList(); track item.link) {
+      <div class="sidebar__nav-item">
+        <a [routerLink]="item.link"
+           routerLinkActive="active-nav-item"
+           #rla="routerLinkActive"
+           class="sidebar__link"
+           [class.centered]="isCollapsed()">
+
+          <!-- Active Indicator -->
+          @if (rla.isActive && !isCollapsed()) {
+            <div class="sidebar__active-indicator"></div>
+          }
+
+          <!-- Icon -->
+          <div class="sidebar__icon"
+               [class.dimmed]="item.comingSoon">
+            @if (item.icon) {
+              <app-icon [name]="item.icon" size="md" />
+            } @else {
+              <app-icon name="table" size="md" />
+            }
+          </div>
+
+          <!-- Label -->
+          <div class="sidebar__label" [class.hidden]="isCollapsed()">
+            <span [class.coming-soon-text]="item.comingSoon"
+                  [class.active-text]="rla.isActive">{{ item.title }}</span>
+
+            @if (item.comingSoon) {
+              <span class="sidebar__badge">قريباً</span>
+            }
+          </div>
+        </a>
+      </div>
+    }
+  </nav>
+
+  <!-- User Footer -->
+  <div class="sidebar__footer" [class.centered]="isCollapsed()">
+     
+
+    @if (!isCollapsed()) {
+      <div class="sidebar__logout">
+        <button (click)="logout()">
+          <app-icon name="user" size="sm" />
+          تسجيل خروج
+        </button>
+      </div>
+    }
+  </div>
+</aside>

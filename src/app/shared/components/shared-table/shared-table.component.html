@@ -1,0 +1,193 @@
+<div class="overflow-hidden rounded-[var(--radius-2xl)] border border-[var(--color-border)] bg-[var(--color-card-bg)] shadow-[var(--shadow-sm)]">
+  @if (showToolbar) {
+    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+      <div class="flex items-center gap-4">
+        <div class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--color-primary-50)] text-[var(--color-primary-700)]">
+          <app-icon name="table" />
+        </div>
+
+        <div class="grid gap-[2px]">
+          <h3 class="m-0 text-lg font-[var(--font-weight-bold)] text-[var(--color-text-primary)]">{{ title }}</h3>
+          <p class="m-0 text-xs text-[var(--color-text-tertiary)]">{{ mergedLabels.total }}: {{ data.length }}</p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        @if (showSearch) {
+          <div class="relative min-w-[min(20rem,100%)]">
+            <app-icon name="search" size="sm" class="absolute start-3 top-1/2 -translate-y-1/2 text-[var(--color-text-tertiary)]" />
+            <input
+              #searchInput
+              pInputText
+              type="text"
+              class="min-h-11 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-card-bg)] px-4 ps-10 text-[var(--color-text-primary)]"
+              [placeholder]="mergedLabels.searchPlaceholder"
+              (input)="dt.filterGlobal(searchInput.value, 'contains')"
+            />
+          </div>
+        }
+
+        @if (showFilter) {
+          <p-button
+            [text]="true"
+            [rounded]="true"
+            (click)="toggleFilters()"
+            [pTooltip]="mergedLabels.filterTooltip"
+            tooltipPosition="top"
+            [styleClass]="
+              '!w-10 !h-10 !min-h-0 !border ' +
+              (isFilterVisible
+                ? '!border-[var(--color-primary-200)] !bg-[var(--color-primary-50)] !text-[var(--color-primary-700)]'
+                : '!border-[var(--color-border)] !bg-[var(--color-card-bg)] !text-[var(--color-text-secondary)]')
+            "
+          >
+            <ng-template pTemplate="content">
+              <app-icon name="filter" size="sm" />
+            </ng-template>
+          </p-button>
+        }
+
+        @if (showPrint) {
+          <p-button
+            [text]="true"
+            [rounded]="true"
+            (click)="printTable()"
+            [pTooltip]="mergedLabels.printTooltip"
+            tooltipPosition="top"
+            styleClass="!w-10 !h-10 !min-h-0 !border !border-[var(--color-border)] !bg-[var(--color-card-bg)] !text-[var(--color-text-secondary)]"
+          >
+            <ng-template pTemplate="content">
+              <app-icon name="print" size="sm" />
+            </ng-template>
+          </p-button>
+        }
+      </div>
+    </div>
+  }
+
+  <p-table
+    #dt
+    [value]="data"
+    [columns]="columns"
+    [globalFilterFields]="filterFields"
+    [rows]="rows"
+    [paginator]="showPaginator"
+    [rowsPerPageOptions]="[5, 10, 25, 50]"
+    [styleClass]="tableStyleClass"
+  >
+    <ng-template pTemplate="header" let-columns>
+      <tr>
+        @for (column of columns; track column.field) {
+          <th [style.text-align]="getAlign(column)">{{ column.header }}</th>
+        }
+
+        @if (showActions) {
+          <th class="w-px whitespace-nowrap text-center">{{ mergedLabels.actionsHeader }}</th>
+        }
+      </tr>
+
+      @if (isFilterVisible) {
+        <tr class="bg-[var(--color-surface)]">
+          @for (column of columns; track column.field) {
+            <th>
+              @if (column.filterable) {
+                @if (filterTemplate) {
+                  <ng-container
+                    *ngTemplateOutlet="filterTemplate; context: { $implicit: column, table: dt }"
+                  />
+                } @else if (column.filterType === 'dropdown') {
+                  <p-select
+                    [options]="column.filterOptions || []"
+                    optionLabel="label"
+                    optionValue="value"
+                    [showClear]="true"
+                    appendTo="body"
+                    styleClass="app-shared-table__filter-select"
+                    (onChange)="dt.filter($event.value, column.field, 'equals')"
+                  />
+                } @else {
+                  <input
+                    #filterInput
+                    pInputText
+                    type="text"
+                    class="min-h-10 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] px-4 text-[var(--color-text-primary)]"
+                    [placeholder]="column.placeholder || column.header"
+                    (input)="dt.filter(filterInput.value, column.field, 'contains')"
+                  />
+                }
+              }
+            </th>
+          }
+
+          @if (showActions) {
+            <th></th>
+          }
+        </tr>
+      }
+    </ng-template>
+
+    <ng-template pTemplate="body" let-rowData let-columns="columns">
+      <tr>
+        @for (column of columns; track column.field) {
+          <td [style.text-align]="getAlign(column)">
+            @if (bodyTemplate) {
+              <ng-container
+                *ngTemplateOutlet="bodyTemplate; context: { $implicit: rowData, col: column }"
+              />
+            } @else {
+              <span>{{ getCellValue(column, rowData) }}</span>
+            }
+          </td>
+        }
+
+        @if (showActions) {
+          <td class="w-px whitespace-nowrap text-center">
+            <p-button
+              [text]="true"
+              [rounded]="true"
+              (click)="rowMenu.toggle($event)"
+              styleClass="!w-10 !h-10 !min-h-0 !border !border-[var(--color-border)] !bg-[var(--color-card-bg)] !text-[var(--color-text-secondary)]"
+            >
+              <ng-template pTemplate="content">
+                <app-icon name="moreVertical" size="sm" />
+              </ng-template>
+            </p-button>
+
+            <p-menu
+              #rowMenu
+              [popup]="true"
+              [model]="buildActionItems(rowData)"
+              appendTo="body"
+              styleClass="app-shared-table__menu"
+            >
+              <ng-template pTemplate="item" let-item>
+                <button type="button" class="app-shared-table__menu-item" (click)="item.command?.()">
+                  <span
+                    class="app-shared-table__menu-icon"
+                    [class.app-shared-table__menu-icon--danger]="getActionMeta(item.id).danger"
+                  >
+                    <app-icon [name]="getActionMeta(item.id).icon" size="sm" />
+                  </span>
+                  <span class="app-shared-table__menu-label">{{ item.label }}</span>
+                </button>
+              </ng-template>
+            </p-menu>
+          </td>
+        }
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td [attr.colspan]="columns.length + (showActions ? 1 : 0)" class="px-5 py-10">
+          <div class="grid justify-items-center gap-3">
+            <span class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-surface)] text-[var(--color-text-tertiary)]">
+              <app-icon name="inbox" size="lg" />
+            </span>
+            <p class="m-0 text-[var(--color-text-secondary)]">{{ emptyMessage }}</p>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

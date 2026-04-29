@@ -1,0 +1,13 @@
+.btn,
+.p-button {
+  font-family: var(--font-body);
+}
+
+.card,
+.p-card {
+  border-radius: var(--radius-xl);
+}
+
+:where(.p-inputtext) {
+  border-radius: var(--radius-lg);
+}

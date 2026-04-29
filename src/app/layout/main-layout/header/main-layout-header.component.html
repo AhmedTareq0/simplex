@@ -1,0 +1,47 @@
+<header class="layout-header">
+  <div class="layout-header__start">
+    <button
+      type="button"
+      class="layout-header__menu-btn"
+      (click)="menuClick.emit()"
+      aria-label="فتح القائمة"
+    >
+      <app-icon name="menu" size="md" />
+    </button>
+
+    <div class="layout-header__search">
+      <div class="layout-header__search-icon">
+        <app-icon name="search" size="sm" />
+      </div>
+      <input type="text" [placeholder]="searchPlaceholder()" />
+    </div>
+  </div>
+
+  <div class="layout-header__end">
+    <!-- Chat -->
+    <button type="button" class="layout-header__icon-btn" aria-label="الدردشة">
+      <app-icon name="chat" size="md" />
+    </button>
+
+    <!-- Language Toggle -->
+    <button type="button" class="layout-header__icon-btn" aria-label="تغيير اللغة" (click)="toggleLang()">
+      <span class="layout-header__lang-label">{{ isArabic() ? 'EN' : 'AR' }}</span>
+    </button>
+
+    <button type="button" class="layout-header__icon-btn" aria-label="الإشعارات">
+      <app-icon name="bell" size="md" />
+    </button>
+
+    <div class="layout-header__divider"></div>
+
+    <button type="button" class="layout-header__user-btn">
+      <div class="layout-header__user-info">
+        <span class="layout-header__user-name">{{ userName() }}</span>
+        <span class="layout-header__user-role">{{ userRole() }}</span>
+      </div>
+      <div class="layout-header__user-avatar">
+        <img [src]="avatarUrl()" [alt]="userName()" />
+      </div>
+    </button>
+  </div>
+</header>

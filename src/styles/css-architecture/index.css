@@ -1,0 +1,17 @@
+@import './base/_reset.css';
+@import './base/_global.css';
+@import './base/_accessibility.css';
+@import './layout/_container.css';
+@import './layout/_grid.css';
+@import './layout/_flex.css';
+@import './layout/_responsive.css';
+@import './utilities/_text.css';
+@import './utilities/_display.css';
+@import './utilities/_position.css';
+@import './utilities/_spacing.css';
+@import './utilities/_misc.css';
+@import './components/_scrollbar.css';
+@import './vendors/_overrides.css';
+@import './rtl/_rtl.css';
+@import './animations/_keyframes.css';
+@import 'primeicons/primeicons.css';

@@ -1,0 +1,25 @@
+<div class="layout-shell" dir="rtl">
+  <div class="layout-overlay" [class.visible]="isMobileMenuOpen()" (click)="toggleMobileMenu()"></div>
+
+  <app-sidebar
+    [sidebarList]="sidebarList()"
+    [isMobileMenuOpen]="isMobileMenuOpen()"
+    (onToggleMobileMenu)="toggleMobileMenu()"
+  />
+
+  <main class="layout-main">
+    <app-main-layout-header
+      [userName]="headerUserName"
+      [userRole]="headerUserRole"
+      [avatarUrl]="headerAvatarUrl"
+      (menuClick)="toggleMobileMenu()"
+    />
+
+    <div class="layout-content">
+      <div class="layout-content__glow"></div>
+      <div class="layout-content__inner">
+        <router-outlet />
+      </div>
+    </div>
+  </main>
+</div>

@@ -1,0 +1,24 @@
+<button
+  [type]="type"
+  [disabled]="isDisabled"
+  [class]="buttonClassList.join(' ')"
+  (click)="onClick($event)"
+>
+  <span class="app-button__content">
+    @if (loading) {
+      <app-loading-spinner size="sm" />
+    } @else if (icon && iconPosition === 'start') {
+      <app-icon [name]="icon" size="sm" />
+    }
+
+    @if (label) {
+      <span class="app-button__label">{{ label }}</span>
+    }
+
+    <ng-content />
+
+    @if (!loading && icon && iconPosition === 'end') {
+      <app-icon [name]="icon" size="sm" />
+    }
+  </span>
+</button>

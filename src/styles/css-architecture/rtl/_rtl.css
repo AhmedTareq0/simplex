@@ -1,0 +1,19 @@
+.rtl {
+  direction: rtl;
+}
+
+.rtl .text-left {
+  text-align: right;
+}
+.rtl .text-right {
+  text-align: left;
+}
+
+.rtl .ml-0 {
+  margin-left: 0;
+  margin-right: var(--space-4);
+}
+.rtl .mr-0 {
+  margin-right: 0;
+  margin-left: var(--space-4);
+}

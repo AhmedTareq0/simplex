@@ -1,0 +1,40 @@
+<div class="app-shared-select">
+  @if (label) {
+    <label class="app-shared-select__label">
+      {{ label }}
+    </label>
+  }
+
+  <p-select
+    [options]="options"
+    [(ngModel)]="value"
+    (ngModelChange)="onModelChange($event)"
+    [optionLabel]="optionLabel"
+    [optionValue]="optionValue"
+    [placeholder]="placeholder"
+    [filter]="filter"
+    [disabled]="disabled"
+    [showClear]="showClear"
+    [fluid]="fluid"
+    appendTo="body"
+    styleClass="app-shared-select__control"
+    panelStyleClass="app-shared-select__panel"
+    [pt]="{
+      root: {
+        class:
+          'min-h-11 rounded-xl border bg-[var(--color-card-bg)] shadow-[var(--shadow-xs)] transition-colors ' +
+          (error
+            ? 'border-[color:color-mix(in_srgb,var(--color-danger)_35%,white)]'
+            : 'border-[var(--color-border)] hover:border-[var(--color-primary-300)]')
+      },
+      label: { class: 'px-4 py-3 text-sm font-medium text-[var(--color-text-primary)]' },
+      dropdown: { class: 'text-[var(--color-text-tertiary)]' }
+    }"
+  />
+
+  @if (error) {
+    <p class="app-shared-select__message app-shared-select__message--error">{{ error }}</p>
+  } @else if (hint) {
+    <p class="app-shared-select__message">{{ hint }}</p>
+  }
+</div>
