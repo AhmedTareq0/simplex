@@ -1,14 +1,30 @@
 <div class="chat-conversation" [class.chat-conversation--active]="selected" (click)="onClick()">
-  <div class="chat-conversation__avatar">
-    <img [src]="imageUrl" alt="display picture" />
+
+  <!-- Avatar with online indicator -->
+  <div class="chat-conversation__avatar-wrap">
+    <img [src]="imageUrl" [alt]="displayName" class="chat-conversation__avatar" />
+    <span *ngIf="isOnline" class="chat-conversation__online-dot"></span>
   </div>
+
+  <!-- Content -->
   <div class="chat-conversation__content">
     <div class="chat-conversation__row">
       <span class="chat-conversation__name">{{ displayName }}</span>
-      <span *ngIf="timestamp" class="chat-conversation__timestamp">{{ timestamp }}</span>
+      <span *ngIf="timestamp" class="chat-conversation__timestamp" [class.chat-conversation__timestamp--unread]="unreadCount > 0">
+        {{ timestamp }}
+      </span>
     </div>
     <div class="chat-conversation__row">
-      <span class="chat-conversation__message">{{ messageText }}</span>
+      <span class="chat-conversation__message" [class.chat-conversation__message--unread]="unreadCount > 0">
+        <!-- Tick for own last message -->
+        <span *ngIf="isOwnLastMessage" class="chat-conversation__tick">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="11" viewBox="0 0 18 11">
+            <path d="M17.394.677a.45.45 0 0 0-.304-.152.46.46 0 0 0-.328.108l-5.508 5.628-1.44-1.358a.46.46 0 0 0-.328-.108.45.45 0 0 0-.304.152.44.44 0 0 0 .02.624l1.76 1.661a.46.46 0 0 0 .624 0l5.837-5.934a.44.44 0 0 0-.029-.621zM11.071.653a.45.45 0 0 0-.304-.152.46.46 0 0 0-.328.108L4.931 6.237 2.461 3.9a.46.46 0 0 0-.328-.108.45.45 0 0 0-.304.152.44.44 0 0 0 .02.624l2.8 2.643a.46.46 0 0 0 .624 0l5.837-5.934a.44.44 0 0 0-.039-.624z" fill="currentColor"/>
+          </svg>
+        </span>
+        {{ messageText }}
+      </span>
+      <span *ngIf="unreadCount > 0" class="chat-conversation__badge">{{ unreadCount }}</span>
     </div>
   </div>
 </div>

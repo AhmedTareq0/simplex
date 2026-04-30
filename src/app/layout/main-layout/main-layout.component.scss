@@ -55,16 +55,16 @@
   &::-webkit-scrollbar {
     width: 6px;
   }
-  
+
   &::-webkit-scrollbar-track {
     background: transparent;
   }
-  
+
   &::-webkit-scrollbar-thumb {
     background: color-mix(in srgb, var(--color-primary, #0ea5e9) 40%, transparent);
     border-radius: 10px;
   }
-  
+
   &::-webkit-scrollbar-thumb:hover {
     background: color-mix(in srgb, var(--color-primary, #0ea5e9) 70%, transparent);
   }
@@ -101,6 +101,6 @@
   }
 
   @media (min-width: 1024px) {
-    padding: var(--space-10);
+    padding: var(--space-7);
   }
 }

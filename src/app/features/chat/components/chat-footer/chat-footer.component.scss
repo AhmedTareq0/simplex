@@ -1,48 +1,115 @@
 .chat-footer {
   height: 55px;
-  background: #ededed;
+  background: #f0f2f5;
   width: 100%;
   display: flex;
   align-items: center;
-  padding: 0 15px;
-  gap: 10px;
+  padding: 6px 10px;
+  gap: 8px;
+  flex-shrink: 0;
+  direction: ltr;
+  position: relative;
+}
 
-  &__icon {
-    color: #919191;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: color 0.2s;
+/* Icon buttons */
+.chat-footer__icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #54656f;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+  padding: 0;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  &--send {
+    color: #fff;
+    background: #00a884;
 
     &:hover {
-      color: #555;
+      background: #017f63;
     }
   }
+}
 
-  &__file-label {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-  }
+/* Input wrap */
+.chat-footer__input-wrap {
+  flex: 1;
+  background: #fff;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  min-height: 42px;
+  gap: 6px;
+}
 
-  &__file-input {
-    display: none;
-  }
+.chat-footer__emoji-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
 
-  &__search {
-    border-radius: 18px;
-    background-color: #ffffff;
-    flex: 1;
-    display: flex;
-    align-items: center;
-  }
+.chat-footer__emoji-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #54656f;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  flex-shrink: 0;
+  transition: color 0.15s;
 
-  &__input {
-    width: 100%;
-    padding: 8px 16px;
-    font-size: 14px;
-    border: none;
-    background: transparent;
-    outline: none;
-    border-radius: 18px;
+  &:hover {
+    color: #111b21;
   }
+}
+
+/* Emoji picker popup */
+.chat-footer__emoji-picker-container {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 0;
+  z-index: 1000;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+
+.chat-footer__emoji-picker {
+  --num-columns: 8;
+  --emoji-size: 1.4rem;
+  --emoji-padding: 0.3rem;
+  width: 320px;
+  height: 380px;
+}
+
+.chat-footer__input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  outline: none;
+  color: #111b21;
+  line-height: 20px;
+  padding: 0;
+
+  &::placeholder {
+    color: #8696a0;
+  }
+}
+
+.chat-footer__file-input {
+  display: none;
 }

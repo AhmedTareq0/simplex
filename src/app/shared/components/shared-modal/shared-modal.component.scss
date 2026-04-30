@@ -1,8 +1,27 @@
-:host {
-  display: block;
-}
 
-:host ::ng-deep .app-shared-modal-mask {
+::ng-deep .app-shared-modal-mask {
   background: rgba(15, 23, 42, 0.45);
   backdrop-filter: blur(4px);
+}
+
+::ng-deep .app-shared-modal__body {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--color-primary, #0ea5e9) 40%, transparent);
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--color-primary, #0ea5e9) 70%, transparent);
+  }
+
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-primary, #0ea5e9) 40%, transparent) transparent;
 }

@@ -19,9 +19,16 @@
 
   <div class="layout-header__end">
     <!-- Chat -->
-    <button type="button" class="layout-header__icon-btn" aria-label="الدردشة">
+    <a
+      class="layout-header__icon-btn"
+      aria-label="الدردشة"
+      routerLink="/chat"
+    >
       <app-icon name="chat" size="md" />
-    </button>
+      @if (chatUnreadCount() > 0) {
+        <span class="layout-header__badge">{{ chatUnreadCount() > 99 ? '99+' : chatUnreadCount() }}</span>
+      }
+    </a>
 
     <!-- Language Toggle -->
     <button type="button" class="layout-header__icon-btn" aria-label="تغيير اللغة" (click)="toggleLang()">
@@ -30,6 +37,9 @@
 
     <button type="button" class="layout-header__icon-btn" aria-label="الإشعارات">
       <app-icon name="bell" size="md" />
+      @if (notifCount() > 0) {
+        <span class="layout-header__badge layout-header__badge--notif">{{ notifCount() }}</span>
+      }
     </button>
 
     <div class="layout-header__divider"></div>

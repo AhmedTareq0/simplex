@@ -1,4 +1,4 @@
-import { Component, Input, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -14,6 +14,9 @@ export class ChatMessageComponent {
   @Input() senderName = '';
   @Input() senderPicture = '';
   @Input() showSenderInfo = false;
+  @Input() isGrouped = false; // consecutive messages from same sender
+
+  @Output() replyTo = new EventEmitter<any>();
 
   showDropdown = signal(false);
 
@@ -37,6 +40,10 @@ export class ChatMessageComponent {
     return this.message?.replyTo?.text || '';
   }
 
+  get status(): 'sent' | 'delivered' | 'read' {
+    return this.message?.status || 'read';
+  }
+
   toggleDropdown(event: Event) {
     event.stopPropagation();
     this.showDropdown.update(v => !v);
@@ -47,7 +54,7 @@ export class ChatMessageComponent {
   }
 
   onReply() {
-    console.log('Reply to message:', this.message);
+    this.replyTo.emit(this.message);
     this.closeDropdown();
   }
 
@@ -61,18 +68,9 @@ export class ChatMessageComponent {
     this.closeDropdown();
   }
 
-  formatDate(date: string | Date): string {
+  formatTime(date: string | Date): string {
     if (!date) return '';
     const d = new Date(date);
     return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
-
-  downloadMedia() {
-    if (this.message?.text) {
-      const link = document.createElement('a');
-      link.href = this.message.text;
-      link.download = this.message.text.split('/').pop() || 'download';
-      link.click();
-    }
   }
 }

@@ -75,7 +75,7 @@
 
       <!-- Body -->
       <ng-template pTemplate="body" let-rowData let-columns="columns">
-        <tr class="st-body-row">
+        <tr class="st-body-row" (click)="onRowClick.emit(rowData)" style="cursor: pointer;">
           <td *ngFor="let col of columns; let i = index" class="st-td">
             <ng-container *ngIf="bodyTemplate; else defaultCell">
               <ng-container *ngTemplateOutlet="bodyTemplate; context: {$implicit: rowData, col: col}"></ng-container>

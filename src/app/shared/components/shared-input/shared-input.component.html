@@ -1,0 +1,33 @@
+<div class="app-shared-input">
+  @if (label) {
+    <label class="app-shared-input__label">
+      {{ label }}
+    </label>
+  }
+
+  <div class="app-shared-input__wrapper">
+    @if (icon) {
+      <i class="app-shared-input__icon bx" [ngClass]="icon"></i>
+    }
+    
+    <input
+      pInputText
+      [type]="type"
+      [(ngModel)]="value"
+      (ngModelChange)="onModelChange($event)"
+      [placeholder]="placeholder"
+      [disabled]="disabled"
+      class="app-shared-input__control"
+      [ngClass]="{
+        'app-shared-input__control--error': error,
+        'app-shared-input__control--has-icon': icon
+      }"
+    />
+  </div>
+
+  @if (error) {
+    <p class="app-shared-input__message app-shared-input__message--error">{{ error }}</p>
+  } @else if (hint) {
+    <p class="app-shared-input__message">{{ hint }}</p>
+  }
+</div>

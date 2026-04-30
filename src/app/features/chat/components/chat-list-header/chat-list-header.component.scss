@@ -1,10 +1,11 @@
 .chat-list-header {
   height: 60px;
-  background: #ededed;
+  background: #f0f2f5;
   display: flex;
   padding: 8px 16px;
   align-items: center;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.14);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 
   &__image {
     width: 40px;
@@ -15,23 +16,27 @@
   }
 
   &__actions {
-    margin-right: auto;
+    margin-inline-start: auto;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 2px;
+  }
+
+  &__action-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
     color: #54656f;
+    transition: background 0.15s;
 
-    svg {
-      padding: 10px;
-      border-radius: 50%;
-      cursor: pointer;
-      transition: background 0.2s;
-      width: 28px;
-      height: 28px;
-
-      &:hover {
-        background: rgba(0, 0, 0, 0.05);
-      }
+    &:hover {
+      background: rgba(0, 0, 0, 0.06);
     }
   }
 }

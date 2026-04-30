@@ -17,15 +17,17 @@ export class ChatListComponent {
   @Input() accountPicture = '';
   @Input() lastMessages: Record<string, any> = {};
   @Input() selectedUserId = '';
+  @Input() onlineUsers: string[] = [];
 
   @Output() selectUser = new EventEmitter<any>();
 
   searchText = '';
 
   get filteredUsers(): any[] {
-    if (!this.searchText) return this.users.filter(u => u.sub !== this.currentUserId);
+    const others = this.users.filter(u => u.sub !== this.currentUserId);
+    if (!this.searchText) return others;
     const lower = this.searchText.toLowerCase();
-    return this.users.filter(u => u.sub !== this.currentUserId && u.name?.toLowerCase().includes(lower));
+    return others.filter(u => u.name?.toLowerCase().includes(lower));
   }
 
   onSearch(text: string) {
@@ -38,5 +40,14 @@ export class ChatListComponent {
 
   getLastMessage(userId: string): any {
     return this.lastMessages[userId] || null;
+  }
+
+  getUnreadCount(userId: string): number {
+    // Placeholder — wire to real data when available
+    return 0;
+  }
+
+  isUserOnline(userId: string): boolean {
+    return this.onlineUsers.includes(userId);
   }
 }

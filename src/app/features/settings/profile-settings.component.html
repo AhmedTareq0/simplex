@@ -1,0 +1,325 @@
+<div class="settings">
+
+  <div class="settings__layout">
+
+    <!-- Sidebar Tabs -->
+    <aside class="settings__sidebar">
+      <!-- Avatar Card -->
+      <div class="settings__avatar-card">
+        <div class="settings__avatar-wrapper">
+          @if (avatarPreview()) {
+            <img [src]="avatarPreview()" alt="الصورة الشخصية" class="settings__avatar-img" />
+          } @else {
+            <div class="settings__avatar-initials">{{ initials }}</div>
+          }
+          <label class="settings__avatar-edit" for="avatar-upload" title="تغيير الصورة">
+            <app-icon name="camera" size="sm" />
+          </label>
+          <input id="avatar-upload" type="file" accept="image/*" hidden (change)="onAvatarChange($event)" />
+        </div>
+        <div class="settings__avatar-info">
+          <span class="settings__avatar-name ">{{ profile.firstName }} {{ profile.lastName }}</span>
+          <span class="settings__avatar-role">{{ profile.role }}</span>
+        </div>
+      </div>
+
+      <!-- Nav Tabs -->
+      <nav class="settings__nav">
+        @for (tab of tabs; track tab.key) {
+          <button
+            class="settings__nav-item"
+            [class.active]="activeTab() === tab.key"
+            (click)="setTab(tab.key)"
+          >
+            <app-icon [name]="tab.icon" size="sm" />
+            <span>{{ tab.label }}</span>
+          </button>
+        }
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="settings__content">
+
+      <!-- ── Profile Tab ── -->
+      @if (activeTab() === 'profile') {
+        <div class="settings__section">
+          <div class="settings__section-header">
+            <h2 class="settings__section-title">الملف الشخصي</h2>
+            <p class="settings__section-desc">تحديث معلوماتك الشخصية وبيانات الاتصال</p>
+          </div>
+
+          <form class="settings__form" (ngSubmit)="saveProfile()">
+            <!-- Name Row -->
+            <div class="settings__form-row">
+              <div class="settings__field">
+                <label class="settings__label">الاسم الأول</label>
+                <input class="settings__input" type="text" [(ngModel)]="profile.firstName" name="firstName" placeholder="الاسم الأول" />
+              </div>
+              <div class="settings__field">
+                <label class="settings__label">اسم العائلة</label>
+                <input class="settings__input" type="text" [(ngModel)]="profile.lastName" name="lastName" placeholder="اسم العائلة" />
+              </div>
+            </div>
+
+            <!-- Email & Phone -->
+            <div class="settings__form-row">
+              <div class="settings__field">
+                <label class="settings__label">البريد الإلكتروني</label>
+                <div class="settings__input-icon">
+                  <app-icon name="mail" size="sm" />
+                  <input class="settings__input settings__input--icon" type="email" [(ngModel)]="profile.email" name="email" placeholder="example@domain.com" />
+                </div>
+              </div>
+              <div class="settings__field">
+                <label class="settings__label">رقم الهاتف</label>
+                <div class="settings__input-icon">
+                  <app-icon name="phone" size="sm" />
+                  <input class="settings__input settings__input--icon" type="tel" [(ngModel)]="profile.phone" name="phone" placeholder="+966 5X XXX XXXX" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Role & Department -->
+            <div class="settings__form-row">
+              <div class="settings__field">
+                <label class="settings__label">المسمى الوظيفي</label>
+                <input class="settings__input" type="text" [(ngModel)]="profile.role" name="role" placeholder="المسمى الوظيفي" />
+              </div>
+              <div class="settings__field">
+                <label class="settings__label">القسم</label>
+                <input class="settings__input" type="text" [(ngModel)]="profile.department" name="department" placeholder="القسم" />
+              </div>
+            </div>
+
+            <!-- Bio -->
+            <div class="settings__field settings__field--full">
+              <label class="settings__label">نبذة شخصية</label>
+              <textarea class="settings__textarea" [(ngModel)]="profile.bio" name="bio" rows="3" placeholder="اكتب نبذة مختصرة عنك..."></textarea>
+            </div>
+
+            <!-- Language -->
+            <div class="settings__field">
+              <label class="settings__label">اللغة</label>
+              <select class="settings__select" [(ngModel)]="profile.language" name="language">
+                @for (lang of languages; track lang.value) {
+                  <option [value]="lang.value">{{ lang.label }}</option>
+                }
+              </select>
+            </div>
+
+            @if (saveSuccess()) {
+              <div class="settings__toast">
+                <app-icon name="check-circle" size="sm" />
+                <span>تم الحفظ بنجاح</span>
+              </div>
+            }
+
+            <div class="settings__form-actions">
+              <button type="submit" class="settings__btn settings__btn--primary">
+                <app-icon name="save" size="sm" />
+                حفظ التغييرات
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+
+      <!-- ── Notifications Tab ── -->
+      @if (activeTab() === 'notifications') {
+        <div class="settings__section">
+          <div class="settings__section-header">
+            <h2 class="settings__section-title">الإشعارات</h2>
+            <p class="settings__section-desc">تحكم في كيفية وصول الإشعارات إليك</p>
+          </div>
+
+          <div class="settings__notif-list">
+            <div class="settings__notif-group">
+              <h3 class="settings__notif-group-title">قنوات الإشعار</h3>
+
+              <div class="settings__notif-item">
+                <div class="settings__notif-info">
+                  <div class="settings__notif-icon-wrap settings__notif-icon-wrap--blue">
+                    <app-icon name="mail" size="sm" />
+                  </div>
+                  <div>
+                    <span class="settings__notif-label">إشعارات البريد الإلكتروني</span>
+                    <span class="settings__notif-desc">استقبال الإشعارات عبر البريد الإلكتروني</span>
+                  </div>
+                </div>
+                <label class="settings__toggle">
+                  <input type="checkbox" [(ngModel)]="notifications.emailNotifications" />
+                  <span class="settings__toggle-track"></span>
+                </label>
+              </div>
+
+              <div class="settings__notif-item">
+                <div class="settings__notif-info">
+                  <div class="settings__notif-icon-wrap settings__notif-icon-wrap--purple">
+                    <app-icon name="bell" size="sm" />
+                  </div>
+                  <div>
+                    <span class="settings__notif-label">الإشعارات الفورية</span>
+                    <span class="settings__notif-desc">إشعارات داخل التطبيق في الوقت الفعلي</span>
+                  </div>
+                </div>
+                <label class="settings__toggle">
+                  <input type="checkbox" [(ngModel)]="notifications.pushNotifications" />
+                  <span class="settings__toggle-track"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="settings__notif-group">
+              <h3 class="settings__notif-group-title">أنواع الإشعارات</h3>
+
+              <div class="settings__notif-item">
+                <div class="settings__notif-info">
+                  <div class="settings__notif-icon-wrap settings__notif-icon-wrap--green">
+                    <app-icon name="ticket" size="sm" />
+                  </div>
+                  <div>
+                    <span class="settings__notif-label">تحديثات التذاكر</span>
+                    <span class="settings__notif-desc">عند تغيير حالة التذاكر أو إضافة تعليق</span>
+                  </div>
+                </div>
+                <label class="settings__toggle">
+                  <input type="checkbox" [(ngModel)]="notifications.ticketUpdates" />
+                  <span class="settings__toggle-track"></span>
+                </label>
+              </div>
+
+              <div class="settings__notif-item">
+                <div class="settings__notif-info">
+                  <div class="settings__notif-icon-wrap settings__notif-icon-wrap--cyan">
+                    <app-icon name="message-circle" size="sm" />
+                  </div>
+                  <div>
+                    <span class="settings__notif-label">رسائل المحادثة</span>
+                    <span class="settings__notif-desc">عند استقبال رسالة جديدة في المحادثات</span>
+                  </div>
+                </div>
+                <label class="settings__toggle">
+                  <input type="checkbox" [(ngModel)]="notifications.chatMessages" />
+                  <span class="settings__toggle-track"></span>
+                </label>
+              </div>
+
+              <div class="settings__notif-item">
+                <div class="settings__notif-info">
+                  <div class="settings__notif-icon-wrap settings__notif-icon-wrap--orange">
+                    <app-icon name="alert-triangle" size="sm" />
+                  </div>
+                  <div>
+                    <span class="settings__notif-label">تنبيهات النظام</span>
+                    <span class="settings__notif-desc">تنبيهات الصيانة والتحديثات الهامة</span>
+                  </div>
+                </div>
+                <label class="settings__toggle">
+                  <input type="checkbox" [(ngModel)]="notifications.systemAlerts" />
+                  <span class="settings__toggle-track"></span>
+                </label>
+              </div>
+
+              <div class="settings__notif-item">
+                <div class="settings__notif-info">
+                  <div class="settings__notif-icon-wrap settings__notif-icon-wrap--indigo">
+                    <app-icon name="bar-chart-2" size="sm" />
+                  </div>
+                  <div>
+                    <span class="settings__notif-label">التقرير الأسبوعي</span>
+                    <span class="settings__notif-desc">ملخص أسبوعي لأداء الفريق والإحصائيات</span>
+                  </div>
+                </div>
+                <label class="settings__toggle">
+                  <input type="checkbox" [(ngModel)]="notifications.weeklyReport" />
+                  <span class="settings__toggle-track"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          @if (saveSuccess()) {
+            <div class="settings__toast">
+              <app-icon name="check-circle" size="sm" />
+              <span>تم الحفظ بنجاح</span>
+            </div>
+          }
+
+          <div class="settings__form-actions">
+            <button type="button" class="settings__btn settings__btn--primary" (click)="saveNotifications()">
+              <app-icon name="save" size="sm" />
+              حفظ الإعدادات
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- ── Security Tab ── -->
+      @if (activeTab() === 'security') {
+        <div class="settings__section">
+          <div class="settings__section-header">
+            <h2 class="settings__section-title">الأمان</h2>
+            <p class="settings__section-desc">إدارة كلمة المرور وإعدادات الأمان</p>
+          </div>
+
+          <!-- Change Password -->
+          <div class="settings__card">
+            <div class="settings__card-header">
+              <div class="settings__card-icon settings__card-icon--primary">
+                <app-icon name="lock" size="sm" />
+              </div>
+              <div>
+                <h3 class="settings__card-title">تغيير كلمة المرور</h3>
+                <p class="settings__card-desc">يُنصح بتغيير كلمة المرور بشكل دوري</p>
+              </div>
+            </div>
+
+            <form class="settings__form" (ngSubmit)="changePassword()">
+              <div class="settings__field settings__field--full">
+                <label class="settings__label">كلمة المرور الحالية</label>
+                <input class="settings__input" type="password" [(ngModel)]="security.currentPassword" name="currentPassword" placeholder="••••••••" />
+              </div>
+              <div class="settings__form-row">
+                <div class="settings__field">
+                  <label class="settings__label">كلمة المرور الجديدة</label>
+                  <input class="settings__input" type="password" [(ngModel)]="security.newPassword" name="newPassword" placeholder="••••••••" />
+                </div>
+                <div class="settings__field">
+                  <label class="settings__label">تأكيد كلمة المرور</label>
+                  <input
+                    class="settings__input"
+                    [class.settings__input--success]="passwordsMatch"
+                    type="password"
+                    [(ngModel)]="security.confirmPassword"
+                    name="confirmPassword"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+
+              @if (security.confirmPassword && !passwordsMatch) {
+                <p class="settings__error">كلمتا المرور غير متطابقتين</p>
+              }
+
+              @if (saveSuccess()) {
+                <div class="settings__toast">
+                  <app-icon name="check-circle" size="sm" />
+                  <span>تم تحديث كلمة المرور بنجاح</span>
+                </div>
+              }
+
+              <div class="settings__form-actions">
+                <button type="submit" class="settings__btn settings__btn--primary" [disabled]="!passwordsMatch || !security.currentPassword">
+                  <app-icon name="shield" size="sm" />
+                  تحديث كلمة المرور
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
+
+    </main>
+  </div>
+</div>

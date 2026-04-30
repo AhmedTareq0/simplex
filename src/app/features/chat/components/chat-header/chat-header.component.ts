@@ -11,4 +11,5 @@ import { CommonModule } from '@angular/common';
 export class ChatHeaderComponent {
   @Input() person: any;
   @Input() isOnline = false;
+  @Input() isTyping = false;
 }

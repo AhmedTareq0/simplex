@@ -14,7 +14,7 @@
     [placeholder]="placeholder"
     [filter]="filter"
     [disabled]="disabled"
-    [showClear]="showClear"
+    [showClear]="showClear && value !== null && value !== undefined && value !== ''"
     [fluid]="fluid"
     appendTo="body"
     styleClass="app-shared-select__control"
