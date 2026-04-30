@@ -63,6 +63,7 @@ export class SharedTableComponent {
   @Output() onEdit = new EventEmitter<any>();
   @Output() onDelete = new EventEmitter<any>();
   @Output() onAction = new EventEmitter<{ type: string, data: any }>();
+  @Output() onRowClick = new EventEmitter<any>();
 
   @ContentChild('bodyTpl') bodyTemplate!: TemplateRef<any>;
   @ContentChild('filterTpl') filterTemplate!: TemplateRef<any>;

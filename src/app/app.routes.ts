@@ -22,8 +22,8 @@ export const routes: Routes = [
       {
         path: 'customer-support',
         loadComponent: () =>
-          import('./features/customer-support/coming-soon.component').then(
-            (m) => m.ComingSoonComponent,
+          import('./features/customer-support/customer-support.component').then(
+            (m) => m.CustomerSupportComponent,
           ),
       },
       {
@@ -34,7 +34,7 @@ export const routes: Routes = [
       {
         path: 'settings',
         loadComponent: () =>
-          import('./features/settings/coming-soon.component').then((m) => m.ComingSoonComponent),
+          import('./features/settings/profile-settings.component').then((m) => m.ProfileSettingsComponent),
       },
     ],
   },

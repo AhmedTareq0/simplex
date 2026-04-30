@@ -1,14 +1,26 @@
 <div class="chat-messages">
   <div class="chat-messages__wrapper" #scrollContainer>
     <div class="chat-messages__container">
-      <app-chat-message
-        *ngFor="let message of messages; let i = index"
-        [message]="message"
-        [isOwn]="isOwnMessage(message)"
-        [senderName]="getSenderInfo(message).name"
-        [senderPicture]="getSenderInfo(message).picture"
-        [showSenderInfo]="shouldShowSenderInfo(message, i)"
-      />
+      @for (item of groupedItems; track $index) {
+        <!-- Date separator -->
+        @if (item.type === 'date') {
+          <div class="chat-messages__date-sep">
+            <span class="chat-messages__date-label">{{ item.label }}</span>
+          </div>
+        }
+
+        <!-- Message -->
+        @if (item.type === 'message') {
+          <app-chat-message
+            [message]="item.message"
+            [isOwn]="item.isOwn!"
+            [senderName]="item.senderName!"
+            [senderPicture]="item.senderPicture!"
+            [showSenderInfo]="item.showSenderInfo!"
+            [isGrouped]="item.isGrouped!"
+          />
+        }
+      }
     </div>
   </div>
   <app-chat-footer

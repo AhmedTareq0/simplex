@@ -12,6 +12,9 @@ export class ChatConversationComponent {
   @Input() user: any;
   @Input() lastMessage: any;
   @Input() selected = false;
+  @Input() currentUserId = '';
+  @Input() unreadCount = 0;
+  @Input() isOnline = false;
   @Output() select = new EventEmitter<void>();
 
   get imageUrl(): string {
@@ -24,13 +27,23 @@ export class ChatConversationComponent {
 
   get messageText(): string {
     if (!this.lastMessage?.text) return '';
-    return this.lastMessage.text.includes('localhost') ? 'media' : this.lastMessage.text;
+    if (this.lastMessage.isDeleted) return 'تم حذف هذه الرسالة';
+    return this.lastMessage.text.includes('localhost') || this.lastMessage.text.includes('blob:')
+      ? '📎 ملف'
+      : this.lastMessage.text;
+  }
+
+  get isOwnLastMessage(): boolean {
+    return this.lastMessage?.senderId === this.currentUserId;
   }
 
   get timestamp(): string {
-    if (!this.lastMessage?.timestamp) return '';
-    const d = new Date(this.lastMessage.timestamp);
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (!this.lastMessage?.createdAt && !this.lastMessage?.timestamp) return '';
+    const d = new Date(this.lastMessage.createdAt || this.lastMessage.timestamp);
+    const now = new Date();
+    const isToday = d.toDateString() === now.toDateString();
+    if (isToday) return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString('ar-EG', { day: 'numeric', month: 'numeric' });
   }
 
   onClick() {

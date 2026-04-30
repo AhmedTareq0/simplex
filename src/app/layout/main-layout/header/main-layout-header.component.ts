@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-main-layout-header',
   standalone: true,
-  imports: [IconComponent],
+  imports: [IconComponent, RouterLink],
   templateUrl: './main-layout-header.component.html',
   styleUrl: './main-layout-header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -18,6 +19,8 @@ export class MainLayoutHeaderComponent {
   readonly menuClick = output<void>();
 
   isArabic = signal(true);
+  chatUnreadCount = signal(5);
+  notifCount = signal(3);
 
   toggleLang() {
     this.isArabic.update(v => !v);

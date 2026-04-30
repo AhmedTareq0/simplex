@@ -1,0 +1,88 @@
+:host {
+  display: block;
+}
+
+.app-shared-input {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.app-shared-input__label {
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.app-shared-input__wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.app-shared-input__icon {
+  position: absolute;
+  left: 1rem;
+  color: var(--color-text-tertiary);
+  font-size: 1.25rem;
+  pointer-events: none;
+}
+
+.app-shared-input__control {
+  width: 100%;
+  min-height: 2.75rem; /* ~44px to match Select */
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-xl); /* Similar to Select's rounded-xl */
+  border: 1px solid var(--color-border);
+  background: var(--color-card-bg);
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  font-family: inherit;
+  box-shadow: var(--shadow-xs);
+  transition: all 0.2s ease;
+  outline: none;
+
+
+  &--has-icon {
+    padding-left: 2.75rem;
+  }
+
+  &::placeholder {
+    color: var(--color-text-tertiary);
+    opacity: 1;
+  }
+
+  &:enabled:hover {
+    border-color: var(--color-primary-300);
+  }
+
+  &:enabled:focus {
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary-500) 12%, transparent);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    background: var(--color-surface);
+    cursor: not-allowed;
+  }
+}
+
+.app-shared-input__control--error {
+  border-color: color-mix(in srgb, var(--color-danger) 35%, white);
+
+  &:enabled:focus {
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-danger) 15%, transparent);
+  }
+}
+
+.app-shared-input__message {
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: var(--text-xs);
+}
+
+.app-shared-input__message--error {
+  color: var(--color-danger);
+}

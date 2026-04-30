@@ -39,7 +39,7 @@ export const summaryCards: SummaryCard[] = [
     bg: '#f0f9ff',
   },
   {
-    title: 'معدل الرضا',
+    title: 'المغلقة',
     value: '94.2%',
     change: '+2.1%',
     trend: 'up',

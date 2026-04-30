@@ -140,6 +140,13 @@ export class ChatComponent implements AfterViewInit {
   lastMessages = signal<Record<string, any>>({});
 
   ngAfterViewInit() {
+    // Build lastMessages from demo data
+    const lm: Record<string, any> = {};
+    for (const [userId, msgs] of Object.entries(DEMO_MESSAGES)) {
+      if (msgs.length > 0) lm[userId] = msgs[msgs.length - 1];
+    }
+    this.lastMessages.set(lm);
+
     // Find the parent layout-content__inner element and add a class to it
     let parent = this.elementRef.nativeElement.parentElement;
     while (parent) {

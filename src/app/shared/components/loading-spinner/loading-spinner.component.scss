@@ -1,9 +1,3 @@
-:host {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-:host ::ng-deep .app-loading-spinner__circle {
+::ng-deep .app-loading-spinner__circle {
   stroke: var(--color-primary-500);
 }

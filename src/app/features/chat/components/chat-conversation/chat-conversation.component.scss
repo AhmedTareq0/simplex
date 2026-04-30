@@ -3,8 +3,9 @@
   padding: 10px 16px;
   cursor: pointer;
   align-items: center;
-  transition: background 0.2s;
+  transition: background 0.15s;
   border-bottom: 1px solid #e9edef;
+  gap: 12px;
 
   &:hover {
     background: #f0f2f5;
@@ -14,18 +15,32 @@
     background: #f0f2f5;
   }
 
-  &__avatar {
+  /* Avatar */
+  &__avatar-wrap {
+    position: relative;
     flex-shrink: 0;
-    margin-left: 14px;
-
-    img {
-      width: 50px;
-      height: 50px;
-      object-fit: cover;
-      border-radius: 50%;
-    }
   }
 
+  &__avatar {
+    width: 49px;
+    height: 49px;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+  }
+
+  &__online-dot {
+    position: absolute;
+    bottom: 1px;
+    inset-inline-end: 1px;
+    width: 12px;
+    height: 12px;
+    background: #25d366;
+    border-radius: 50%;
+    border: 2px solid #fff;
+  }
+
+  /* Content */
   &__content {
     flex: 1;
     min-width: 0;
@@ -35,27 +50,69 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2px;
+    margin-bottom: 3px;
   }
 
   &__name {
     font-size: 16px;
     font-weight: 500;
     color: #111b21;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &__timestamp {
     font-size: 12px;
-    color: rgba(0, 0, 0, 0.6);
+    color: #667781;
     flex-shrink: 0;
+    margin-inline-start: 6px;
+
+    &--unread {
+      color: #25d366;
+      font-weight: 600;
+    }
   }
 
   &__message {
     font-size: 14px;
-    color: rgba(0, 0, 0, 0.6);
+    color: #667781;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+
+    &--unread {
+      color: #111b21;
+      font-weight: 500;
+    }
+  }
+
+  &__tick {
+    color: #53bdeb;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  /* Unread badge */
+  &__badge {
+    background: #25d366;
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: 600;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+    flex-shrink: 0;
+    margin-inline-start: 6px;
   }
 }

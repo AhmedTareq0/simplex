@@ -1,0 +1,59 @@
+<div class="customer-support">
+  <!-- Page Header -->
+  <div class="customer-support__header">
+    <div class="customer-support__info">
+      <h1 class="customer-support__title">دعم العملاء</h1>
+      <p class="customer-support__subtitle">إدارة المستخدمين والمكنات</p>
+    </div>
+    <button class="customer-support__create-btn" (click)="openCreateModal()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      إنشاء زيارة جديدة
+    </button>
+  </div>
+
+  <!-- Table -->
+  <app-shared-table [data]="clients()" [columns]="columns" title="قائمة العملاء" [showView]="false" [showEdit]="true"
+    (onDelete)="onDeleteUser($event)" (onRowClick)="onRowClick($event)" (onEdit)="onEditClient($event)">
+    <ng-template #bodyTpl let-rowData let-col="col">
+      <ng-container *ngIf="col.field === 'status'; else priorityCell">
+        <span class="customer-support__badge" [style.backgroundColor]="getStatusColor(rowData[col.field]) + '20'"
+          [style.color]="getStatusColor(rowData[col.field])">
+          {{ getStatusLabel(rowData[col.field]) }}
+        </span>
+      </ng-container>
+      <ng-template #priorityCell>
+        <ng-container *ngIf="col.field === 'priority'; else defaultCell">
+          <span class="customer-support__badge" [style.backgroundColor]="getPriorityColor(rowData[col.field]) + '20'"
+            [style.color]="getPriorityColor(rowData[col.field])">
+            {{ getPriorityLabel(rowData[col.field]) }}
+          </span>
+        </ng-container>
+        <ng-template #defaultCell>
+          {{ rowData[col.field] }}
+        </ng-template>
+      </ng-template>
+    </ng-template>
+  </app-shared-table>
+</div>
+
+<app-customer-support-create
+  [(visible)]="showCreateModal"
+  [isEditMode]="isEditMode()"
+  [editData]="editData()"
+  (create)="onCreateUser($event)"
+  (update)="onUpdateUserFromCreate($event)"
+/>
+
+<app-customer-support-detail
+  [(visible)]="showDetailModal"
+  [user]="selectedClient()"
+  [isEditing]="isEditing()"
+  (editModeChange)="onEditModeChange($event)"
+  (update)="onUpdateUser($event)"
+  (delete)="onDeleteUserById($event)"
+  (edit)="onEditFromDetail($event)"
+/>
