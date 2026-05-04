@@ -14,6 +14,7 @@ export class ChatBoxComponent {
   @Input() person: any;
   @Input() messages: any[] = [];
   @Input() currentUserId = '';
+  @Input() conversationId = '';
   @Input() isOnline = false;
   @Input() users: any[] = [];
 }

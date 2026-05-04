@@ -1,0 +1,38 @@
+@for (item of items; track item) {
+  @switch (type) {
+    @case ('chat-list') {
+      <div class="skeleton skeleton--chat-list">
+        <div class="skeleton__avatar"></div>
+        <div class="skeleton__content">
+          <div class="skeleton__line skeleton__line--short"></div>
+          <div class="skeleton__line skeleton__line--long"></div>
+        </div>
+      </div>
+    }
+    @case ('chat-message') {
+      <div class="skeleton skeleton--chat-message" [class.skeleton--own]="item % 2 === 0">
+        <div class="skeleton__bubble">
+          <div class="skeleton__line skeleton__line--medium"></div>
+          <div class="skeleton__line skeleton__line--short"></div>
+        </div>
+      </div>
+    }
+    @case ('avatar') {
+      <div class="skeleton skeleton--avatar"></div>
+    }
+    @case ('card') {
+      <div class="skeleton skeleton--card">
+        @for (row of textRows; track row) {
+          <div class="skeleton__line" [class.skeleton__line--short]="row === 0"></div>
+        }
+      </div>
+    }
+    @default {
+      <div class="skeleton skeleton--text">
+        @for (row of textRows; track row) {
+          <div class="skeleton__line" [style.width.%]="row === 0 ? 100 : row === 1 ? 75 : 50"></div>
+        }
+      </div>
+    }
+  }
+}
