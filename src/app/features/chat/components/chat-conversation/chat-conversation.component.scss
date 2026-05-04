@@ -53,13 +53,28 @@
     margin-bottom: 3px;
   }
 
+  &__name-wrap {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+  }
+
   &__name {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 500;
     color: #111b21;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  &__machine-id {
+    font-size: 12px;
+    color: #667781;
+    margin-top: 2px;
+    direction: ltr;
+    text-align: right;
   }
 
   &__timestamp {
@@ -97,6 +112,37 @@
     display: inline-flex;
     align-items: center;
     flex-shrink: 0;
+  }
+
+  /* Status badge */
+  &__status {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    margin-inline-start: auto;
+    margin-inline-end: 6px;
+
+    &.status-care {
+      background: #d1f4e0;
+      color: #0a8c4a;
+    }
+
+    &.status-engineer {
+      background: #fde3e1;
+      color: #c0392b;
+    }
+
+    &.status-ai {
+      background: #e3f2fd;
+      color: #1976d2;
+    }
+
+    &.status-ended {
+      background: #f0f2f5;
+      color: #667781;
+    }
   }
 
   /* Unread badge */

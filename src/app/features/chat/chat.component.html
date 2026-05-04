@@ -1,23 +1,31 @@
 <div class="chat-layout">
   <div class="chat-layout__left">
-    <app-chat-list
-      [users]="users()"
-      [currentUserId]="currentUserId"
-      [accountPicture]="accountPicture"
-      [lastMessages]="lastMessages()"
-      [selectedUserId]="selectedPerson()?.sub || ''"
-      (selectUser)="onSelectUser($event)"
-    />
+    @if (isLoading()) {
+    <app-skeleton-loader type="chat-list" [count]="6" />
+    } @else if (errorMessage()) {
+    <div class="chat-error">
+      <span>{{ errorMessage() }}</span>
+      <button (click)="loadConversations()" class="btn-retry">إعادة المحاولة</button>
+    </div>
+    } @else {
+    <app-chat-list [users]="users()" [currentUserId]="currentUserId()" [accountPicture]="accountPicture()"
+      [lastMessages]="lastMessages()" [selectedUserId]="selectedPerson()?.sub || ''"
+      (selectUser)="onSelectUser($event)" />
+    }
   </div>
   <div class="chat-layout__right">
     <ng-container *ngIf="selectedPerson(); else emptyChat">
-      <app-chat-box
-        [person]="selectedPerson()"
-        [messages]="messages()"
-        [currentUserId]="currentUserId"
-        [isOnline]="false"
-        [users]="users()"
-      />
+      @if (isLoadingMessages()) {
+      <app-skeleton-loader type="chat-message" [count]="8" />
+      } @else if (messagesError()) {
+      <div class="chat-error chat-error--messages">
+        <span>{{ messagesError() }}</span>
+        <button (click)="onSelectUser(selectedPerson()!)" class="btn-retry">إعادة المحاولة</button>
+      </div>
+      } @else {
+      <app-chat-box [person]="selectedPerson()" [messages]="messages()" [currentUserId]="currentUserId()"
+        [conversationId]="selectedPerson()?.sub || ''" [isOnline]="false" [users]="users()" />
+      }
     </ng-container>
     <ng-template #emptyChat>
       <app-chat-empty />

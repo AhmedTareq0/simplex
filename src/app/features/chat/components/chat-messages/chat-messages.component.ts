@@ -1,13 +1,14 @@
 import {
   Component, Input, signal, ViewChild, ElementRef,
-  AfterViewChecked, OnChanges, SimpleChanges
+  AfterViewChecked, OnChanges, SimpleChanges, inject
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatMessageComponent } from '../chat-message/chat-message.component';
 import { ChatFooterComponent } from '../chat-footer/chat-footer.component';
+import { ChatService } from '../../services/chat.service';
 
 export interface MessageGroup {
-  type: 'date' | 'message';
+  type: 'date' | 'message' | 'system';
   label?: string;
   message?: any;
   isOwn?: boolean;
@@ -27,7 +28,10 @@ export interface MessageGroup {
 export class ChatMessagesComponent implements AfterViewChecked, OnChanges {
   @Input() messages: any[] = [];
   @Input() currentUserId = '';
+  @Input() conversationId = '';
   @Input() users: any[] = [];
+
+  private readonly chatService = inject(ChatService);
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
 
@@ -59,8 +63,14 @@ export class ChatMessagesComponent implements AfterViewChecked, OnChanges {
     let lastSenderId = '';
 
     for (const msg of this.localMessages) {
-      const msgDate = this.getDateLabel(msg.createdAt);
 
+      if (msg.type === 'system') {
+        items.push({ type: 'system', label: msg.text });
+        lastSenderId = '';
+        continue;
+      }
+
+      const msgDate = this.getDateLabel(msg.createdAt);
       if (msgDate !== lastDate) {
         items.push({ type: 'date', label: msgDate });
         lastDate = msgDate;
@@ -76,7 +86,7 @@ export class ChatMessagesComponent implements AfterViewChecked, OnChanges {
         type: 'message',
         message: msg,
         isOwn,
-        senderName: sender?.name || '',
+        senderName: sender?.name || this.getSenderDisplayName(msg),
         senderPicture: sender?.picture || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
         showSenderInfo,
         isGrouped,
@@ -86,6 +96,14 @@ export class ChatMessagesComponent implements AfterViewChecked, OnChanges {
     }
 
     this.groupedItems = items;
+  }
+
+  private getSenderDisplayName(msg: any): string {
+    const role = msg.role?.toLowerCase() || '';
+    if (role === 'ai') return 'AI Assistant';
+    if (role === 'customer_care') return 'خدمة العملاء';
+    if (role === 'engineer') return 'المهندس';
+    return '';
   }
 
   getDateLabel(date: string | Date): string {
@@ -116,9 +134,21 @@ export class ChatMessagesComponent implements AfterViewChecked, OnChanges {
       type: 'text',
       status: 'sent',
     };
+
+    // Optimistic update — show immediately
     this.localMessages = [...this.localMessages, newMsg];
     this.buildGroups();
     this.shouldScroll.set(true);
+
+    if (this.conversationId) {
+      this.chatService.sendMessage(this.conversationId, text).subscribe({
+        error: () => {
+          // Rollback on failure
+          this.localMessages = this.localMessages.filter(m => m !== newMsg);
+          this.buildGroups();
+        },
+      });
+    }
   }
 
   onSendFile(file: File) {
@@ -130,8 +160,20 @@ export class ChatMessagesComponent implements AfterViewChecked, OnChanges {
       type: 'file',
       status: 'sent',
     };
+
+    // Optimistic update — show local preview immediately
     this.localMessages = [...this.localMessages, newMsg];
     this.buildGroups();
     this.shouldScroll.set(true);
+
+    if (this.conversationId) {
+      // Send with empty message text + attachment
+      this.chatService.sendMessage(this.conversationId, '', file).subscribe({
+        error: () => {
+          this.localMessages = this.localMessages.filter(m => m !== newMsg);
+          this.buildGroups();
+        },
+      });
+    }
   }
 }

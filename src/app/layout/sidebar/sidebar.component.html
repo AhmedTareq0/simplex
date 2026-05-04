@@ -46,15 +46,17 @@
 
   <!-- User Footer -->
   <div class="sidebar__footer" [class.centered]="isCollapsed()">
-
-
-    @if (!isCollapsed()) {
     <div class="sidebar__logout">
-      <button (click)="logout()">
-        <app-icon name="user" size="sm" />
-        تسجيل خروج
+      <button (click)="logout()" [disabled]="isLoggingOut()">
+        @if (isLoggingOut()) {
+          <i class="pi pi-spin pi-spinner" style="font-size: 1rem;"></i>
+        } @else {
+          <app-icon name="user" size="sm" />
+        }
+        @if (!isCollapsed()) {
+          <span>تسجيل خروج</span>
+        }
       </button>
     </div>
-    }
   </div>
 </aside>

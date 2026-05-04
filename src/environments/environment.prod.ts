@@ -4,7 +4,7 @@ export const environment = {
   stage: 'production',
 
   // ============ API ============
-  apiUrl: '',
+  apiUrl: 'http://135.181.24.133',
   apiTimeout: 30000,
 
   // ============ Logging & Debug ============

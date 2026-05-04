@@ -26,6 +26,7 @@ export class SidebarComponent {
   onToggleMobileMenu = output<void>();
 
   isCollapsed = signal(false);
+  isLoggingOut = signal(false);
 
   toggleMobileMenu() {
     this.onToggleMobileMenu.emit();
@@ -36,6 +37,7 @@ export class SidebarComponent {
   }
 
   logout() {
+    this.isLoggingOut.set(true);
     this.authService.logout();
   }
 }

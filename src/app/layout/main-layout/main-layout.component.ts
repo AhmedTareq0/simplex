@@ -20,9 +20,6 @@ export class MainLayoutComponent {
   ]);
 
   isMobileMenuOpen = signal(false);
-  readonly headerUserName = 'المدير';
-  readonly headerUserRole = 'Admin';
-  readonly headerAvatarUrl = 'https://ui-avatars.com/api/?name=Admin&background=6ec1e4&color=fff';
 
   toggleMobileMenu() {
     this.isMobileMenuOpen.update((val) => !val);

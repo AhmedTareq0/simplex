@@ -9,7 +9,15 @@
   <!-- Content -->
   <div class="chat-conversation__content">
     <div class="chat-conversation__row">
-      <span class="chat-conversation__name">{{ displayName }}</span>
+      <div class="chat-conversation__name-wrap">
+        <span class="chat-conversation__name">{{ displayName }}</span>
+        @if (machineId) {
+          <span class="chat-conversation__machine-id">Machine_Name: {{ machineId }}</span>
+        }
+      </div>
+      @if (statusLabel) {
+        <span class="chat-conversation__status" [class]="statusClass">{{ statusLabel }}</span>
+      }
       <span *ngIf="timestamp" class="chat-conversation__timestamp" [class.chat-conversation__timestamp--unread]="unreadCount > 0">
         {{ timestamp }}
       </span>

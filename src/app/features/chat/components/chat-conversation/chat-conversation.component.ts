@@ -46,6 +46,30 @@ export class ChatConversationComponent {
     return d.toLocaleDateString('ar-EG', { day: 'numeric', month: 'numeric' });
   }
 
+  get statusLabel(): string {
+    const map: Record<string, string> = {
+      'with_customer_care': 'خدمة العملاء',
+      'with_engineer': 'المهندس',
+      'with_ai': 'AI',
+      'ended': 'منتهية',
+    };
+    return map[this.user?.status] || this.user?.status || '';
+  }
+
+  get machineId(): string {
+    return this.user?.machineId || '';
+  }
+
+  get statusClass(): string {
+    const map: Record<string, string> = {
+      'with_customer_care': 'status-care',
+      'with_engineer': 'status-engineer',
+      'with_ai': 'status-ai',
+      'ended': 'status-ended',
+    };
+    return map[this.user?.status] || '';
+  }
+
   onClick() {
     this.select.emit();
   }

@@ -18,7 +18,7 @@ export class LoginComponent {
 
   readonly isLoading = signal(false);
   readonly errorMessage = signal('');
-  readonly loginMethod = signal<'phone' | 'email'>('phone');
+  readonly loginMethod = signal<'phone' | 'email'>('email');
   readonly isPasswordVisible = signal(false);
 
   readonly loginForm = this.fb.group({
@@ -46,9 +46,9 @@ export class LoginComponent {
   }
 
   quickLogin() {
-    this.setLoginMethod('phone');
+    this.setLoginMethod('email');
     this.loginForm.patchValue({
-      PhoneNumber: '01112223330',
+      email: 'm.khalifa@simplexarabia.com',
       password: '123456'
     });
     this.onSubmit();
@@ -61,12 +61,11 @@ export class LoginComponent {
     this.errorMessage.set('');
 
     const formVal = this.loginForm.value;
-    // In a real app, you might pass email or phone based on the selected method
-    // Since AuthLocalService currently expects PhoneNumber, we map email to it for mock purposes or pass both
-    const PhoneNumber = this.loginMethod() === 'phone' ? formVal.PhoneNumber : formVal.email;
-    const password = formVal.password;
+    const credentials = this.loginMethod() === 'phone'
+      ? { PhoneNumber: formVal.PhoneNumber, password: formVal.password }
+      : { email: formVal.email, password: formVal.password };
 
-    this.authService.login({ PhoneNumber: PhoneNumber as string, password: password as string }).subscribe({
+    this.authService.login(credentials as any).subscribe({
       next: () => {
         this.isLoading.set(false);
         this.router.navigate(['/dashboard']);

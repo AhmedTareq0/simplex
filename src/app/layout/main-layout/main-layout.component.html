@@ -5,8 +5,7 @@
     (onToggleMobileMenu)="toggleMobileMenu()" />
 
   <main class="layout-main">
-    <app-main-layout-header [userName]="headerUserName" [userRole]="headerUserRole" [avatarUrl]="headerAvatarUrl"
-      (menuClick)="toggleMobileMenu()" />
+    <app-main-layout-header (menuClick)="toggleMobileMenu()" />
 
     <div class="layout-content">
       <div class="layout-content__glow"></div>
