@@ -4,7 +4,7 @@ export const environment = {
   stage: 'production',
 
   // ============ API ============
-  apiUrl: 'https://135.181.24.133',
+  apiUrl: 'https://api-simplex.envsabqpro.site',
   apiTimeout: 30000,
 
   // ============ Logging & Debug ============
