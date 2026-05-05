@@ -7,12 +7,12 @@ export const environment = {
   apiUrl: 'https://api-simplex.envsabqpro.site',
   apiTimeout: 30000,
 
-  // ============ Logging & Debug ============
+  // =========== Logging & Debug ==========
   enableLogging: false,
   enableErrorTracking: true,
   enableConsoleLog: false,
 
-  // ============ Features ============
+  // ========== Features ===========
   features: {
     analytics: true,
     errorTracking: true,
