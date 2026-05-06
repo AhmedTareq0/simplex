@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { WebSocketService } from '../../../core/services/websocket.service';
 
@@ -14,6 +15,7 @@ export interface Conversation {
   escalation_reason: string | null;
   created_at: string;
   ended_at: string | null;
+  last_message?: ApiMessage;
 }
 
 export interface ApiMessage {
@@ -33,10 +35,30 @@ export class ChatService {
 
   readonly activeConversationId = signal<string | null>(null);
   readonly messages = signal<ApiMessage[]>([]);
-  readonly lastMessages = signal<Record<string, ApiMessage>>({});
+  readonly lastMessages = signal<Record<string, ApiMessage>>(this.loadCachedLastMessages());
   readonly isLoading = signal(false);
 
+  private loadCachedLastMessages(): Record<string, ApiMessage> {
+    try {
+      const cached = localStorage.getItem('chat_last_messages');
+      return cached ? JSON.parse(cached) : {};
+    } catch {
+      return {};
+    }
+  }
+
+  private cacheLastMessages(msgs: Record<string, ApiMessage>) {
+    try {
+      localStorage.setItem('chat_last_messages', JSON.stringify(msgs));
+    } catch { }
+  }
+
   constructor() {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      this.ws.connect(token);
+    }
+
     this.ws.messageReceived$.subscribe((payload) => {
       const msg: ApiMessage = {
         id: payload.id,
@@ -47,7 +69,11 @@ export class ChatService {
         timestamp: payload.timestamp,
       };
 
-      this.lastMessages.update(prev => ({ ...prev, [payload.conversation_id]: msg }));
+      this.lastMessages.update(prev => {
+        const next = { ...prev, [payload.conversation_id]: msg };
+        this.cacheLastMessages(next);
+        return next;
+      });
 
       if (payload.conversation_id === this.activeConversationId()) {
         this.messages.update((prev) => [...prev, msg]);
@@ -73,7 +99,26 @@ export class ChatService {
   }
 
   getConversations(): Observable<any> {
-    return this.http.get<any>(`${this.base}/api/ai-assistant/conversations`);
+    return this.http.get<any>(`${this.base}/api/ai-assistant/conversations`).pipe(
+      tap(res => {
+        const lastMsgs: Record<string, ApiMessage> = {};
+        (res.data || []).forEach((c: any) => {
+          const lm = c.last_message || c.lastMessage || c.last_message_content;
+          if (lm) {
+            lastMsgs[c.conversation_id] = typeof lm === 'string' 
+              ? { content: lm, timestamp: c.created_at } as ApiMessage 
+              : lm;
+          }
+        });
+        if (Object.keys(lastMsgs).length > 0) {
+          this.lastMessages.update(prev => {
+            const next = { ...prev, ...lastMsgs };
+            this.cacheLastMessages(next);
+            return next;
+          });
+        }
+      })
+    );
   }
 
   loadMessages(conversationId: string): void {
@@ -98,5 +143,9 @@ export class ChatService {
     if (attachment) form.append('Attachment', attachment);
     
     return this.http.post<any>(`${this.base}/api/ai-assistant/customer-care/message`, form);
+  }
+
+  requestVisit(conversationId: string): Observable<any> {
+    return this.http.post<any>(`${this.base}/api/visits/create`, { conversationId });
   }
 }
