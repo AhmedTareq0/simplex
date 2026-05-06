@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, OnInit, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, output, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '@/shared/components/icon/icon.component';
 import { NotificationDropdownComponent } from '@/shared/components/notification-dropdown/notification-dropdown.component';
+import { ChatService } from '../../../features/chat/services/chat.service';
 
 @Component({
   selector: 'app-main-layout-header',
@@ -16,7 +17,12 @@ export class MainLayoutHeaderComponent implements OnInit {
   readonly menuClick = output<void>();
 
   readonly isArabic = signal(true);
-  readonly chatUnreadCount = signal(0);
+  private readonly chatService = inject(ChatService);
+
+  readonly chatUnreadCount = computed(() => {
+    const counts = this.chatService.unreadCounts();
+    return Object.values(counts).reduce((sum, c) => sum + c, 0);
+  });
 
   private readonly userData = signal<any>(null);
 

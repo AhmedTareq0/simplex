@@ -10,6 +10,7 @@
     } @else {
     <app-chat-list [users]="users()" [currentUserId]="currentUserId()" [accountPicture]="accountPicture()"
       [lastMessages]="lastMessages()" [selectedUserId]="selectedPerson()?.sub || ''"
+      [unreadCounts]="unreadCounts()"
       (selectUser)="onSelectUser($event)" />
     }
   </div>

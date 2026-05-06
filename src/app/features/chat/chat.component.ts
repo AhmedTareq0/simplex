@@ -47,6 +47,7 @@ export class ChatComponent implements OnInit, AfterViewInit {
   readonly errorMessage = signal('');
   readonly isLoadingMessages = this.chatService.isLoading;
   readonly messagesError = signal('');
+  readonly unreadCounts = this.chatService.unreadCounts;
 
   ngOnInit() {
     try {
@@ -54,6 +55,23 @@ export class ChatComponent implements OnInit, AfterViewInit {
       if (raw) this.userData.set(JSON.parse(raw));
     } catch { }
     this.loadConversations();
+
+    this.chatService.newEscalation$.subscribe((payload) => {
+      const exists = this.users().some(u => u.sub === payload.conversation_id);
+      if (exists) return;
+      this.users.update(prev => [...prev, {
+        sub: payload.conversation_id,
+        name: payload.customer_name,
+        picture: `https://ui-avatars.com/api/?name=${encodeURIComponent(payload.customer_name)}&background=random`,
+        status: 'with_customer_care',
+        machineId: payload.machine_id,
+        customerCareName: null,
+        engineerName: null,
+        escalationReason: payload.escalation_reason,
+        createdAt: payload.escalated_at,
+        endedAt: null,
+      }]);
+    });
   }
 
   loadConversations() {
@@ -102,6 +120,7 @@ export class ChatComponent implements OnInit, AfterViewInit {
     this.selectedPerson.set(user);
     this.messagesError.set('');
     this.chatService.loadMessages(user.sub);
+    this.chatService.markRead(user.sub);
   }
 
   private mapApiMessage(m: ApiMessage, user: any): any {
