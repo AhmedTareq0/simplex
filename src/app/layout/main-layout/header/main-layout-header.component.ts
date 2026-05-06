@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, OnInit, output, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '@/shared/components/icon/icon.component';
+import { NotificationDropdownComponent } from '@/shared/components/notification-dropdown/notification-dropdown.component';
 
 @Component({
   selector: 'app-main-layout-header',
   standalone: true,
-  imports: [IconComponent, RouterLink],
+  imports: [IconComponent, RouterLink, NotificationDropdownComponent],
   templateUrl: './main-layout-header.component.html',
   styleUrl: './main-layout-header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -15,8 +16,7 @@ export class MainLayoutHeaderComponent implements OnInit {
   readonly menuClick = output<void>();
 
   readonly isArabic = signal(true);
-  readonly chatUnreadCount = signal(5);
-  readonly notifCount = signal(3);
+  readonly chatUnreadCount = signal(0);
 
   private readonly userData = signal<any>(null);
 

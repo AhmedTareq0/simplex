@@ -1,5 +1,10 @@
 <div class="chat-box">
-  <app-chat-header [person]="person" [isOnline]="isOnline" />
+  <app-chat-header 
+    [person]="person" 
+    [isOnline]="isOnline" 
+    [conversationId]="conversationId"
+    [status]="person?.status"
+  />
   <app-chat-messages
     [messages]="messages"
     [currentUserId]="currentUserId"

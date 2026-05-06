@@ -1,5 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { SharedTableComponent, TableColumn } from '../../shared/components/shared-table/shared-table.component';
 import {
   CustomerSupportCreateComponent,
@@ -9,7 +10,6 @@ import {
   CustomerSupportDetailComponent,
   DetailUserData,
 } from './components/customer-support-detail/customer-support-detail.component';
-
 interface Client {
   id: string;
   name: string;
@@ -28,6 +28,7 @@ interface Client {
   styleUrl: './customer-support.component.scss',
 })
 export class CustomerSupportComponent {
+  private readonly router = inject(Router);
   showCreateModal = signal(false);
   showDetailModal = signal(false);
   isEditing = signal(false);
@@ -179,5 +180,10 @@ export class CustomerSupportComponent {
       low: 'var(--color-success)',
     };
     return map[priority] || 'var(--color-text-secondary)';
+  }
+
+  onAcceptEscalation(conversationId: string): void {
+    // Navigate to chat with this conversation selected
+    this.router.navigate(['/chat'], { queryParams: { conversation: conversationId } });
   }
 }
