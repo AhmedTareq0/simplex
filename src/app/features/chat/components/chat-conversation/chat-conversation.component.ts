@@ -26,20 +26,34 @@ export class ChatConversationComponent {
   }
 
   get messageText(): string {
-    if (!this.lastMessage?.text) return '';
+    const text = this.lastMessage?.text || this.lastMessage?.content;
+    if (!text) return '';
     if (this.lastMessage.isDeleted) return 'تم حذف هذه الرسالة';
-    return this.lastMessage.text.includes('localhost') || this.lastMessage.text.includes('blob:')
+    return text.includes('localhost') || text.includes('blob:') || text.includes('http') && (text.includes('.jpg') || text.includes('.png') || text.includes('.pdf'))
       ? '📎 ملف'
-      : this.lastMessage.text;
+      : text;
   }
 
   get isOwnLastMessage(): boolean {
-    return this.lastMessage?.senderId === this.currentUserId;
+    if (!this.lastMessage) return false;
+    const senderId = this.lastMessage.senderId;
+    if (senderId) return senderId === this.currentUserId;
+
+    const role = this.lastMessage.role?.toLowerCase();
+    if (role === 'customer_care') return this.currentUserId === 'support';
+    if (role === 'engineer') return this.currentUserId === 'engineer';
+    return false;
+  }
+
+  get senderPrefix(): string {
+    if (!this.lastMessage) return '';
+    return this.isOwnLastMessage ? 'أنا: ' : 'العميل: ';
   }
 
   get timestamp(): string {
-    if (!this.lastMessage?.createdAt && !this.lastMessage?.timestamp) return '';
-    const d = new Date(this.lastMessage.createdAt || this.lastMessage.timestamp);
+    const rawDate = this.lastMessage?.timestamp || this.lastMessage?.createdAt || this.lastMessage?.created_at;
+    if (!rawDate) return '';
+    const d = new Date(rawDate);
     const now = new Date();
     const isToday = d.toDateString() === now.toDateString();
     if (isToday) return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });

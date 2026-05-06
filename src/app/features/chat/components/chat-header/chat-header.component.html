@@ -36,6 +36,10 @@
         <div class="chat-header__dropdown">
           <div class="chat-header__dropdown-backdrop" (click)="showMenu.set(false)"></div>
           <div class="chat-header__dropdown-content">
+            <button class="chat-header__dropdown-item" (click)="requestVisit()">
+              <app-icon name="calendarPlus" size="sm" />
+              <span>Need Visit</span>
+            </button>
             <!-- Assign engineer / End conversation removed -->
           </div>
         </div>

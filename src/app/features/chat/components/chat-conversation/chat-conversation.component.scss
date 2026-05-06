@@ -73,8 +73,6 @@
     font-size: 12px;
     color: #667781;
     margin-top: 2px;
-    direction: ltr;
-    text-align: right;
   }
 
   &__timestamp {
@@ -90,7 +88,7 @@
   }
 
   &__message {
-    font-size: 14px;
+    font-size: 12px;
     color: #667781;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -98,7 +96,6 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    flex: 1;
     min-width: 0;
 
     &--unread {
