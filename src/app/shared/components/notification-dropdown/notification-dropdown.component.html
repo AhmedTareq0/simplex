@@ -1,0 +1,59 @@
+<div class="notif-dropdown">
+  <button type="button" class="notif-dropdown__trigger" (click)="toggle()" [attr.aria-label]="headerTitle()">
+    <app-icon name="bell" size="md" />
+    @if (count() > 0) {
+      <span class="notif-dropdown__badge">{{ count() > 99 ? '99+' : count() }}</span>
+    }
+  </button>
+
+  @if (isOpen()) {
+    <div class="notif-dropdown__menu">
+      <div class="notif-dropdown__header">
+        <h3>{{ headerTitle() }}</h3>
+        @if (count() > 0) {
+          <span class="notif-dropdown__count-label">{{ count() }} جديد</span>
+        }
+      </div>
+
+      <div class="notif-dropdown__list">
+        @if (notifications().length === 0) {
+          <div class="notif-dropdown__empty">
+            <p>لا توجد إشعارات جديدة</p>
+          </div>
+        } @else {
+          @for (item of notifications(); track item.id) {
+            <a class="notif-dropdown__item" 
+               [routerLink]="item.link ? [item.link] : null" 
+               [queryParams]="item.queryParams"
+               (click)="onItemClick(item)">
+              
+              @if (item.avatarText) {
+                <div class="notif-dropdown__avatar">
+                  {{ item.avatarText }}
+                </div>
+              }
+
+              <div class="notif-dropdown__info">
+                <p class="notif-dropdown__text">
+                  <strong>{{ item.title }}</strong> {{ item.description }}
+                </p>
+                @if (item.time) {
+                  <span class="notif-dropdown__time">{{ item.time }}</span>
+                }
+              </div>
+            </a>
+          }
+        }
+      </div>
+
+      <div class="notif-dropdown__footer">
+        <a [routerLink]="[viewAllLink()]" (click)="viewAllClick.emit(); close()">
+          عرض الكل
+        </a>
+      </div>
+    </div>
+
+    <!-- Overlay to handle click outside -->
+    <div class="notif-dropdown__overlay" (click)="close()"></div>
+  }
+</div>

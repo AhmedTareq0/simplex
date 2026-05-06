@@ -4,7 +4,7 @@ import { SkeletonLoaderComponent } from '@/shared/components/skeleton-loader/ske
 import { ChatListComponent } from './components/chat-list/chat-list.component';
 import { ChatBoxComponent } from './components/chat-box/chat-box.component';
 import { ChatEmptyComponent } from './components/chat-empty/chat-empty.component';
-import { ChatService, Conversation } from './services/chat.service';
+import { ChatService, Conversation, ApiMessage } from './services/chat.service';
 
 @Component({
   selector: 'app-chat',
@@ -35,12 +35,17 @@ export class ChatComponent implements OnInit, AfterViewInit {
   });
 
   selectedPerson = signal<any>(null);
-  messages = signal<any[]>([]);
-  lastMessages = signal<Record<string, any>>({});
+  readonly lastMessages = this.chatService.lastMessages;
+
+  readonly messages = computed(() => {
+    const raw = this.chatService.messages();
+    const person = this.selectedPerson();
+    return raw.map(m => this.mapApiMessage(m, person));
+  });
 
   readonly isLoading = signal(true);
   readonly errorMessage = signal('');
-  readonly isLoadingMessages = signal(false);
+  readonly isLoadingMessages = this.chatService.isLoading;
   readonly messagesError = signal('');
 
   ngOnInit() {
@@ -56,7 +61,7 @@ export class ChatComponent implements OnInit, AfterViewInit {
     this.errorMessage.set('');
     this.chatService.getConversations().subscribe({
       next: (res) => {
-        const mapped = (res.data || []).map((c) => this.mapConversation(c));
+        const mapped = (res.data || []).map((c: Conversation) => this.mapConversation(c));
         this.users.set(mapped);
         this.isLoading.set(false);
       },
@@ -95,24 +100,11 @@ export class ChatComponent implements OnInit, AfterViewInit {
 
   onSelectUser(user: any) {
     this.selectedPerson.set(user);
-    this.messages.set([]);
     this.messagesError.set('');
-    this.isLoadingMessages.set(true);
-
-    this.chatService.getMessages(user.sub).subscribe({
-      next: (res) => {
-        const mapped = (res.data?.messages || []).map((m) => this.mapApiMessage(m, user));
-        this.messages.set(mapped);
-        this.isLoadingMessages.set(false);
-      },
-      error: (err) => {
-        this.messagesError.set(err?.error?.message ?? 'فشل تحميل الرسائل');
-        this.isLoadingMessages.set(false);
-      },
-    });
+    this.chatService.loadMessages(user.sub);
   }
 
-  private mapApiMessage(m: any, user: any): any {
+  private mapApiMessage(m: ApiMessage, user: any): any {
     const role = m.role?.toLowerCase() || '';
 
     if (role === 'system') {

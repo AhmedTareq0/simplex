@@ -1,41 +1,45 @@
-<div class="chat-header">
-  <div class="chat-header__avatar-wrap">
-    <img
-      class="chat-header__image"
-      [src]="person?.picture || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'"
-      [alt]="person?.name"
-    />
-    <span *ngIf="isOnline" class="chat-header__online-dot"></span>
-  </div>
-
+<header class="chat-header">
   <div class="chat-header__info">
-    <span class="chat-header__name">{{ person?.name || 'غير معروف' }}</span>
-    <span class="chat-header__status" [class.chat-header__status--typing]="isTyping">
-      <ng-container *ngIf="isTyping; else statusText">
-        <span class="chat-header__typing-dots">
-          <span></span><span></span><span></span>
-        </span>
-        يكتب...
-      </ng-container>
-      <ng-template #statusText>
-        {{ isOnline ? 'متصل الآن' : 'غير متصل' }}
-      </ng-template>
-    </span>
+    <div class="chat-header__avatar-wrap">
+      <img
+        class="chat-header__image"
+        [src]="person?.picture || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'"
+        [alt]="person?.name"
+      />
+      @if (isOnline) {
+        <span class="chat-header__online-dot"></span>
+      }
+    </div>
+    <div class="chat-header__text">
+      <h3 class="chat-header__name">{{ person?.name || 'غير معروف' }}</h3>
+      <p class="chat-header__status">
+        @if (isTyping) {
+          <span class="chat-header__typing">يكتب...</span>
+        } @else {
+          {{ isOnline ? 'متصل الآن' : 'غير متصل' }}
+        }
+      </p>
+    </div>
   </div>
 
   <div class="chat-header__actions">
     <button class="chat-header__action-btn" aria-label="بحث">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-      </svg>
+      <app-icon name="search" size="sm" />
     </button>
-    <button class="chat-header__action-btn" aria-label="المزيد">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="5" r="1"></circle>
-        <circle cx="12" cy="12" r="1"></circle>
-        <circle cx="12" cy="19" r="1"></circle>
-      </svg>
-    </button>
+    
+    <div class="chat-header__menu-wrap">
+      <button class="chat-header__action-btn" aria-label="المزيد" (click)="toggleMenu()">
+        <app-icon name="moreVertical" size="sm" />
+      </button>
+
+      @if (showMenu()) {
+        <div class="chat-header__dropdown">
+          <div class="chat-header__dropdown-backdrop" (click)="showMenu.set(false)"></div>
+          <div class="chat-header__dropdown-content">
+            <!-- Assign engineer / End conversation removed -->
+          </div>
+        </div>
+      }
+    </div>
   </div>
-</div>
+</header>

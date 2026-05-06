@@ -1,0 +1,36 @@
+<app-shared-modal
+  [visible]="visible"
+  (visibleChange)="visibleChange.emit($event)"
+  title=""
+  maxWidth="400px"
+  [showCloseButton]="false"
+>
+  <div class="confirmation-content">
+    <div class="confirmation-content__body">
+      <div class="confirmation-content__icon-wrap" [class]="'confirmation-content__icon-wrap--' + type">
+        <app-icon name="alert-triangle" size="lg" />
+      </div>
+      <p class="confirmation-content__message">{{ message }}</p>
+    </div>
+
+    <div class="confirmation-content__footer">
+      <button 
+        class="confirmation-btn confirmation-btn--cancel" 
+        [disabled]="isLoading"
+        (click)="onCancel()">
+        {{ cancelLabel }}
+      </button>
+      <button 
+        class="confirmation-btn" 
+        [class]="'confirmation-btn--' + type"
+        [disabled]="isLoading"
+        (click)="onConfirm()">
+        @if (isLoading) {
+          <span class="btn-spinner"></span>
+        } @else {
+          {{ confirmLabel }}
+        }
+      </button>
+    </div>
+  </div>
+</app-shared-modal>

@@ -40,20 +40,9 @@
   </app-shared-table>
 </div>
 
-<app-customer-support-create
-  [(visible)]="showCreateModal"
-  [isEditMode]="isEditMode()"
-  [editData]="editData()"
-  (create)="onCreateUser($event)"
-  (update)="onUpdateUserFromCreate($event)"
-/>
+<app-customer-support-create [(visible)]="showCreateModal" [isEditMode]="isEditMode()" [editData]="editData()"
+  (create)="onCreateUser($event)" (update)="onUpdateUserFromCreate($event)" />
 
-<app-customer-support-detail
-  [(visible)]="showDetailModal"
-  [user]="selectedClient()"
-  [isEditing]="isEditing()"
-  (editModeChange)="onEditModeChange($event)"
-  (update)="onUpdateUser($event)"
-  (delete)="onDeleteUserById($event)"
-  (edit)="onEditFromDetail($event)"
-/>
+<app-customer-support-detail [(visible)]="showDetailModal" [user]="selectedClient()" [isEditing]="isEditing()"
+  (editModeChange)="onEditModeChange($event)" (update)="onUpdateUser($event)" (delete)="onDeleteUserById($event)"
+  (edit)="onEditFromDetail($event)" />

@@ -127,52 +127,17 @@ export class ChatMessagesComponent implements AfterViewChecked, OnChanges {
   }
 
   onSendMessage(text: string) {
-    const newMsg = {
-      senderId: this.currentUserId,
-      text,
-      createdAt: new Date(),
-      type: 'text',
-      status: 'sent',
-    };
-
-    // Optimistic update — show immediately
-    this.localMessages = [...this.localMessages, newMsg];
-    this.buildGroups();
-    this.shouldScroll.set(true);
-
     if (this.conversationId) {
       this.chatService.sendMessage(this.conversationId, text).subscribe({
-        error: () => {
-          // Rollback on failure
-          this.localMessages = this.localMessages.filter(m => m !== newMsg);
-          this.buildGroups();
-        },
+        error: (err) => console.error('[ChatMessages] Send failed:', err)
       });
     }
   }
 
   onSendFile(file: File) {
-    const url = URL.createObjectURL(file);
-    const newMsg = {
-      senderId: this.currentUserId,
-      text: url,
-      createdAt: new Date(),
-      type: 'file',
-      status: 'sent',
-    };
-
-    // Optimistic update — show local preview immediately
-    this.localMessages = [...this.localMessages, newMsg];
-    this.buildGroups();
-    this.shouldScroll.set(true);
-
     if (this.conversationId) {
-      // Send with empty message text + attachment
       this.chatService.sendMessage(this.conversationId, '', file).subscribe({
-        error: () => {
-          this.localMessages = this.localMessages.filter(m => m !== newMsg);
-          this.buildGroups();
-        },
+        error: (err) => console.error('[ChatMessages] File send failed:', err)
       });
     }
   }

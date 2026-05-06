@@ -1,11 +1,6 @@
 <header class="layout-header">
   <div class="layout-header__start">
-    <button
-      type="button"
-      class="layout-header__menu-btn"
-      (click)="menuClick.emit()"
-      aria-label="فتح القائمة"
-    >
+    <button type="button" class="layout-header__menu-btn" (click)="menuClick.emit()" aria-label="فتح القائمة">
       <app-icon name="menu" size="md" />
     </button>
 
@@ -19,14 +14,10 @@
 
   <div class="layout-header__end">
     <!-- Chat -->
-    <a
-      class="layout-header__icon-btn"
-      aria-label="الدردشة"
-      routerLink="/chat"
-    >
+    <a class="layout-header__icon-btn" aria-label="الدردشة" routerLink="/chat">
       <app-icon name="chat" size="md" />
       @if (chatUnreadCount() > 0) {
-        <span class="layout-header__badge">{{ chatUnreadCount() > 99 ? '99+' : chatUnreadCount() }}</span>
+      <span class="layout-header__badge">{{ chatUnreadCount() > 99 ? '99+' : chatUnreadCount() }}</span>
       }
     </a>
 
@@ -35,12 +26,15 @@
       <span class="layout-header__lang-label">{{ isArabic() ? 'EN' : 'AR' }}</span>
     </button>
 
-    <button type="button" class="layout-header__icon-btn" aria-label="الإشعارات">
-      <app-icon name="bell" size="md" />
-      @if (notifCount() > 0) {
-        <span class="layout-header__badge layout-header__badge--notif">{{ notifCount() }}</span>
-      }
-    </button>
+    <div class="layout-header__notification-wrap" style="position: relative;">
+      
+      <app-notification-dropdown
+        #notificationDropdown
+        [notifications]="[]"
+        [count]="0"
+        viewAllLink="/customer-support"
+      />
+    </div>
 
     <div class="layout-header__divider"></div>
 
