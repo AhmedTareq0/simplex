@@ -1,20 +1,19 @@
-# WebSocket — Customer Care App
+# WebSocket – Customer Care App
 
 ## Connection
 
 ```
-ws://135.181.24.133//chat?access_token=<JWT>
+wss://api-simplex.envsabqpro.site//chat?access_token=<JWT>
 ```
 
 Pass the JWT token obtained from `POST /api/auth/employee/login` as a query parameter.  
-**No Authorization header** — query string only.
+**No Authorization header** – query string only.
 
 ```
-ws://135.181.24.133/ws/chat?access_token=eyJhbGci...
+wss://api-simplex.envsabqpro.site/ws/chat?access_token=eyJhbGci...
 ```
 
 On connect the server automatically:
-- Subscribes the connection to the **Customer Care queue** (`queue:customer_care`) — receives `NewEscalation` events for every new customer request.
 - Subscribes the connection to **all active conversations** this agent is already part of.
 - Sends an `UnreadCount` event for each conversation that has unread messages.
 
@@ -43,19 +42,6 @@ Every message in both directions is JSON.
 ---
 
 ## Client → Server (Actions)
-
-### join_conversation
-Subscribe to a specific conversation room after accepting it via REST.  
-Call this right after `POST /api/ai-assistant/customer-care/join`.
-
-```json
-{
-  "type": "join_conversation",
-  "conversation_id": "66487929b9c34e6f8041390ed7436535"
-}
-```
-
----
 
 ### leave_conversation
 Unsubscribe from a conversation room.
@@ -107,8 +93,9 @@ Keep-alive check. Server replies with `pong`.
 ## Server → Client (Events)
 
 ### NewEscalation
-A customer escalated their conversation and is waiting for an agent.  
-Pushed to **all connected customer care employees** automatically (no join needed).
+Sent **only to the assigned agent's WebSocket connection**. Other connected customer care agents do not receive this event.
+
+The server assigns the conversation automatically and pushes this event directly to the assigned agent — no broadcast, no manual join needed.
 
 ```json
 {
@@ -123,7 +110,7 @@ Pushed to **all connected customer care employees** automatically (no join neede
 }
 ```
 
-> After receiving this, call `GET /api/ai-assistant/customer-care/pending` to get the full queue, then `POST /api/ai-assistant/customer-care/join` to accept.
+> Upon receiving this event the agent is already subscribed to the conversation. No further action is required to join — just start listening for `MessageReceived` events on that `conversation_id`.
 
 ---
 
@@ -172,7 +159,7 @@ The conversation moved to a new state.
 |---|---|
 | `ai` | Chatting with AI (before escalation) |
 | `pending_customer_care` | Waiting for agent |
-| `with_customer_care` | Agent joined |
+| `with_customer_care` | Agent auto-assigned and active |
 | `pending_engineer` | Engineer assigned, not yet joined |
 | `with_engineer` | Engineer has joined |
 | `ended` | Conversation closed |
@@ -276,16 +263,14 @@ Response to a `ping`.
 Agent connects → WS open
   ↓
 Server auto-joins agent to:
-  - queue:customer_care   (new escalation alerts)
   - conv:abc123...        (any active conversation already joined)
 Server sends UnreadCount for each active conversation
 
 ── New customer escalates ──────────────────────────────
-Server pushes NewEscalation to ALL connected agents
+Server picks an agent and assigns the conversation automatically
   ↓
-Agent calls REST: GET  /api/ai-assistant/customer-care/pending  (see the queue)
-Agent calls REST: POST /api/ai-assistant/customer-care/join     (accept conversation)
-Agent sends WS:   join_conversation { conversation_id }
+Server pushes NewEscalation → ONLY to the assigned agent's connection
+  (other connected customer care agents do NOT receive this)
   ↓
 Server pushes StatusChanged  { status: "with_customer_care" }
 Server pushes AgentJoined    { name: "Sara", role: "customer_care" }
@@ -306,7 +291,7 @@ Server pushes EngineerAssigned to engineer's personal channel
 Server pushes AgentJoined    { role: "engineer" }
 Server pushes StatusChanged  { status: "with_engineer" }
 
-── End conversation ─────────────────────────────────────
+── End conversation ────────────────────────────────────
 Agent calls REST: POST /api/ai-assistant/customer-care/end
   ↓
 Server pushes ConversationEnded to all participants
@@ -318,8 +303,6 @@ Server pushes ConversationEnded to all participants
 
 | Action | Method | URL |
 |---|---|---|
-| Get pending queue | GET | `/api/ai-assistant/customer-care/pending` |
-| Join conversation | POST | `/api/ai-assistant/customer-care/join` |
 | Send message | POST | `/api/ai-assistant/customer-care/message` |
 | List engineers | GET | `/api/ai-assistant/customer-care/engineers` |
 | Assign engineer | POST | `/api/ai-assistant/customer-care/assign-engineer` |

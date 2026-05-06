@@ -18,6 +18,7 @@ export class ChatListComponent {
   @Input() lastMessages: Record<string, any> = {};
   @Input() selectedUserId = '';
   @Input() onlineUsers: string[] = [];
+  @Input() unreadCounts: Record<string, number> = {};
 
   @Output() selectUser = new EventEmitter<any>();
 
@@ -43,8 +44,7 @@ export class ChatListComponent {
   }
 
   getUnreadCount(userId: string): number {
-    // Placeholder — wire to real data when available
-    return 0;
+    return this.unreadCounts[userId] ?? 0;
   }
 
   isUserOnline(userId: string): boolean {

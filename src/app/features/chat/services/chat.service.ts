@@ -36,7 +36,10 @@ export class ChatService {
   readonly activeConversationId = signal<string | null>(null);
   readonly messages = signal<ApiMessage[]>([]);
   readonly lastMessages = signal<Record<string, ApiMessage>>(this.loadCachedLastMessages());
+  readonly unreadCounts = signal<Record<string, number>>({});
   readonly isLoading = signal(false);
+
+  readonly newEscalation$ = this.ws.newEscalation$;
 
   private loadCachedLastMessages(): Record<string, ApiMessage> {
     try {
@@ -96,6 +99,10 @@ export class ChatService {
         // Optionally clear active conversation or set a read-only flag
       }
     });
+
+    this.ws.unreadCount$.subscribe((payload) => {
+      this.unreadCounts.update(prev => ({ ...prev, [payload.conversation_id]: payload.count }));
+    });
   }
 
   getConversations(): Observable<any> {
@@ -147,5 +154,10 @@ export class ChatService {
 
   requestVisit(conversationId: string): Observable<any> {
     return this.http.post<any>(`${this.base}/api/visits/create`, { conversationId });
+  }
+
+  markRead(conversationId: string): void {
+    this.ws.markRead(conversationId);
+    this.unreadCounts.update(prev => ({ ...prev, [conversationId]: 0 }));
   }
 }

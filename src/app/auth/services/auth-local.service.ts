@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { WebSocketService } from '../../core/services/websocket.service';
 
 export interface AuthCredentials {
   PhoneNumber?: string;
@@ -39,6 +40,7 @@ export interface RefreshResponse {
 export class AuthLocalService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly ws = inject(WebSocketService);
 
   private readonly _token = signal<string | null>(localStorage.getItem('access_token'));
   readonly token = this._token.asReadonly();
@@ -57,6 +59,7 @@ export class AuthLocalService {
           }
           localStorage.setItem('user', JSON.stringify(response.data.user));
           this._token.set(token);
+          this.ws.connect(token);
         }
       })
     );
