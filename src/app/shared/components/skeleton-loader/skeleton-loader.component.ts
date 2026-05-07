@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-export type SkeletonType = 'chat-list' | 'chat-message' | 'text' | 'avatar' | 'card';
+export type SkeletonType = 'chat-list' | 'chat-message' | 'text' | 'avatar' | 'card' | 'table';
 
 @Component({
   selector: 'app-skeleton-loader',

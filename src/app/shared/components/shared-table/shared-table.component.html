@@ -9,7 +9,7 @@
       </div>
       <div class="st-toolbar__text">
         <h3 class="st-toolbar__title">{{ title }}</h3>
-        <p class="st-toolbar__count" *ngIf="data">الإجمالي {{ data.length }}</p>
+        <p class="st-toolbar__count" *ngIf="data">الإجمالي {{ lazy ? totalRecords : data.length }}</p>
       </div>
     </div>
 
@@ -40,7 +40,7 @@
   <!-- ── Table ───────────────────────────────────────────────── -->
   <div class="st-table-scroll">
     <p-table #dt [value]="data" [columns]="columns" [globalFilterFields]="filterFields"
-      [tableStyle]="{ 'min-width': '40rem' }" [rows]="rows" [paginator]="showPaginator"
+      [tableStyle]="{ 'min-width': '40rem' }" [rows]="rows" [paginator]="!lazy && showPaginator"
       [rowsPerPageOptions]="[5, 10, 25, 50]" styleClass="st-prime-table" dir="rtl">
       <!-- Header -->
       <ng-template pTemplate="header" let-columns>
@@ -61,7 +61,7 @@
                   <p-select *ngSwitchCase="'dropdown'" [options]="col.filterOptions"
                     (onChange)="dt.filter($event.value, col.field, 'equals')"
                     [placeholder]="col.placeholder || 'اختر...'" [showClear]="true" appendTo="body"
-                    styleClass="st-filter-select" />
+                    styleClass="st-filter-select" panelStyleClass="st-filter-select-panel" />
                   <input *ngSwitchDefault pInputText type="text" class="st-filter-input"
                     (input)="dt.filter($any($event.target).value, col.field, 'contains')"
                     [placeholder]="col.placeholder || col.header" />
@@ -148,4 +148,50 @@
       </ng-template>
     </p-table>
   </div>
+
+  <!-- ── Server-side Paginator ──────────────────────────────── -->
+  @if (lazy && showPaginator && totalRecords > 0) {
+    <div class="st-server-paginator" dir="rtl">
+      <div class="st-server-paginator__info">
+        صفحة {{ currentPage }} من {{ totalPages }} &nbsp;·&nbsp; الإجمالي {{ totalRecords }}
+      </div>
+      <div class="st-server-paginator__controls">
+        <!-- Rows per page -->
+        <select class="st-server-paginator__select" [ngModel]="rows" (ngModelChange)="onRowsChange($event)">
+          <option [value]="10">10</option>
+          <option [value]="20">20</option>
+          <option [value]="50">50</option>
+        </select>
+
+        <!-- Prev -->
+        <button class="st-server-paginator__btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
+          ‹
+        </button>
+
+        <!-- Page numbers -->
+        @if (pageNumbers[0] > 1) {
+          <button class="st-server-paginator__btn" (click)="goToPage(1)">1</button>
+          @if (pageNumbers[0] > 2) {
+            <span class="st-server-paginator__ellipsis">…</span>
+          }
+        }
+        @for (p of pageNumbers; track p) {
+          <button class="st-server-paginator__btn"
+            [class.st-server-paginator__btn--active]="p === currentPage"
+            (click)="goToPage(p)">{{ p }}</button>
+        }
+        @if (pageNumbers[pageNumbers.length - 1] < totalPages) {
+          @if (pageNumbers[pageNumbers.length - 1] < totalPages - 1) {
+            <span class="st-server-paginator__ellipsis">…</span>
+          }
+          <button class="st-server-paginator__btn" (click)="goToPage(totalPages)">{{ totalPages }}</button>
+        }
+
+        <!-- Next -->
+        <button class="st-server-paginator__btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">
+          ›
+        </button>
+      </div>
+    </div>
+  }
 </div>

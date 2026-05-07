@@ -20,10 +20,10 @@ export const routes: Routes = [
           import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
       },
       {
-        path: 'customer-support',
+        path: 'tickets',
         loadComponent: () =>
-          import('./features/customer-support/customer-support.component').then(
-            (m) => m.CustomerSupportComponent,
+          import('./features/tickets/tickets.component').then(
+            (m) => m.TicketsComponent,
           ),
       },
       {
