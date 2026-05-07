@@ -8,14 +8,17 @@ import { WebSocketService } from '../../../core/services/websocket.service';
 export interface Conversation {
   conversation_id: string;
   status: 'with_customer_care' | 'with_engineer' | 'with_ai' | 'ended' | string;
-  machine_id: string;
+  machine?: { id: number; name: string; type: string; image: string };
+  machine_id?: string;
   customer_name: string;
+  customer_profile_image?: string;
   customer_care_name: string | null;
   engineer_name: string | null;
   escalation_reason: string | null;
   created_at: string;
   ended_at: string | null;
-  last_message?: ApiMessage;
+  last_message?: ApiMessage | string;
+  last_message_at?: string;
 }
 
 export interface ApiMessage {
@@ -39,7 +42,12 @@ export class ChatService {
   readonly unreadCounts = signal<Record<string, number>>({});
   readonly isLoading = signal(false);
 
+  // Exposed WS streams for components
   readonly newEscalation$ = this.ws.newEscalation$;
+  readonly statusChanged$ = this.ws.statusChanged$;
+  readonly agentJoined$ = this.ws.agentJoined$;
+  readonly typingIndicator$ = this.ws.typingIndicator$;
+  readonly conversationReopened$ = this.ws.conversationReopened$;
 
   private loadCachedLastMessages(): Record<string, ApiMessage> {
     try {
@@ -57,11 +65,7 @@ export class ChatService {
   }
 
   constructor() {
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      this.ws.connect(token);
-    }
-
+    // New message received
     this.ws.messageReceived$.subscribe((payload) => {
       const msg: ApiMessage = {
         id: payload.id,
@@ -79,27 +83,28 @@ export class ChatService {
       });
 
       if (payload.conversation_id === this.activeConversationId()) {
-        this.messages.update((prev) => [...prev, msg]);
+        this.messages.update(prev => [...prev, msg]);
       }
     });
 
-     this.ws.conversationEnded$.subscribe((payload) => {
+    // Conversation ended by customer — append system message
+    this.ws.conversationEnded$.subscribe((payload) => {
       if (payload.conversation_id === this.activeConversationId()) {
-        this.messages.update((prev) => [
+        this.messages.update(prev => [
           ...prev,
           {
             id: 'end-' + Date.now(),
             role: 'system',
-            content: 'تم إنهاء المحادثة من قبل الموظف',
+            content: 'تم إنهاء المحادثة من قبل العميل',
             attachment_url: null,
             attachment_type: null,
             timestamp: new Date().toISOString(),
           },
         ]);
-        // Optionally clear active conversation or set a read-only flag
       }
     });
 
+    // Unread count updated
     this.ws.unreadCount$.subscribe((payload) => {
       this.unreadCounts.update(prev => ({ ...prev, [payload.conversation_id]: payload.count }));
     });
@@ -107,13 +112,20 @@ export class ChatService {
 
   getConversations(): Observable<any> {
     return this.http.get<any>(`${this.base}/api/ai-assistant/conversations`).pipe(
-      tap(res => {
+      tap((res: any) => {
         const lastMsgs: Record<string, ApiMessage> = {};
-        (res.data || []).forEach((c: any) => {
+        (res.data?.items || []).forEach((c: any) => {
           const lm = c.last_message || c.lastMessage || c.last_message_content;
           if (lm) {
-            lastMsgs[c.conversation_id] = typeof lm === 'string' 
-              ? { content: lm, timestamp: c.created_at } as ApiMessage 
+            lastMsgs[c.conversation_id] = typeof lm === 'string'
+              ? {
+                  id: '',
+                  role: '',
+                  content: lm,
+                  attachment_url: null,
+                  attachment_type: null,
+                  timestamp: c.last_message_at || c.created_at,
+                } as ApiMessage
               : lm;
           }
         });
@@ -131,7 +143,7 @@ export class ChatService {
   loadMessages(conversationId: string): void {
     this.isLoading.set(true);
     this.activeConversationId.set(conversationId);
-    
+
     this.http.get<any>(`${this.base}/api/ai-assistant/messages/${conversationId}`)
       .subscribe({
         next: (res) => {
@@ -139,25 +151,31 @@ export class ChatService {
           this.isLoading.set(false);
           this.ws.joinConversation(conversationId);
         },
-        error: () => this.isLoading.set(false)
+        error: () => this.isLoading.set(false),
       });
   }
 
   sendMessage(conversationId: string, message: string, attachment?: File): Observable<any> {
     const form = new FormData();
     form.append('ConversationId', conversationId);
-    form.append('Message', message);
+     form.append('Message', message.trim() || ' ');
     if (attachment) form.append('Attachment', attachment);
-    
     return this.http.post<any>(`${this.base}/api/ai-assistant/customer-care/message`, form);
   }
 
   requestVisit(conversationId: string): Observable<any> {
-    return this.http.post<any>(`${this.base}/api/visits/create`, { conversationId });
+    return this.http.post<any>(
+      `${this.base}/api/ai-assistant/customer-care/request-engineer-visit`,
+      { conversation_id: conversationId }
+    );
   }
 
   markRead(conversationId: string): void {
     this.ws.markRead(conversationId);
     this.unreadCounts.update(prev => ({ ...prev, [conversationId]: 0 }));
+  }
+
+  sendTyping(conversationId: string, senderName: string): void {
+    this.ws.typing(conversationId, senderName);
   }
 }

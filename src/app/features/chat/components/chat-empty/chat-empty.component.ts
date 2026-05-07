@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-chat-empty',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './chat-empty.component.html',
   styleUrl: './chat-empty.component.scss',
 })

@@ -1,10 +1,9 @@
 import {
-  Component, Input, signal, ViewChild, ElementRef,
+  Component, input, signal, ViewChild, ElementRef,
   AfterViewChecked, OnChanges, SimpleChanges, inject
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ChatMessageComponent } from '../chat-message/chat-message.component';
-import { ChatFooterComponent } from '../chat-footer/chat-footer.component';
+import { ChatFooterComponent, SendPayload } from '../chat-footer/chat-footer.component';
 import { ChatService } from '../../services/chat.service';
 
 export interface MessageGroup {
@@ -18,52 +17,55 @@ export interface MessageGroup {
   isGrouped?: boolean;
 }
 
+const SENDER_NAMES: Record<string, string> = {
+  ai: 'AI Assistant',
+  customer_care: 'خدمة العملاء',
+  engineer: 'المهندس',
+};
+
 @Component({
   selector: 'app-chat-messages',
   standalone: true,
-  imports: [CommonModule, ChatMessageComponent, ChatFooterComponent],
+  imports: [ChatMessageComponent, ChatFooterComponent],
   templateUrl: './chat-messages.component.html',
   styleUrl: './chat-messages.component.scss',
 })
 export class ChatMessagesComponent implements AfterViewChecked, OnChanges {
-  @Input() messages: any[] = [];
-  @Input() currentUserId = '';
-  @Input() conversationId = '';
-  @Input() users: any[] = [];
+  readonly messages = input<any[]>([]);
+  readonly currentUserId = input('');
+  readonly conversationId = input('');
+  readonly userName = input('');
+  readonly users = input<any[]>([]);
 
   private readonly chatService = inject(ChatService);
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
 
-  shouldScroll = signal(false);
   groupedItems: MessageGroup[] = [];
-
-  // local copy so we can append without mutating the input
-  private localMessages: any[] = [];
+  private needsScroll = false;
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['messages']) {
-      // reset local messages when conversation changes
-      this.localMessages = [...(this.messages || [])];
-      this.buildGroups();
-      this.shouldScroll.set(true);
+      this.groupedItems = this.buildGroups(this.messages());
+      this.needsScroll = true;
     }
   }
 
   ngAfterViewChecked() {
-    if (this.shouldScroll()) {
-      this.scrollToBottom();
-      this.shouldScroll.set(false);
+    if (this.needsScroll) {
+      this.needsScroll = false;
+      this.scrollContainer?.nativeElement.scrollTo({
+        top: this.scrollContainer.nativeElement.scrollHeight,
+      });
     }
   }
 
-  buildGroups() {
+  private buildGroups(messages: any[]): MessageGroup[] {
     const items: MessageGroup[] = [];
     let lastDate = '';
     let lastSenderId = '';
 
-    for (const msg of this.localMessages) {
-
+    for (const msg of messages) {
       if (msg.type === 'system') {
         items.push({ type: 'system', label: msg.text });
         lastSenderId = '';
@@ -77,68 +79,48 @@ export class ChatMessagesComponent implements AfterViewChecked, OnChanges {
         lastSenderId = '';
       }
 
-      const isOwn = msg.senderId === this.currentUserId;
-      const sender = this.users.find(u => u.sub === msg.senderId);
+      const isOwn = msg.senderId === this.currentUserId();
       const isGrouped = msg.senderId === lastSenderId;
-      const showSenderInfo = !isOwn && !isGrouped;
+      const sender = this.users().find(u => u.sub === msg.senderId);
 
       items.push({
         type: 'message',
         message: msg,
         isOwn,
-        senderName: sender?.name || this.getSenderDisplayName(msg),
-        senderPicture: sender?.picture || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
-        showSenderInfo,
         isGrouped,
+        showSenderInfo: !isOwn && !isGrouped,
+        senderName: sender?.name || SENDER_NAMES[msg.role?.toLowerCase()] || '',
+        senderPicture: sender?.picture || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
       });
 
       lastSenderId = msg.senderId;
     }
 
-    this.groupedItems = items;
+    return items;
   }
 
-  private getSenderDisplayName(msg: any): string {
-    const role = msg.role?.toLowerCase() || '';
-    if (role === 'ai') return 'AI Assistant';
-    if (role === 'customer_care') return 'خدمة العملاء';
-    if (role === 'engineer') return 'المهندس';
-    return '';
-  }
-
-  getDateLabel(date: string | Date): string {
+  private getDateLabel(date: string | Date): string {
     if (!date) return '';
     const d = new Date(date);
     const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const msgDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const toDay = (dt: Date) => new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime();
 
-    if (msgDay.getTime() === today.getTime()) return 'اليوم';
-    if (msgDay.getTime() === yesterday.getTime()) return 'أمس';
+    if (toDay(d) === toDay(now)) return 'اليوم';
+    if (toDay(d) === toDay(now) - 86_400_000) return 'أمس';
     return d.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
   }
 
-  scrollToBottom() {
-    if (this.scrollContainer?.nativeElement) {
-      this.scrollContainer.nativeElement.scrollTop = this.scrollContainer.nativeElement.scrollHeight;
-    }
+  onSend({ text, file }: SendPayload) {
+    if (!this.conversationId()) return;
+    // Single request with both text and optional file
+    this.chatService.sendMessage(this.conversationId(), text, file).subscribe({
+      error: (err) => console.error('[ChatMessages] Send failed:', err),
+    });
   }
 
-  onSendMessage(text: string) {
-    if (this.conversationId) {
-      this.chatService.sendMessage(this.conversationId, text).subscribe({
-        error: (err) => console.error('[ChatMessages] Send failed:', err)
-      });
-    }
-  }
-
-  onSendFile(file: File) {
-    if (this.conversationId) {
-      this.chatService.sendMessage(this.conversationId, '', file).subscribe({
-        error: (err) => console.error('[ChatMessages] File send failed:', err)
-      });
+  onTyping() {
+    if (this.conversationId()) {
+      this.chatService.sendTyping(this.conversationId(), this.userName());
     }
   }
 }
