@@ -1,5 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, input, output, signal, computed } from '@angular/core';
 import { ChatListHeaderComponent } from '../chat-list-header/chat-list-header.component';
 import { ChatSearchComponent } from '../chat-search/chat-search.component';
 import { ChatConversationComponent } from '../chat-conversation/chat-conversation.component';
@@ -7,47 +6,42 @@ import { ChatConversationComponent } from '../chat-conversation/chat-conversatio
 @Component({
   selector: 'app-chat-list',
   standalone: true,
-  imports: [CommonModule, ChatListHeaderComponent, ChatSearchComponent, ChatConversationComponent],
+  imports: [ChatListHeaderComponent, ChatSearchComponent, ChatConversationComponent],
   templateUrl: './chat-list.component.html',
   styleUrl: './chat-list.component.scss',
 })
 export class ChatListComponent {
-  @Input() users: any[] = [];
-  @Input() currentUserId = '';
-  @Input() accountPicture = '';
-  @Input() lastMessages: Record<string, any> = {};
-  @Input() selectedUserId = '';
-  @Input() onlineUsers: string[] = [];
-  @Input() unreadCounts: Record<string, number> = {};
+  readonly users = input<any[]>([]);
+  readonly currentUserId = input('');
+  readonly accountPicture = input('');
+  readonly lastMessages = input<Record<string, any>>({});
+  readonly selectedUserId = input('');
+  readonly onlineUsers = input<string[]>([]);
+  readonly unreadCounts = input<Record<string, number>>({});
+  readonly selectUser = output<any>();
 
-  @Output() selectUser = new EventEmitter<any>();
+  readonly searchText = signal('');
 
-  searchText = '';
-
-  get filteredUsers(): any[] {
-    const others = this.users.filter(u => u.sub !== this.currentUserId);
-    if (!this.searchText) return others;
-    const lower = this.searchText.toLowerCase();
-    return others.filter(u => u.name?.toLowerCase().includes(lower));
-  }
+  readonly filteredUsers = computed(() => {
+    const search = this.searchText().toLowerCase();
+    return this.users().filter(u =>
+      !search || u.name?.toLowerCase().includes(search)
+    );
+  });
 
   onSearch(text: string) {
-    this.searchText = text;
-  }
-
-  onSelectUser(user: any) {
-    this.selectUser.emit(user);
+    this.searchText.set(text);
   }
 
   getLastMessage(userId: string): any {
-    return this.lastMessages[userId] || null;
+    return this.lastMessages()[userId] ?? null;
   }
 
   getUnreadCount(userId: string): number {
-    return this.unreadCounts[userId] ?? 0;
+    return this.unreadCounts()[userId] ?? 0;
   }
 
   isUserOnline(userId: string): boolean {
-    return this.onlineUsers.includes(userId);
+    return this.onlineUsers().includes(userId);
   }
 }

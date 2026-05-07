@@ -1,19 +1,19 @@
 <div class="chat-list">
-  <app-chat-list-header [accountPicture]="accountPicture" />
+  <app-chat-list-header [accountPicture]="accountPicture()" />
   <app-chat-search (search)="onSearch($event)" />
   <div class="chat-list__conversations">
-    @for (user of filteredUsers; track user.sub; let last = $last) {
+    @for (user of filteredUsers(); track user.sub) {
       <app-chat-conversation
         [user]="user"
         [lastMessage]="getLastMessage(user.sub)"
-        [selected]="user.sub === selectedUserId"
-        [currentUserId]="currentUserId"
+        [selected]="user.sub === selectedUserId()"
+        [currentUserId]="currentUserId()"
         [unreadCount]="getUnreadCount(user.sub)"
         [isOnline]="isUserOnline(user.sub)"
-        (select)="onSelectUser(user)"
+        (select)="selectUser.emit(user)"
       />
     }
-    @if (filteredUsers.length === 0) {
+    @if (filteredUsers().length === 0) {
       <div class="chat-list__empty">
         لم يتم العثور على محادثات
       </div>

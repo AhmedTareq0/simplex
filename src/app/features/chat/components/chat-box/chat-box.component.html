@@ -1,14 +1,16 @@
 <div class="chat-box">
-  <app-chat-header 
-    [person]="person" 
-    [isOnline]="isOnline" 
-    [conversationId]="conversationId"
-    [status]="person?.status"
+  <app-chat-header
+    [person]="person()"
+    [isOnline]="isOnline()"
+    [isTyping]="isTyping()"
+    [conversationId]="conversationId()"
+    [status]="person()?.status"
   />
   <app-chat-messages
-    [messages]="messages"
-    [currentUserId]="currentUserId"
-    [conversationId]="conversationId"
-    [users]="users"
+    [messages]="messages()"
+    [currentUserId]="currentUserId()"
+    [conversationId]="conversationId()"
+    [userName]="userName()"
+    [users]="users()"
   />
 </div>

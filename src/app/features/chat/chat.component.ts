@@ -1,5 +1,5 @@
-import { Component, signal, HostBinding, ViewEncapsulation, ElementRef, inject, AfterViewInit, OnInit, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, signal, HostBinding, ViewEncapsulation, ElementRef, inject, AfterViewInit, OnInit, OnDestroy, computed } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 import { SkeletonLoaderComponent } from '@/shared/components/skeleton-loader/skeleton-loader.component';
 import { ChatListComponent } from './components/chat-list/chat-list.component';
 import { ChatBoxComponent } from './components/chat-box/chat-box.component';
@@ -9,19 +9,20 @@ import { ChatService, Conversation, ApiMessage } from './services/chat.service';
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [CommonModule, SkeletonLoaderComponent, ChatListComponent, ChatBoxComponent, ChatEmptyComponent],
+  imports: [SkeletonLoaderComponent, ChatListComponent, ChatBoxComponent, ChatEmptyComponent],
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class ChatComponent implements OnInit, AfterViewInit {
+export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostBinding('class.chat-page') chatPageClass = true;
 
   private elementRef = inject(ElementRef);
   private chatService = inject(ChatService);
+  private readonly destroy$ = new Subject<void>();
 
   readonly users = signal<any[]>([]);
-  private readonly userData = signal<any>(null);
+  readonly userData = signal<any>(null);
 
 
   readonly currentUserId = computed(() => {
@@ -48,6 +49,8 @@ export class ChatComponent implements OnInit, AfterViewInit {
   readonly isLoadingMessages = this.chatService.isLoading;
   readonly messagesError = signal('');
   readonly unreadCounts = this.chatService.unreadCounts;
+  readonly isTyping = signal(false);
+  private typingTimeout?: ReturnType<typeof setTimeout>;
 
   ngOnInit() {
     try {
@@ -56,22 +59,84 @@ export class ChatComponent implements OnInit, AfterViewInit {
     } catch { }
     this.loadConversations();
 
-    this.chatService.newEscalation$.subscribe((payload) => {
-      const exists = this.users().some(u => u.sub === payload.conversation_id);
-      if (exists) return;
-      this.users.update(prev => [...prev, {
-        sub: payload.conversation_id,
-        name: payload.customer_name,
-        picture: `https://ui-avatars.com/api/?name=${encodeURIComponent(payload.customer_name)}&background=random`,
-        status: 'with_customer_care',
-        machineId: payload.machine_id,
-        customerCareName: null,
-        engineerName: null,
-        escalationReason: payload.escalation_reason,
-        createdAt: payload.escalated_at,
-        endedAt: null,
-      }]);
-    });
+    // New escalation — add conversation to list
+    this.chatService.newEscalation$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((payload) => {
+        const exists = this.users().some(u => u.sub === payload.conversation_id);
+        if (exists) return;
+        this.users.update(prev => [...prev, {
+          sub: payload.conversation_id,
+          name: payload.customer_name,
+          picture: `https://ui-avatars.com/api/?name=${encodeURIComponent(payload.customer_name)}&background=random`,
+          status: 'with_customer_care',
+          machineId: payload.machine_id,
+          machineName: null,
+          machineImage: null,
+          customerCareName: null,
+          engineerName: null,
+          escalationReason: payload.escalation_reason,
+          createdAt: payload.escalated_at,
+          endedAt: null,
+        }]);
+      });
+
+    // Status changed — update status badge in list
+    this.chatService.statusChanged$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((payload) => {
+        this.users.update(prev =>
+          prev.map(u => u.sub === payload.conversation_id
+            ? { ...u, status: payload.status }
+            : u
+          )
+        );
+      });
+
+    // Agent joined — update engineerName in list + append system message
+    this.chatService.agentJoined$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((payload) => {
+        if (payload.role === 'engineer') {
+          this.users.update(prev =>
+            prev.map(u => u.sub === payload.conversation_id
+              ? { ...u, engineerName: payload.name }
+              : u
+            )
+          );
+        }
+      });
+
+    // Typing indicator — show only if from customer (not from ourselves)
+    this.chatService.typingIndicator$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((payload) => {
+        if (
+          payload.conversation_id === this.selectedPerson()?.sub &&
+          payload.sender_role === 'customer'
+        ) {
+          // Cancel previous timeout to reset the 3s timer
+          clearTimeout(this.typingTimeout);
+          this.isTyping.set(true);
+          this.typingTimeout = setTimeout(() => this.isTyping.set(false), 3000);
+        }
+      });
+
+    // Conversation reopened — remove from list, clear selection if active
+    this.chatService.conversationReopened$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((payload) => {
+        this.users.update(prev => prev.filter(u => u.sub !== payload.conversation_id));
+        if (this.selectedPerson()?.sub === payload.conversation_id) {
+          this.selectedPerson.set(null);
+        }
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    clearTimeout(this.typingTimeout);
   }
 
   loadConversations() {
@@ -79,7 +144,7 @@ export class ChatComponent implements OnInit, AfterViewInit {
     this.errorMessage.set('');
     this.chatService.getConversations().subscribe({
       next: (res) => {
-        const mapped = (res.data || []).map((c: Conversation) => this.mapConversation(c));
+        const mapped = (res.data?.items || []).map((c: any) => this.mapConversation(c));
         this.users.set(mapped);
         this.isLoading.set(false);
       },
@@ -94,9 +159,11 @@ export class ChatComponent implements OnInit, AfterViewInit {
     return {
       sub: c.conversation_id,
       name: c.customer_name,
-      picture: `https://ui-avatars.com/api/?name=${encodeURIComponent(c.customer_name)}&background=random`,
+      picture: c.customer_profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.customer_name)}&background=random`,
       status: c.status,
-      machineId: c.machine_id,
+      machineId: c.machine?.id ?? c.machine_id,
+      machineName: c.machine?.name,
+      machineImage: c.machine?.image,
       customerCareName: c.customer_care_name,
       engineerName: c.engineer_name,
       escalationReason: c.escalation_reason,

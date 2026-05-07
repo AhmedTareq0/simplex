@@ -1,76 +1,54 @@
-import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, input, output, signal, HostListener } from '@angular/core';
 
 @Component({
   selector: 'app-chat-message',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './chat-message.component.html',
   styleUrl: './chat-message.component.scss',
 })
 export class ChatMessageComponent {
-  @Input() message: any;
-  @Input() isOwn = false;
-  @Input() senderName = '';
-  @Input() senderPicture = '';
-  @Input() showSenderInfo = false;
-  @Input() isGrouped = false; // consecutive messages from same sender
+  readonly message = input<any>(null);
+  readonly isOwn = input(false);
+  readonly senderName = input('');
+  readonly senderPicture = input('');
+  readonly showSenderInfo = input(false);
+  readonly isGrouped = input(false);
+  readonly replyTo = output<any>();
 
-  @Output() replyTo = new EventEmitter<any>();
+  readonly showDropdown = signal(false);
 
-  showDropdown = signal(false);
-
-  get isFile(): boolean {
-    return this.message?.type === 'file';
-  }
-
-  get isPdf(): boolean {
-    return this.message?.text?.includes('.pdf');
-  }
-
-  get isDeleted(): boolean {
-    return this.message?.isDeleted;
-  }
-
-  get isReply(): boolean {
-    return !!this.message?.replyTo;
-  }
-
-  get replyText(): string {
-    return this.message?.replyTo?.text || '';
-  }
-
-  get status(): 'sent' | 'delivered' | 'read' {
-    return this.message?.status || 'read';
-  }
+  get isFile(): boolean { return this.message()?.type === 'file'; }
+  get isPdf(): boolean { return this.message()?.text?.includes('.pdf'); }
+  get isDeleted(): boolean { return !!this.message()?.isDeleted; }
+  get isReply(): boolean { return !!this.message()?.replyTo; }
+  get replyText(): string { return this.message()?.replyTo?.text || ''; }
+  get status(): 'sent' | 'delivered' | 'read' { return this.message()?.status || 'read'; }
 
   toggleDropdown(event: Event) {
     event.stopPropagation();
     this.showDropdown.update(v => !v);
   }
 
-  closeDropdown() {
-    this.showDropdown.set(false);
-  }
+  closeDropdown() { this.showDropdown.set(false); }
 
   onReply() {
-    this.replyTo.emit(this.message);
+    this.replyTo.emit(this.message());
     this.closeDropdown();
   }
 
-  onDelete() {
-    console.log('Delete message:', this.message);
-    this.closeDropdown();
-  }
-
-  onEdit() {
-    console.log('Edit message:', this.message);
-    this.closeDropdown();
-  }
+  onDelete() { this.closeDropdown(); }
+  onEdit() { this.closeDropdown(); }
 
   formatTime(date: string | Date): string {
     if (!date) return '';
-    const d = new Date(date);
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  @HostListener('document:click')
+  onDocumentClick() {
+    if (this.showDropdown()) {
+      this.showDropdown.set(false);
+    }
   }
 }

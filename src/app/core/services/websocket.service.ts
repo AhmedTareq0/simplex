@@ -8,8 +8,8 @@ import {
   AgentJoinedPayload,
   TypingIndicatorPayload,
   UnreadCountPayload,
-  EngineerAssignedPayload,
   ConversationEndedPayload,
+  ConversationReopenedPayload,
 } from '../interfaces/websocket-event.interface';
 
 
@@ -39,9 +39,8 @@ export class WebSocketService {
   private _agentJoined$ = new Subject<AgentJoinedPayload>();
   private _typingIndicator$ = new Subject<TypingIndicatorPayload>();
   private _unreadCount$ = new Subject<UnreadCountPayload>();
-  private _engineerAssigned$ = new Subject<EngineerAssignedPayload>();
   private _conversationEnded$ = new Subject<ConversationEndedPayload>();
-  private _escalationRemoved$ = new Subject<{ conversation_id: string }>();
+  private _conversationReopened$ = new Subject<ConversationReopenedPayload>();
   private _pong$ = new Subject<void>();
   private _connected$ = new Subject<void>();
   private _disconnected$ = new Subject<CloseEvent>();
@@ -60,9 +59,8 @@ export class WebSocketService {
   readonly agentJoined$ = this._agentJoined$.asObservable();
   readonly typingIndicator$ = this._typingIndicator$.asObservable();
   readonly unreadCount$ = this._unreadCount$.asObservable();
-  readonly engineerAssigned$ = this._engineerAssigned$.asObservable();
   readonly conversationEnded$ = this._conversationEnded$.asObservable();
-  readonly escalationRemoved$ = this._escalationRemoved$.asObservable();
+  readonly conversationReopened$ = this._conversationReopened$.asObservable();
   readonly pong$ = this._pong$.asObservable();
 
   connect(token: string): void {
@@ -210,14 +208,11 @@ export class WebSocketService {
       case 'UnreadCount':
         this._unreadCount$.next(msg.data);
         break;
-      case 'EngineerAssigned':
-        this._engineerAssigned$.next(msg.data);
-        break;
       case 'ConversationEnded':
         this._conversationEnded$.next(msg.data);
         break;
-      case 'EscalationRemoved':
-        this._escalationRemoved$.next(msg.data);
+      case 'ConversationReopened':
+        this._conversationReopened$.next(msg.data);
         break;
       case 'pong':
         this._pong$.next();

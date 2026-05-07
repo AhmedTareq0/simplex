@@ -1,19 +1,8 @@
-import { Component, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, signal, inject, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import type { AppIconName } from '../../shared/components/icon/icon.component';
-
-interface ProfileForm {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  role: string;
-  department: string;
-  bio: string;
-  language: string;
-}
+import { AuthLocalService } from '../../auth/services/auth-local.service';
 
 interface NotificationSettings {
   emailNotifications: boolean;
@@ -33,25 +22,33 @@ interface SecurityForm {
 @Component({
   selector: 'app-profile-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, IconComponent],
+  imports: [FormsModule, IconComponent],
   templateUrl: './profile-settings.component.html',
   styleUrl: './profile-settings.component.scss',
 })
-export class ProfileSettingsComponent {
+export class ProfileSettingsComponent implements OnInit {
+  readonly authService = inject(AuthLocalService);
+
   activeTab = signal<'profile' | 'notifications' | 'security'>('profile');
   saveSuccess = signal(false);
+  isLoading = signal(false);
   avatarPreview = signal<string | null>(null);
 
-  profile: ProfileForm = {
-    firstName: 'أحمد',
-    lastName: 'محمد',
-    email: 'ahmed.mohamed@simplex.com',
-    phone: '+966 50 123 4567',
-    role: 'مشرف دعم العملاء',
-    department: 'خدمة العملاء',
-    bio: 'مشرف متخصص في دعم العملاء مع خبرة تزيد عن 5 سنوات في إدارة فرق الدعم الفني.',
-    language: 'ar',
-  };
+  // Read from the auth service signal — stays in sync automatically
+  readonly user = this.authService.currentUser;
+
+  // Derived display values
+  readonly displayName = computed(() => this.user()?.name || '');
+  readonly displayEmail = computed(() => this.user()?.email || '');
+  readonly displayPhone = computed(() => this.user()?.phone || '');
+  readonly displayDepartment = computed(() => this.user()?.department || '');
+  readonly displayRole = computed(() => this.user()?.employee_role || '');
+  readonly displayAvatar = computed(() => this.user()?.avatar_url || null);
+
+  readonly initials = computed(() => {
+    const name = this.user()?.name || '';
+    return name.split(' ').map(w => w.charAt(0)).slice(0, 2).join('').toUpperCase();
+  });
 
   notifications: NotificationSettings = {
     emailNotifications: true,
@@ -74,11 +71,10 @@ export class ProfileSettingsComponent {
     { key: 'security', label: 'الأمان', icon: 'shield' },
   ];
 
-  languages = [
-    { value: 'ar', label: 'العربية' },
-    { value: 'en', label: 'English' },
- 
-  ];
+  ngOnInit() {
+    // Refresh user data when settings page opens
+    this.authService.fetchCurrentUser();
+  }
 
   setTab(tab: 'profile' | 'notifications' | 'security') {
     this.activeTab.set(tab);
@@ -86,16 +82,15 @@ export class ProfileSettingsComponent {
 
   onAvatarChange(event: Event) {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
+    if (input.files?.[0]) {
       const reader = new FileReader();
-      reader.onload = (e) => {
-        this.avatarPreview.set(e.target?.result as string);
-      };
+      reader.onload = (e) => this.avatarPreview.set(e.target?.result as string);
       reader.readAsDataURL(input.files[0]);
     }
   }
 
   saveProfile() {
+    // Profile is read-only from API — just show success for now
     this.saveSuccess.set(true);
     setTimeout(() => this.saveSuccess.set(false), 3000);
   }
@@ -106,14 +101,10 @@ export class ProfileSettingsComponent {
   }
 
   changePassword() {
-    if (this.security.newPassword !== this.security.confirmPassword) return;
+    if (!this.passwordsMatch || !this.security.currentPassword) return;
     this.security = { currentPassword: '', newPassword: '', confirmPassword: '' };
     this.saveSuccess.set(true);
     setTimeout(() => this.saveSuccess.set(false), 3000);
-  }
-
-  get initials(): string {
-    return `${this.profile.firstName.charAt(0)}${this.profile.lastName.charAt(0)}`;
   }
 
   get passwordsMatch(): boolean {

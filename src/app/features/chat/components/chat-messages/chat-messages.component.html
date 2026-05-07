@@ -1,29 +1,32 @@
 <div class="chat-messages">
   <div class="chat-messages__wrapper" #scrollContainer>
     <div class="chat-messages__container">
-      @for (item of groupedItems; track $index) {
-
-      <!-- Date separator -->
-      @if (item.type === 'date') {
-      <div class="chat-messages__date-sep">
-        <span class="chat-messages__date-label">{{ item.label }}</span>
-      </div>
-      }
-
-      <!-- System notice (e.g. "Ahmed joined the conversation") -->
-      @if (item.type === 'system') {
-      <div class="chat-messages__system-notice">
-        <span class="chat-messages__system-text">{{ item.label }}</span>
-      </div>
-      }
-
-      <!-- Regular message -->
-      @if (item.type === 'message') {
-      <app-chat-message [message]="item.message" [isOwn]="item.isOwn!" [senderName]="item.senderName!"
-        [senderPicture]="item.senderPicture!" [showSenderInfo]="item.showSenderInfo!" [isGrouped]="item.isGrouped!" />
-      }
+      @for (item of groupedItems; track item.message?.senderId + item.message?.createdAt || item.label) {
+        @if (item.type === 'date') {
+          <div class="chat-messages__date-sep">
+            <span class="chat-messages__date-label">{{ item.label }}</span>
+          </div>
+        }
+        @if (item.type === 'system') {
+          <div class="chat-messages__system-notice">
+            <span class="chat-messages__system-text">{{ item.label }}</span>
+          </div>
+        }
+        @if (item.type === 'message') {
+          <app-chat-message
+            [message]="item.message"
+            [isOwn]="item.isOwn!"
+            [senderName]="item.senderName!"
+            [senderPicture]="item.senderPicture!"
+            [showSenderInfo]="item.showSenderInfo!"
+            [isGrouped]="item.isGrouped!"
+          />
+        }
       }
     </div>
   </div>
-  <app-chat-footer (sendMessage)="onSendMessage($event)" (sendFile)="onSendFile($event)" />
+  <app-chat-footer
+    (send)="onSend($event)"
+    (typing)="onTyping()"
+  />
 </div>

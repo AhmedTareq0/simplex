@@ -7,9 +7,21 @@ import { environment } from '../../../environments/environment';
 import { WebSocketService } from '../../core/services/websocket.service';
 
 export interface AuthCredentials {
-  PhoneNumber?: string;
   email?: string;
   password?: string;
+}
+
+export interface CurrentUser {
+  id: string | number;
+  name: string;
+  email: string;
+  avatar_url: string | null;
+  phone: string | null;
+  department: string | null;
+  employee_role: string;
+  user_type: string;
+  created_at: string;
+  last_login: string;
 }
 
 export interface LoginResponse {
@@ -46,18 +58,29 @@ export class AuthLocalService {
   readonly token = this._token.asReadonly();
   readonly isLoggedIn = computed(() => !!this._token());
 
+  // Current user — loaded from API, falls back to localStorage cache
+  readonly currentUser = signal<CurrentUser | null>(this.loadCachedUser());
+
+  private loadCachedUser(): CurrentUser | null {
+    try {
+      const raw = localStorage.getItem('user');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }
+
   login(credentials: AuthCredentials): Observable<LoginResponse> {
-    const endpoint = `${environment.apiUrl}/api/auth/employee/login`;
-    return this.http.post<LoginResponse>(endpoint, credentials).pipe(
+    return this.http.post<LoginResponse>(`${environment.apiUrl}/api/auth/employee/login`, credentials).pipe(
       tap((response) => {
         const token = response?.data?.access_token;
         const refreshToken = response?.data?.refresh_token;
         if (token) {
           localStorage.setItem('access_token', token);
-          if (refreshToken) {
-            localStorage.setItem('refresh_token', refreshToken);
-          }
-          localStorage.setItem('user', JSON.stringify(response.data.user));
+          if (refreshToken) localStorage.setItem('refresh_token', refreshToken);
+          const user = response.data.user;
+          localStorage.setItem('user', JSON.stringify(user));
+          this.currentUser.set(user);
           this._token.set(token);
           this.ws.connect(token);
         }
@@ -65,18 +88,33 @@ export class AuthLocalService {
     );
   }
 
+  // Fetch fresh user data from API and update signal + cache
+  fetchCurrentUser(): void {
+    this.http.get<{ success: boolean; data: CurrentUser }>(`${environment.apiUrl}/api/auth/me`)
+      .subscribe({
+        next: (res) => {
+          if (res.success && res.data) {
+            localStorage.setItem('user', JSON.stringify(res.data));
+            this.currentUser.set(res.data);
+          }
+        },
+        error: () => {
+         
+        },
+      });
+  }
+
   refresh(refreshToken: string): Observable<RefreshResponse> {
-    const endpoint = `${environment.apiUrl}/api/auth/refresh`;
-    return this.http.post<RefreshResponse>(endpoint, { refreshToken }).pipe(
+    return this.http.post<RefreshResponse>(`${environment.apiUrl}/api/auth/refresh`, { refreshToken }).pipe(
       tap((response) => {
         const token = response?.data?.access_token;
         const newRefreshToken = response?.data?.refresh_token;
         if (token) {
           localStorage.setItem('access_token', token);
-          if (newRefreshToken) {
-            localStorage.setItem('refresh_token', newRefreshToken);
-          }
+          if (newRefreshToken) localStorage.setItem('refresh_token', newRefreshToken);
           this._token.set(token);
+          // Refresh user data after token refresh
+          this.fetchCurrentUser();
         }
       }),
       catchError((error) => {
@@ -87,8 +125,7 @@ export class AuthLocalService {
   }
 
   logout() {
-    const endpoint = `${environment.apiUrl}/api/auth/logout`;
-    this.http.post(endpoint, {}).subscribe({
+    this.http.post(`${environment.apiUrl}/api/auth/logout`, {}).subscribe({
       next: () => this.clearSession(),
       error: () => this.clearSession(),
     });
@@ -99,6 +136,8 @@ export class AuthLocalService {
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
     this._token.set(null);
+    this.currentUser.set(null);
+    this.ws.disconnect();
     this.router.navigate(['/auth/login']);
   }
 }

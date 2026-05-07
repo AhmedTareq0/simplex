@@ -38,13 +38,10 @@ export interface UnreadCountPayload {
   count: number;
 }
 
-export interface EngineerAssignedPayload {
+export interface ConversationEndedPayload {
   conversation_id: string;
-  customer_name: string;
-  machine_id: string;
-  customer_care_name: string;
 }
 
-export interface ConversationEndedPayload {
+export interface ConversationReopenedPayload {
   conversation_id: string;
 }
