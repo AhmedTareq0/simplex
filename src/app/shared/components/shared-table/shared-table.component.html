@@ -14,6 +14,7 @@
     </div>
 
     <div class="st-toolbar__actions">
+
       <!-- Search -->
       <div class="st-search" *ngIf="showSearch">
         <span class="st-search__icon">
@@ -22,6 +23,11 @@
         <input #searchInput type="text" class="st-search__input" placeholder="ابحث عن أي شيء..."
           (input)="dt.filterGlobal($any($event.target).value, 'contains')" />
       </div>
+      <!-- Sync -->
+      <button *ngIf="showSync" class="st-btn-icon" [class.st-btn-icon--active]="isSyncing"
+        (click)="onSync.emit()" pTooltip="تحديث البيانات " tooltipPosition="top" [disabled]="isSyncing">
+        <app-icon name="sync" size="sm" [class.st-spin]="isSyncing" />
+      </button>
 
       <!-- Filter Button -->
       <button *ngIf="showFilter" class="st-btn-icon" [class.st-btn-icon--active]="isFilterVisible"
@@ -82,6 +88,23 @@
             </ng-container>
             <ng-template #defaultCell>
               <div [ngSwitch]="col.type">
+                <!-- Image Type -->
+                <div *ngSwitchCase="'image'" class="st-img-cell">
+                   <img [src]="rowData[col.field] || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'" class="st-thumb" alt="thumbnail" />
+                </div>
+
+                <!-- Link Type -->
+                <div *ngSwitchCase="'link'" class="st-link-cell">
+                   @if (rowData[col.field]) {
+                     <a [href]="rowData[col.field]" target="_blank" class="st-btn-link">
+                        <app-icon [name]="col.icon || 'fileAlt'" size="sm" />
+                        <span>{{ col.linkText || 'عرض' }}</span>
+                     </a>
+                   } @else {
+                     <span class="st-text-muted">لا يوجد</span>
+                   }
+                </div>
+
                 <!-- Badge Type -->
                 <span *ngSwitchCase="'badge'" 
                   class="st-badge" 
@@ -107,27 +130,34 @@
 
           <td *ngIf="showActions" class="st-td st-td--actions">
             <div (click)="$event.stopPropagation()">
-              <button #btn type="button" class="st-action-btn"
-                (click)="menu.toggle($event); setSelectedRow(rowData); setActiveMenu(menu)">
-                <app-icon name="moreVertical" size="sm" />
-              </button>
+              @if (isOnlyEdit) {
+                <button type="button" class="st-action-btn st-action-btn--direct" 
+                  (click)="onEdit.emit(rowData)" pTooltip="تعديل" tooltipPosition="top">
+                  <app-icon name="pencil" size="sm" />
+                </button>
+              } @else {
+                <button #btn type="button" class="st-action-btn"
+                  (click)="menu.toggle($event); setSelectedRow(rowData); setActiveMenu(menu)">
+                  <app-icon name="moreVertical" size="sm" />
+                </button>
 
-              <p-menu #menu [model]="actionItems" [popup]="true" appendTo="body" (onHide)="onMenuHide()"
-                styleClass="st-action-menu">
-                <ng-template pTemplate="item" let-item>
-                  <div class="st-menu-item" (click)="item.command?.({item: item})">
-                    <span class="st-menu-item__icon" [class.st-menu-item__icon--danger]="item.id === 'delete'">
-                      <app-icon *ngIf="item.id === 'view'" name="eye" size="sm" />
-                      <app-icon *ngIf="item.id === 'edit'" name="pencil" size="sm" />
-                      <app-icon *ngIf="item.id === 'delete'" name="trash" size="sm" />
-                    </span>
-                    <div class="st-menu-item__text">
-                      <span class="st-menu-item__label">{{ item.label }}</span>
-                      <span class="st-menu-item__sub">{{ getSubtext(item) }}</span>
+                <p-menu #menu [model]="actionItems" [popup]="true" appendTo="body" (onHide)="onMenuHide()"
+                  styleClass="st-action-menu">
+                  <ng-template pTemplate="item" let-item>
+                    <div class="st-menu-item" (click)="item.command?.({item: item})">
+                      <span class="st-menu-item__icon" [class.st-menu-item__icon--danger]="item.id === 'delete'">
+                        <app-icon *ngIf="item.id === 'view'" name="eye" size="sm" />
+                        <app-icon *ngIf="item.id === 'edit'" name="pencil" size="sm" />
+                        <app-icon *ngIf="item.id === 'delete'" name="trash" size="sm" />
+                      </span>
+                      <div class="st-menu-item__text">
+                        <span class="st-menu-item__label">{{ item.label }}</span>
+                        <span class="st-menu-item__sub">{{ getSubtext(item) }}</span>
+                      </div>
                     </div>
-                  </div>
-                </ng-template>
-              </p-menu>
+                  </ng-template>
+                </p-menu>
+              }
             </div>
           </td>
         </tr>

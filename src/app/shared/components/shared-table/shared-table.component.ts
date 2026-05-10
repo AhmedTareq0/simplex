@@ -13,12 +13,14 @@ import { IconComponent } from '../icon/icon.component';
 export interface TableColumn {
   field: string;
   header: string;
-  type?: 'text' | 'number' | 'date' | 'status' | 'badge';
+  type?: 'text' | 'number' | 'date' | 'status' | 'badge' | 'image' | 'link';
   filterable?: boolean; // إيقاف أو تشغيل الفلتر لهذا العمود
   filterType?: 'text' | 'dropdown' | 'date' | 'boolean';
   filterOptions?: any[];
   placeholder?: string;
   color?: string;
+  icon?: string;
+  linkText?: string;
   formatter?: (value: any, row: any) => string;
 }
 
@@ -55,6 +57,9 @@ export class SharedTableComponent {
   // Server-side pagination
   @Input() lazy: boolean = false;
   @Input() totalRecords: number = 0;
+  @Input() showSync: boolean = false;
+  @Input() isSyncing: boolean = false;
+  @Output() onSync = new EventEmitter<void>();
   @Output() onPageChange = new EventEmitter<{ page: number; rows: number }>();
 
   // Internal pagination state
@@ -111,6 +116,10 @@ export class SharedTableComponent {
     if (this.showEdit) items.push({ id: 'edit', label: 'تعديل السجل', command: () => this.onEdit.emit(this.selectedRow) });
     if (this.showDelete) items.push({ id: 'delete', label: 'حذف السجل', command: () => this.onDelete.emit(this.selectedRow) });
     return items;
+  }
+
+  get isOnlyEdit(): boolean {
+    return this.showEdit && !this.showView && !this.showDelete && (!this.customActions || this.customActions.length === 0);
   }
 
   getSubtext(item: MenuItem): string {
