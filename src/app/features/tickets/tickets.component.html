@@ -1,0 +1,35 @@
+<div class="tickets">
+  <div class="tickets__header">
+    <div class="tickets__info">
+      <h1 class="tickets__title">التذاكر</h1>
+      <p class="tickets__subtitle">إدارة تذاكر دعم العملاء</p>
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <div class="tickets__skeleton">
+      <app-skeleton-loader type="table" [count]="8" />
+    </div>
+  } @else {
+    <app-shared-table
+      [data]="mappedTickets"
+      [columns]="columns"
+      title="قائمة التذاكر"
+      [showView]="false"
+      [showEdit]="false"
+      [showDelete]="false"
+      [showActions]="false"
+      [lazy]="true"
+      [totalRecords]="total"
+      [rows]="pageSize()"
+      (onPageChange)="onPageChange($event)"
+      (onRowClick)="onRowClick($event)"
+    />
+  }
+</div>
+
+<app-ticket-detail
+  [(visible)]="showDetail"
+  [user]="selectedTicket()"
+  (delete)="onTicketDeleted($event)"
+/>

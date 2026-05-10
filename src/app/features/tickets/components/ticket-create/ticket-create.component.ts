@@ -6,7 +6,7 @@ import { SharedModalComponent } from '../../../../shared/components/shared-modal
 import { SharedSelectComponent } from '../../../../shared/components/shared-select/shared-select.component';
 import { SharedInputComponent } from '../../../../shared/components/shared-input/shared-input.component';
 
-export interface CreateUserData {
+export interface CreateTicketData {
   id?: string;
   name: string;
   machine: string;
@@ -16,7 +16,7 @@ export interface CreateUserData {
 }
 
 @Component({
-  selector: 'app-customer-support-create',
+  selector: 'app-ticket-create',
   standalone: true,
   imports: [
     CommonModule,
@@ -26,32 +26,24 @@ export interface CreateUserData {
     SharedSelectComponent,
     SharedModalComponent,
   ],
-  templateUrl: './customer-support-create.component.html',
-  styleUrl: './customer-support-create.component.scss',
+  templateUrl: './ticket-create.component.html',
+  styleUrl: './ticket-create.component.scss',
 })
-export class CustomerSupportCreateComponent {
+export class TicketCreateComponent {
   @Input() visible = false;
   @Input() isEditMode = false;
-  @Input() editData: CreateUserData | null = null;
+  @Input() editData: CreateTicketData | null = null;
   @Output() visibleChange = new EventEmitter<boolean>();
-  @Output() create = new EventEmitter<CreateUserData>();
-  @Output() update = new EventEmitter<CreateUserData>();
+  @Output() create = new EventEmitter<CreateTicketData>();
+  @Output() update = new EventEmitter<CreateTicketData>();
 
-  newUser: Partial<CreateUserData> = {
+  newTicket: Partial<CreateTicketData> = {
     name: '',
     machine: '',
     status: 'active',
     visitDate: new Date().toISOString().split('T')[0],
     priority: 'medium',
   };
-
-  customerOptions = [
-    { label: 'أحمد ناصر', value: 'أحمد ناصر' },
-    { label: 'محمد مصطفى', value: 'محمد مصطفى' },
-    { label: 'محمود علي', value: 'محمود علي' },
-    { label: 'شركة الأمل', value: 'شركة الأمل' },
-    { label: 'مصنع الشرق', value: 'مصنع الشرق' },
-  ];
 
   statusOptions = [
     { label: 'نشط', value: 'active' },
@@ -68,9 +60,9 @@ export class CustomerSupportCreateComponent {
   ngOnChanges() {
     if (this.visible) {
       if (this.isEditMode && this.editData) {
-        this.newUser = { ...this.editData };
+        this.newTicket = { ...this.editData };
       } else {
-        this.newUser = {
+        this.newTicket = {
           name: '',
           machine: '',
           status: 'active',
@@ -87,21 +79,21 @@ export class CustomerSupportCreateComponent {
   }
 
   onSave() {
-    if (!this.newUser.name || !this.newUser.machine) return;
+    if (!this.newTicket.name || !this.newTicket.machine) return;
 
-    const userData: CreateUserData = {
-      name: this.newUser.name,
-      machine: this.newUser.machine,
-      status: (this.newUser.status as CreateUserData['status']) || 'active',
-      visitDate: this.newUser.visitDate || new Date().toISOString().split('T')[0],
-      priority: (this.newUser.priority as CreateUserData['priority']) || 'medium',
+    const ticketData: CreateTicketData = {
+      name: this.newTicket.name,
+      machine: this.newTicket.machine,
+      status: (this.newTicket.status as CreateTicketData['status']) || 'active',
+      visitDate: this.newTicket.visitDate || new Date().toISOString().split('T')[0],
+      priority: (this.newTicket.priority as CreateTicketData['priority']) || 'medium',
     };
 
     if (this.isEditMode && this.editData?.id) {
-      userData.id = this.editData.id;
-      this.update.emit(userData);
+      ticketData.id = this.editData.id;
+      this.update.emit(ticketData);
     } else {
-      this.create.emit(userData);
+      this.create.emit(ticketData);
     }
     this.close();
   }

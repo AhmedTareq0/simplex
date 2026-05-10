@@ -27,6 +27,16 @@
         }
       </div>
     }
+    @case ('table') {
+      <div class="skeleton skeleton--table-row">
+        <div class="skeleton__cell skeleton__cell--wide"></div>
+        <div class="skeleton__cell skeleton__cell--medium"></div>
+        <div class="skeleton__cell skeleton__cell--badge"></div>
+        <div class="skeleton__cell skeleton__cell--badge"></div>
+        <div class="skeleton__cell skeleton__cell--medium"></div>
+        <div class="skeleton__cell skeleton__cell--short"></div>
+      </div>
+    }
     @default {
       <div class="skeleton skeleton--text">
         @for (row of textRows; track row) {

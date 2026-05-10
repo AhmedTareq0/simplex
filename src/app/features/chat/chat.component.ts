@@ -5,6 +5,7 @@ import { ChatListComponent } from './components/chat-list/chat-list.component';
 import { ChatBoxComponent } from './components/chat-box/chat-box.component';
 import { ChatEmptyComponent } from './components/chat-empty/chat-empty.component';
 import { ChatService, Conversation, ApiMessage } from './services/chat.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-chat',
@@ -19,7 +20,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private elementRef = inject(ElementRef);
   private chatService = inject(ChatService);
+  private route = inject(ActivatedRoute);
   private readonly destroy$ = new Subject<void>();
+  private pendingConversationId = signal<string | null>(null);
 
   readonly users = signal<any[]>([]);
   readonly userData = signal<any>(null);
@@ -57,9 +60,19 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       const raw = localStorage.getItem('user');
       if (raw) this.userData.set(JSON.parse(raw));
     } catch { }
+
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      const convId = params['conversation'];
+      if (convId) {
+        this.pendingConversationId.set(convId);
+        if (this.users().length > 0) {
+          this.checkPendingConversation();
+        }
+      }
+    });
+
     this.loadConversations();
 
-    // New escalation — add conversation to list
     this.chatService.newEscalation$
       .pipe(takeUntil(this.destroy$))
       .subscribe((payload) => {
@@ -81,7 +94,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         }]);
       });
 
-    // Status changed — update status badge in list
     this.chatService.statusChanged$
       .pipe(takeUntil(this.destroy$))
       .subscribe((payload) => {
@@ -93,7 +105,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         );
       });
 
-    // Agent joined — update engineerName in list + append system message
     this.chatService.agentJoined$
       .pipe(takeUntil(this.destroy$))
       .subscribe((payload) => {
@@ -107,7 +118,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       });
 
-    // Typing indicator — show only if from customer (not from ourselves)
     this.chatService.typingIndicator$
       .pipe(takeUntil(this.destroy$))
       .subscribe((payload) => {
@@ -115,14 +125,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           payload.conversation_id === this.selectedPerson()?.sub &&
           payload.sender_role === 'customer'
         ) {
-          // Cancel previous timeout to reset the 3s timer
           clearTimeout(this.typingTimeout);
           this.isTyping.set(true);
           this.typingTimeout = setTimeout(() => this.isTyping.set(false), 3000);
         }
       });
 
-    // Conversation reopened — remove from list, clear selection if active
     this.chatService.conversationReopened$
       .pipe(takeUntil(this.destroy$))
       .subscribe((payload) => {
@@ -147,12 +155,24 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         const mapped = (res.data?.items || []).map((c: any) => this.mapConversation(c));
         this.users.set(mapped);
         this.isLoading.set(false);
+        this.checkPendingConversation();
       },
       error: (err) => {
         this.errorMessage.set(err?.error?.message ?? 'فشل تحميل المحادثات');
         this.isLoading.set(false);
       },
     });
+  }
+
+  private checkPendingConversation() {
+    const convId = this.pendingConversationId();
+    if (convId) {
+      const user = this.users().find(u => u.sub === convId);
+      if (user) {
+        this.onSelectUser(user);
+        this.pendingConversationId.set(null);
+      }
+    }
   }
 
   private mapConversation(c: Conversation) {

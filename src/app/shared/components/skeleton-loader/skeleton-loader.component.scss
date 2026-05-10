@@ -73,4 +73,34 @@
   &--text {
     padding: 8px 0;
   }
+
+  &--table-row {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--color-border, #e5e7eb);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__cell {
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(90deg,
+      var(--color-border, #f0f0f0) 25%,
+      color-mix(in srgb, var(--color-border, #e0e0e0) 60%, transparent) 50%,
+      var(--color-border, #f0f0f0) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite;
+    flex-shrink: 0;
+
+    &--wide   { flex: 3; min-width: 0; }
+    &--medium { flex: 2; min-width: 0; }
+    &--short  { flex: 1.5; min-width: 0; }
+    &--badge  { width: 5rem; border-radius: 99px; }
+  }
 }

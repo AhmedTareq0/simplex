@@ -52,6 +52,14 @@ export class SharedTableComponent {
   @Input() rows: number = 10;
   @Input() emptyMessage: string = 'لا توجد بيانات';
 
+  // Server-side pagination
+  @Input() lazy: boolean = false;
+  @Input() totalRecords: number = 0;
+  @Output() onPageChange = new EventEmitter<{ page: number; rows: number }>();
+
+  // Internal pagination state
+  currentPage: number = 1;
+
   @Input() showView: boolean = true;
   @Input() showEdit: boolean = true;
   @Input() showDelete: boolean = true;
@@ -128,6 +136,38 @@ export class SharedTableComponent {
 
   onMenuHide() {
     this.activeMenu = null;
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.totalRecords / this.rows) || 1;
+  }
+
+  get pageNumbers(): number[] {
+    const total = this.totalPages;
+    const current = this.currentPage;
+    const pages: number[] = [];
+    const delta = 2;
+    for (let i = Math.max(1, current - delta); i <= Math.min(total, current + delta); i++) {
+      pages.push(i);
+    }
+    return pages;
+  }
+
+  goToPage(page: number) {
+    if (page < 1 || page > this.totalPages || page === this.currentPage) return;
+    this.currentPage = page;
+    this.onPageChange.emit({ page, rows: this.rows });
+  }
+
+  onRowsChange(newRows: number) {
+    this.rows = newRows;
+    this.currentPage = 1;
+    this.onPageChange.emit({ page: 1, rows: newRows });
+  }
+
+  onLazyLoad(event: any) {
+    const page = Math.floor((event.first ?? 0) / (event.rows ?? this.rows)) + 1;
+    this.onPageChange.emit({ page, rows: event.rows ?? this.rows });
   }
   
   getColColor(index: number, isText: boolean): string { return this.colorPalette[index % this.colorPalette.length]; }

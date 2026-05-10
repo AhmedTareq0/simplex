@@ -144,7 +144,9 @@ export class ChatService {
     this.isLoading.set(true);
     this.activeConversationId.set(conversationId);
 
-    this.http.get<any>(`${this.base}/api/ai-assistant/messages/${conversationId}`)
+    this.http.get<any>(`${this.base}/api/ai-assistant/messages`, {
+        params: { conversationId: conversationId }
+      })
       .subscribe({
         next: (res) => {
           this.messages.set(res.data.messages);
