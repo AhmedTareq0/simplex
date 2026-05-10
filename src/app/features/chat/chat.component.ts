@@ -41,6 +41,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedPerson = signal<any>(null);
   readonly lastMessages = this.chatService.lastMessages;
 
+  readonly sortedUsers = computed(() => {
+    const usersArr = this.users();
+    const msgs = this.lastMessages();
+    return [...usersArr].sort((a, b) => {
+      const aTime = msgs[a.sub]?.timestamp || a.createdAt || 0;
+      const bTime = msgs[b.sub]?.timestamp || b.createdAt || 0;
+      return new Date(bTime).getTime() - new Date(aTime).getTime();
+    });
+  });
+
   readonly messages = computed(() => {
     const raw = this.chatService.messages();
     const person = this.selectedPerson();
@@ -237,6 +247,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       type: isFile ? 'file' : 'text',
       role: m.role,
       attachmentType: m.attachment_type,
+      status: m.status || 'sent',
     };
   }
 }

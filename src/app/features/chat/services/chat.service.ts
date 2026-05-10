@@ -28,6 +28,7 @@ export interface ApiMessage {
   attachment_url: string | null;
   attachment_type: string | null;
   timestamp: string;
+  status?: 'sent' | 'delivered' | 'read';
 }
 
 @Injectable({ providedIn: 'root' })
@@ -104,6 +105,24 @@ export class ChatService {
       }
     });
 
+    // Agent joined — append system message
+    this.ws.agentJoined$.subscribe((payload) => {
+      if (payload.conversation_id === this.activeConversationId()) {
+        const roleName = payload.role === 'engineer' ? 'المهندس' : 'خدمة العملاء';
+        this.messages.update(prev => [
+          ...prev,
+          {
+            id: 'join-' + Date.now(),
+            role: 'system',
+            content: `تم انضمام ${roleName} ${payload.name} للمحادثة`,
+            attachment_url: null,
+            attachment_type: null,
+            timestamp: new Date().toISOString(),
+          },
+        ]);
+      }
+    });
+
     // Unread count updated
     this.ws.unreadCount$.subscribe((payload) => {
       this.unreadCounts.update(prev => ({ ...prev, [payload.conversation_id]: payload.count }));
@@ -119,13 +138,13 @@ export class ChatService {
           if (lm) {
             lastMsgs[c.conversation_id] = typeof lm === 'string'
               ? {
-                  id: '',
-                  role: '',
-                  content: lm,
-                  attachment_url: null,
-                  attachment_type: null,
-                  timestamp: c.last_message_at || c.created_at,
-                } as ApiMessage
+                id: '',
+                role: '',
+                content: lm,
+                attachment_url: null,
+                attachment_type: null,
+                timestamp: c.last_message_at || c.created_at,
+              } as ApiMessage
               : lm;
           }
         });
@@ -145,8 +164,8 @@ export class ChatService {
     this.activeConversationId.set(conversationId);
 
     this.http.get<any>(`${this.base}/api/ai-assistant/messages`, {
-        params: { conversationId: conversationId }
-      })
+      params: { conversationId: conversationId }
+    })
       .subscribe({
         next: (res) => {
           this.messages.set(res.data.messages);
@@ -160,7 +179,7 @@ export class ChatService {
   sendMessage(conversationId: string, message: string, attachment?: File): Observable<any> {
     const form = new FormData();
     form.append('ConversationId', conversationId);
-     form.append('Message', message.trim() || ' ');
+    form.append('Message', message.trim() || ' ');
     if (attachment) form.append('Attachment', attachment);
     return this.http.post<any>(`${this.base}/api/ai-assistant/customer-care/message`, form);
   }
@@ -169,6 +188,24 @@ export class ChatService {
     return this.http.post<any>(
       `${this.base}/api/ai-assistant/customer-care/request-engineer-visit`,
       { conversation_id: conversationId }
+    ).pipe(
+      tap((res) => {
+        if (res.success && res.data && res.data.engineer_name) {
+          const sysMsg: ApiMessage = {
+            id: 'sys-' + Date.now(),
+            role: 'system',
+            content: `تم انضمام المهندس ${res.data.engineer_name} للمحادثة`,
+            attachment_url: null,
+            attachment_type: null,
+            timestamp: new Date().toISOString(),
+          };
+
+          if (conversationId === this.activeConversationId()) {
+            this.messages.update(prev => [...prev, sysMsg]);
+          }
+
+        }
+      })
     );
   }
 

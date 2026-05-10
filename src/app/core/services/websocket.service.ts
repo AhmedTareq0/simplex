@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
@@ -31,6 +31,8 @@ export class WebSocketService {
   private reconnectAttempts = 0;
   private readonly MAX_RECONNECT = 5;
   private reconnectTimeout?: ReturnType<typeof setTimeout>;
+
+  private readonly ngZone = inject(NgZone);
 
  
   private _newEscalation$ = new Subject<NewEscalationPayload>();
@@ -75,36 +77,44 @@ export class WebSocketService {
     this.socket = new WebSocket(url);
 
     this.socket.onopen = () => {
-      this.reconnectAttempts = 0;
-      this._connected$.next();
-      this._startPing();
-      console.log('[WS] ✅ Connected');
+      this.ngZone.run(() => {
+        this.reconnectAttempts = 0;
+        this._connected$.next();
+        this._startPing();
+        console.log('[WS] ✅ Connected');
+      });
     };
 
     this.socket.onmessage = (ev) => {
-      try {
-        const msg: ServerMessage = JSON.parse(ev.data);
-        this._routeEvent(msg);
-      } catch (e) {
-        console.error('[WS] Failed to parse message:', ev.data, e);
-      }
+      this.ngZone.run(() => {
+        try {
+          const msg: ServerMessage = JSON.parse(ev.data);
+          this._routeEvent(msg);
+        } catch (e) {
+          console.error('[WS] Failed to parse message:', ev.data, e);
+        }
+      });
     };
 
     this.socket.onclose = (ev) => {
-      this._stopPing();
-      this._disconnected$.next(ev);
-      this.socket = undefined;
-      console.warn('[WS] ❌ Disconnected, code:', ev.code, 'clean:', ev.wasClean);
+      this.ngZone.run(() => {
+        this._stopPing();
+        this._disconnected$.next(ev);
+        this.socket = undefined;
+        console.warn('[WS] ❌ Disconnected, code:', ev.code, 'clean:', ev.wasClean);
 
-      // Auto-reconnect if not intentional
-      if (!this.intentionalClose && this.lastToken && this.reconnectAttempts < this.MAX_RECONNECT) {
-        this._scheduleReconnect();
-      }
+        // Auto-reconnect if not intentional
+        if (!this.intentionalClose && this.lastToken && this.reconnectAttempts < this.MAX_RECONNECT) {
+          this._scheduleReconnect();
+        }
+      });
     };
 
     this.socket.onerror = (err) => {
-      console.error('[WS] Error:', err);
-      this._error$.next(err);
+      this.ngZone.run(() => {
+        console.error('[WS] Error:', err);
+        this._error$.next(err);
+      });
     };
   }
 
