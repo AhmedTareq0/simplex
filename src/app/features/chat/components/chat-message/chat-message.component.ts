@@ -18,11 +18,23 @@ export class ChatMessageComponent {
 
   readonly showDropdown = signal(false);
 
-  get isFile(): boolean { return this.message()?.type === 'file'; }
-  get isPdf(): boolean { return this.message()?.text?.includes('.pdf'); }
+  get isFile(): boolean { return this.message()?.type === 'file' || !!this.message()?.attachmentUrl; }
+  get isPdf(): boolean {
+    const url = this.message()?.attachmentUrl || this.message()?.text;
+    return url?.toLowerCase()?.includes('.pdf');
+  }
   get isDeleted(): boolean { return !!this.message()?.isDeleted; }
   get isReply(): boolean { return !!this.message()?.replyTo; }
-  get replyText(): string { return this.message()?.replyTo?.text || ''; }
+  get replyText(): string {
+    const rt = this.message()?.replyTo;
+    if (!rt) return '';
+    // Use text if it exists (caption or message), otherwise use fallback for attachments
+    if (rt.text) return rt.text;
+    if (rt.type === 'file' || rt.attachmentUrl) {
+      return rt.attachmentType?.startsWith('image') ? 'صورة' : 'ملف';
+    }
+    return '';
+  }
   get status(): 'sent' | 'delivered' | 'read' { return this.message()?.status || 'read'; }
 
   toggleDropdown(event: Event) {

@@ -303,6 +303,14 @@ const ICONS = {
   shield: {
     viewBox: '0 0 24 24',
     paths: [{ d: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z' }]
+  },
+  info: {
+    viewBox: '0 0 24 24',
+    paths: [{ d: 'M12 16v-4m0-4h.01M21 12a9 9 0 1 1-18 0a9 9 0 0 1 18 0Z' }]
+  },
+  sync: {
+    viewBox: '0 0 24 24',
+    paths: [{ d: 'M4 4v5h.582m15.356 2A8.001 8.001 0 0 0 4.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 0 1-15.357-2m15.357 2H15' }]
   }
 } satisfies Record<string, IconDefinition>;
 
