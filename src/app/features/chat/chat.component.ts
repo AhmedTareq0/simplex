@@ -220,7 +220,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.chatService.markRead(user.sub);
   }
 
-  private mapApiMessage(m: ApiMessage, user: any): any {
+  private mapApiMessage(m: ApiMessage, person: any): any {
     const role = m.role?.toLowerCase() || '';
 
     if (role === 'system') {
@@ -236,18 +236,24 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     let senderId = role;
     if (role === 'customer_care') senderId = 'support';
     else if (role === 'engineer') senderId = 'engineer';
-    else if (role === 'customer') senderId = user?.sub || 'customer';
+    else if (role === 'customer') senderId = person?.sub || 'customer';
     else if (role === 'ai') senderId = 'ai';
 
     const isFile = !!m.attachment_url;
+    
+    // Map reply_to if exists
+    const replyTo = m.reply_to ? this.mapApiMessage(m.reply_to, person) : null;
+
     return {
       senderId,
-      text: isFile ? m.attachment_url : m.content,
+      text: m.content,
+      attachmentUrl: m.attachment_url,
       createdAt: m.timestamp,
       type: isFile ? 'file' : 'text',
       role: m.role,
       attachmentType: m.attachment_type,
       status: m.status || 'sent',
+      replyTo
     };
   }
 }

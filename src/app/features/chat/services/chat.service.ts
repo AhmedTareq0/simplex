@@ -29,6 +29,7 @@ export interface ApiMessage {
   attachment_type: string | null;
   timestamp: string;
   status?: 'sent' | 'delivered' | 'read';
+  reply_to?: ApiMessage;
 }
 
 @Injectable({ providedIn: 'root' })

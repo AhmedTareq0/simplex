@@ -26,44 +26,45 @@
   </div>
 
   <div class="chat-header__actions">
-    @if (hasMenuItems()) {
-      <div class="chat-header__menu-wrap">
-        <button class="chat-header__action-btn" aria-label="المزيد" (click)="toggleMenu()">
-          <app-icon name="moreVertical" size="sm" />
-        </button>
+    @if (canRequestVisit()) {
+      <button
+        class="chat-header__btn chat-header__btn--primary"
+        (click)="requestVisit()"
+        [disabled]="isRequestingVisit()"
+      >
+        <app-icon name="calendarPlus" size="sm" />
+        <span>{{ isRequestingVisit() ? 'جاري الإرسال...' : 'طلب زيارة مهندس' }}</span>
+      </button>
+    }
 
-        @if (showMenu()) {
-          <div class="chat-header__dropdown">
-            <div class="chat-header__dropdown-backdrop" (click)="showMenu.set(false)"></div>
-            <div class="chat-header__dropdown-content">
-
-              @if (canRequestVisit()) {
-                <button
-                  class="chat-header__dropdown-item"
-                  (click)="requestVisit()"
-                  [disabled]="isRequestingVisit()"
-                >
-                  <app-icon name="calendarPlus" size="sm" />
-                  <span>{{ isRequestingVisit() ? 'جاري الإرسال...' : 'طلب زيارة مهندس' }}</span>
-                </button>
-              }
-
-              @if (isWithEngineer()) {
-                <div class="chat-header__dropdown-item chat-header__dropdown-item--info">
-                  <app-icon name="user" size="sm" />
-                  <span class="chat-header__engineer-info">
-                    <span>مع المهندس</span>
-                    @if (person()?.engineerName) {
-                      <span class="chat-header__engineer-name">{{ person()?.engineerName }}</span>
-                    }
-                  </span>
-                </div>
-              }
-
-            </div>
-          </div>
-        }
+    @if (isWithEngineer()) {
+      <div class="chat-header__engineer-status">
+        <app-icon name="user" size="sm" />
+        <div class="chat-header__engineer-info-text">
+          <span class="chat-header__label">مع المهندس</span>
+          @if (person()?.engineerName) {
+            <span class="chat-header__value">{{ person()?.engineerName }}</span>
+          }
+        </div>
       </div>
     }
+
+    <div class="chat-header__menu-wrap">
+      <button class="chat-header__action-btn" aria-label="المزيد" (click)="toggleMenu()">
+        <app-icon name="moreVertical" size="sm" />
+      </button>
+
+      @if (showMenu()) {
+        <div class="chat-header__dropdown">
+          <div class="chat-header__dropdown-backdrop" (click)="showMenu.set(false)"></div>
+          <div class="chat-header__dropdown-content">
+            <div class="chat-header__dropdown-item chat-header__dropdown-item--info">
+              <app-icon name="info" size="sm" />
+              <span>لا توجد خيارات إضافية</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
   </div>
 </header>
