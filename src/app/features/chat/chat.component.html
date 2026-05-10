@@ -9,7 +9,7 @@
       </div>
     } @else {
       <app-chat-list
-        [users]="users()"
+        [users]="sortedUsers()"
         [currentUserId]="currentUserId()"
         [accountPicture]="accountPicture()"
         [lastMessages]="lastMessages()"
