@@ -6,23 +6,13 @@
       <p class="notifications__subtitle">سجل الإشعارات وحالة التسليم وتاريخ الإشعارات</p>
     </div>
     <div class="notifications__actions">
-      <app-button
-        label="تصفية"
-        variant="secondary"
-        icon="filter"
-        (pressed)="toggleFilters()"
-      />
-      <app-button
-        label="قراءة الكل"
-        variant="secondary"
-        icon="check"
-        [loading]="isMarkingAll()"
-        (pressed)="markAllRead()"
-      />
+      <app-button label="تصفية" variant="secondary" icon="filter" (pressed)="toggleFilters()" />
+      <app-button label="قراءة الكل" variant="secondary" icon="check" [loading]="isMarkingAll()"
+        (pressed)="markAllRead()" />
     </div>
   </div>
 
-  <!-- Stats Cards -->
+  <!-- Stats Cards --->
   <div class="notifications__stats">
     <div class="stat-card stat-card--total">
       <div class="stat-card__icon">
@@ -72,35 +62,33 @@
       <label class="filter-label">النوع</label>
       <select class="filter-select" [ngModel]="filterType()" (ngModelChange)="filterType.set($event); onFilterChange()">
         @for (opt of typeOptions; track opt.value) {
-          <option [value]="opt.value">{{ opt.label }}</option>
+        <option [value]="opt.value">{{ opt.label }}</option>
         }
       </select>
     </div>
 
     <div class="filter-group">
       <label class="filter-label">الحالة</label>
-      <select class="filter-select" [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event); onFilterChange()">
+      <select class="filter-select" [ngModel]="filterStatus()"
+        (ngModelChange)="filterStatus.set($event); onFilterChange()">
         @for (opt of statusOptions; track opt.value) {
-          <option [value]="opt.value">{{ opt.label }}</option>
+        <option [value]="opt.value">{{ opt.label }}</option>
         }
       </select>
     </div>
 
     <div class="filter-group">
       <label class="filter-label">القناة</label>
-      <select class="filter-select" [ngModel]="filterChannel()" (ngModelChange)="filterChannel.set($event); onFilterChange()">
+      <select class="filter-select" [ngModel]="filterChannel()"
+        (ngModelChange)="filterChannel.set($event); onFilterChange()">
         @for (opt of channelOptions; track opt.value) {
-          <option [value]="opt.value">{{ opt.label }}</option>
+        <option [value]="opt.value">{{ opt.label }}</option>
         }
       </select>
     </div>
 
     <div class="filter-group filter-group--actions">
-      <app-button
-        label="إعادة تعيين"
-        variant="secondary"
-        (pressed)="resetFilters()"
-      />
+      <app-button label="إعادة تعيين" variant="secondary" (pressed)="resetFilters()" />
     </div>
   </div>
   }
@@ -111,42 +99,30 @@
     <app-skeleton-loader type="table" [count]="8" />
   </div>
   } @else {
-  <app-shared-table
-    [data]="notifications"
-    [columns]="columns"
-    title="سجل الإشعارات"
-    [showView]="false"
-    [showEdit]="false"
-    [showDelete]="false"
-    [showActions]="false"
-    [lazy]="true"
-    [totalRecords]="total"
-    [rows]="pageSize()"
-    [currentPage]="currentPage()"
-    (onPageChange)="onPageChange($event)"
-    (onRowClick)="onRowClick($event)"
-  />
+  <app-shared-table [data]="notifications" [columns]="columns" title="سجل الإشعارات" [showView]="false"
+    [showEdit]="false" [showDelete]="false" [showActions]="false" [lazy]="true" [totalRecords]="total"
+    [rows]="pageSize()" [currentPage]="currentPage()" (onPageChange)="onPageChange($event)"
+    (onRowClick)="onRowClick($event)" />
   }
 </div>
 
 <!-- Detail Modal -->
 @if (showDetailModal() && selectedNotification()) {
-<app-shared-modal
-  [visible]="showDetailModal()"
-  title="تفاصيل الإشعار"
-  (visibleChange)="showDetailModal.set(false)"
->
+<app-shared-modal [visible]="showDetailModal()" title="تفاصيل الإشعار" (visibleChange)="showDetailModal.set(false)">
   <div class="notif-detail">
     <!-- Type Badge Header -->
     <div class="notif-detail__type-header">
-      <div class="notif-detail__type-icon" [style.background-color]="getTypeColor(selectedNotification()!.type) + '18'" [style.color]="getTypeColor(selectedNotification()!.type)">
+      <div class="notif-detail__type-icon" [style.background-color]="getTypeColor(selectedNotification()!.type) + '18'"
+        [style.color]="getTypeColor(selectedNotification()!.type)">
         <app-icon [name]="getTypeIcon(selectedNotification()!.type)" size="md" />
       </div>
       <div class="notif-detail__type-info">
         <h3 class="notif-detail__title">{{ selectedNotification()!.title }}</h3>
         <span class="notif-detail__time">{{ formatRelativeTime(selectedNotification()!.created_at) }}</span>
       </div>
-      <span class="notif-detail__status-badge" [style.background-color]="getStatusColor(selectedNotification()!.status) + '18'" [style.color]="getStatusColor(selectedNotification()!.status)">
+      <span class="notif-detail__status-badge"
+        [style.background-color]="getStatusColor(selectedNotification()!.status) + '18'"
+        [style.color]="getStatusColor(selectedNotification()!.status)">
         {{ getStatusLabel(selectedNotification()!.status) }}
       </span>
     </div>
@@ -201,17 +177,9 @@
 
     <!-- Actions -->
     <div class="notif-detail__actions">
-      <app-button
-        label="حذف الإشعار"
-        variant="secondary"
-        icon="trash"
-        (pressed)="deleteNotification(selectedNotification()!.id)"
-      />
-      <app-button
-        label="إغلاق"
-        variant="secondary"
-        (pressed)="showDetailModal.set(false)"
-      />
+      <app-button label="حذف الإشعار" variant="secondary" icon="trash"
+        (pressed)="deleteNotification(selectedNotification()!.id)" />
+      <app-button label="إغلاق" variant="secondary" (pressed)="showDetailModal.set(false)" />
     </div>
   </div>
 </app-shared-modal>
