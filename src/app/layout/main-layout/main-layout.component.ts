@@ -14,7 +14,10 @@ import { MainLayoutHeaderComponent } from './header/main-layout-header.component
 export class MainLayoutComponent {
   readonly sidebarList = signal<SidebarItem[]>([
     { link: 'dashboard', title: 'لوحة التحكم', icon: 'chartPie' },
-    { link: 'tickets', title: 'التذاكر', icon: 'users' },
+    { link: 'machines', title: 'الماكينات', icon: 'table' },
+    { link: 'tickets', title: 'التذاكر', icon: 'calendarClock' },
+    { link: 'employees', title: 'الموظفين', icon: 'users' },
+    { link: 'clients', title: 'العملاء', icon: 'user' },
     { link: 'chat', title: 'الدردشة', icon: 'chat' },
     { link: 'settings', title: 'الإعدادات', icon: 'cog' },
   ]);

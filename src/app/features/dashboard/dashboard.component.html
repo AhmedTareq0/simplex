@@ -69,34 +69,8 @@
   <!-- Row 3: Daily Visits Table (Full Width) -->
   <div class="dashboard__row">
     <div class="dashboard__chart-card dashboard__chart-card--full">
-      <app-shared-table 
-        [title]="'سجل الزيارات اليومية'"
-        [data]="dailyVisits"
-        [columns]="visitColumns"
-        [labels]="tableLabels"
-        [showActions]="false"
-        [rows]="5"
-      />
-    </div>
-  </div>
-
-  <!-- Row 4: Machines Table (Full Width) -->
-  <div class="dashboard__row">
-    <div class="dashboard__chart-card dashboard__chart-card--full">
-      <app-shared-table 
-        [title]="'دليل الماكينات '"
-        [data]="machines()"
-        [columns]="machineColumns"
-        [labels]="tableLabels"
-        [showActions]="true"
-        [showSync]="true"
-        [isSyncing]="isSyncingMachines()"
-        (onSync)="syncMachines()"
-        [showView]="false"
-        [showDelete]="false"
-        (onEdit)="openEditModal($event)"
-        [rows]="5"
-      />
+      <app-shared-table [title]="'سجل الزيارات اليومية'" [data]="dailyVisits" [columns]="visitColumns"
+        [labels]="tableLabels" [showActions]="false" [rows]="5" />
     </div>
   </div>
 
@@ -134,11 +108,4 @@
     </div>
   </div>
 
-  @if (selectedMachine()) {
-    <app-machine-edit-modal
-      [machine]="selectedMachine()!"
-      (save)="handleUpdateMachine($event)"
-      (cancel)="closeEditModal()"
-    />
-  }
 </div>

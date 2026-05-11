@@ -208,8 +208,13 @@
 }
 
 @keyframes st-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -497,8 +502,8 @@
   }
 }
 
-/* ── Filter Dropdown Panel ────────────────────────────────── */
-::ng-deep .st-filter-select-panel {
+::ng-deep .p-select-overlay,
+::ng-deep .p-select-panel {
   border: 1px solid var(--color-border) !important;
   border-radius: 0.75rem !important;
   background: var(--color-card-bg) !important;
@@ -511,6 +516,7 @@
     display: flex !important;
     flex-direction: column !important;
     gap: 2px !important;
+    background: transparent !important;
   }
 
   .p-select-option {
@@ -520,6 +526,7 @@
     font-weight: 600 !important;
     color: var(--color-text-secondary) !important;
     transition: all 0.2s ease !important;
+    background: transparent !important;
 
     &:hover,
     &.p-focus {
@@ -533,6 +540,10 @@
       font-weight: 700 !important;
     }
   }
+}
+
+::ng-deep .st-filter-select-panel {
+  @extend .p-select-panel;
 }
 
 /* ── Action Button ── */
@@ -563,7 +574,7 @@
   &--direct {
     color: var(--color-primary-600);
     border-color: var(--color-primary-100);
-    
+
     &:hover {
       background: var(--color-primary-50);
       border-color: var(--color-primary-200);

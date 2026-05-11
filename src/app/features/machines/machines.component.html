@@ -1,0 +1,53 @@
+<div class="machines">
+  <div class="machines__header">
+    <div class="machines__info">
+      <h1 class="machines__title">دليل الماكينات</h1>
+      <p class="machines__subtitle">إدارة وتعديل بيانات الماكينات</p>
+    </div>
+    <div class="machines__actions">
+      <app-button
+        label="إضافة ماكينة"
+        icon="plus"
+        (pressed)="onAdd()"
+      />
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <div class="machines__skeleton">
+      <app-skeleton-loader type="table" [count]="8" />
+    </div>
+  } @else {
+    <app-shared-table
+      [data]="machines"
+      [columns]="columns"
+      title="قائمة الماكينات"
+      [showView]="true"
+      [showEdit]="true"
+      [showDelete]="false"
+      [showActions]="true"
+      (onView)="onRowClick($event)"
+      (onEdit)="onEdit($event)"
+      (onRowClick)="onRowClick($event)"
+    />
+  }
+</div>
+
+@if (showDetailModal() && selectedMachine()) {
+  <app-machine-detail
+    [visible]="showDetailModal()"
+    [machine]="selectedMachine()"
+    (close)="showDetailModal.set(false)"
+    (edit)="onEdit($event)"
+  />
+}
+
+@if (showEditModal() && selectedMachine()) {
+  <app-machine-edit-modal
+    [visible]="showEditModal()"
+    [machine]="selectedMachine()!"
+    [isSubmitting]="isUpdatingMachine()"
+    (save)="handleSaveMachine($event)"
+    (cancel)="showEditModal.set(false)"
+  />
+}

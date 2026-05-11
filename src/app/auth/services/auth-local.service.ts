@@ -58,6 +58,13 @@ export class AuthLocalService {
   readonly token = this._token.asReadonly();
   readonly isLoggedIn = computed(() => !!this._token());
 
+  // Role Helpers
+  readonly userType = computed(() => this.currentUser()?.user_type);
+  readonly employeeRole = computed(() => this.currentUser()?.employee_role);
+
+  readonly isSuperAdmin = computed(() => this.userType() === 'superadmin');
+  readonly isCustomerSupport = computed(() => this.userType() === 'custom_support');
+
   // Current user — loaded from API, falls back to localStorage cache
   readonly currentUser = signal<CurrentUser | null>(this.loadCachedUser());
 
@@ -99,7 +106,7 @@ export class AuthLocalService {
           }
         },
         error: () => {
-         
+
         },
       });
   }

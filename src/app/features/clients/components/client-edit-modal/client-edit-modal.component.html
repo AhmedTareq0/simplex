@@ -1,0 +1,87 @@
+<app-shared-modal
+  [visible]="visible()"
+  [title]="client().id === 0 ? 'إضافة عميل جديد' : 'تعديل بيانات العميل'"
+  (closed)="cancel.emit()"
+>
+  <form [formGroup]="editForm" (ngSubmit)="onSubmit()" class="client-form">
+    <div class="client-form__content">
+      <div class="client-form__image-section">
+        <div class="image-preview" [class.image-preview--empty]="!imagePreview()">
+          @if (imagePreview()) {
+            <img [src]="imagePreview()" alt="Client Preview" />
+          } @else {
+            <app-icon name="user" class="placeholder-icon" />
+          }
+          <label class="image-upload-btn">
+            <app-icon name="camera" />
+            <span>تغيير الصورة</span>
+            <input type="file" (change)="onImageSelected($event)" accept="image/*" hidden />
+          </label>
+        </div>
+      </div>
+
+      <div class="client-form__fields">
+        <div class="form-row">
+          <app-shared-input
+            label="اسم العميل"
+            placeholder="أدخل اسم العميل"
+            formControlName="display_name"
+            class="flex-1"
+          />
+          <app-shared-input
+            label="اسم الشركة"
+            placeholder="أدخل اسم الشركة"
+            formControlName="company_name"
+            class="flex-1"
+          />
+        </div>
+
+        <div class="form-row">
+          <app-shared-input
+            label="البريد الإلكتروني"
+            type="email"
+            placeholder="client@company.com"
+            formControlName="email"
+            class="flex-1"
+          />
+          <app-shared-input
+            label="رقم الهاتف"
+            placeholder="01xxxxxxxxx"
+            formControlName="phone"
+            class="flex-1"
+          />
+        </div>
+
+        <div class="form-row">
+          <app-shared-input
+            label="المدينة"
+            placeholder="القاهرة، الإسكندرية..."
+            formControlName="city"
+            class="flex-1"
+          />
+          <app-shared-input
+            label="العنوان"
+            placeholder="العنوان بالتفصيل"
+            formControlName="address"
+            class="flex-1"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="client-form__actions">
+      <app-button
+        label="إلغاء"
+        variant="secondary"
+        (pressed)="cancel.emit()"
+        [disabled]="isSubmitting()"
+      />
+      <app-button
+        [label]="isSubmitting() ? 'جاري الحفظ...' : 'حفظ البيانات'"
+        type="submit"
+        [loading]="isSubmitting()"
+        [disabled]="editForm.invalid"
+      />
+    </div>
+  </form>
+</app-shared-modal>

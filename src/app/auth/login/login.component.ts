@@ -22,8 +22,8 @@ export class LoginComponent {
   readonly isPasswordVisible = signal(false);
 
   readonly loginForm = this.fb.group({
-    PhoneNumber: ['', [Validators.required, Validators.pattern(/^01[0-9]{9}$/)]],
-    email: [''],
+    PhoneNumber: [''],
+    email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
