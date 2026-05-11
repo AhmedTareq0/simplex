@@ -1,0 +1,68 @@
+<app-shared-modal
+  [visible]="visible()"
+  [title]="visit().id === 0 ? 'إضافة زيارة جديدة' : 'تعديل بيانات الزيارة'"
+  (visibleChange)="cancel.emit()"
+>
+  <form [formGroup]="editForm" (ngSubmit)="onSubmit()" class="visit-form">
+    <div class="visit-form__grid">
+      <app-shared-input
+        label="اسم العميل"
+        formControlName="customer_name"
+        placeholder="أدخل اسم العميل"
+        [required]="true"
+      />
+      <app-shared-input
+        label="اسم المهندس"
+        formControlName="engineer_name"
+        placeholder="أدخل اسم المهندس"
+        [required]="true"
+      />
+      <app-shared-input
+        label="اسم الماكينة"
+        formControlName="machine_name"
+        placeholder="أدخل اسم الماكينة"
+      />
+      <app-shared-input
+        label="تاريخ الزيارة"
+        type="date"
+        formControlName="planned_start"
+        [required]="true"
+      />
+      <app-shared-select
+        label="الحالة"
+        formControlName="status"
+        [options]="statusOptions"
+        [required]="true"
+      />
+      <app-shared-select
+        label="الأولوية"
+        formControlName="priority"
+        [options]="priorityOptions"
+        [required]="true"
+      />
+    </div>
+
+    <div class="visit-form__full">
+      <label class="visit-form__label">ملاحظات</label>
+      <textarea
+        class="visit-form__textarea"
+        formControlName="notes"
+        placeholder="أدخل أي ملاحظات إضافية هنا..."
+      ></textarea>
+    </div>
+
+    <div class="visit-form__actions">
+      <app-button
+        type="button"
+        label="إلغاء"
+        variant="secondary"
+        (pressed)="cancel.emit()"
+      />
+      <app-button
+        type="submit"
+        [label]="visit().id === 0 ? 'إضافة الزيارة' : 'حفظ التعديلات'"
+        [loading]="isSubmitting()"
+      />
+    </div>
+  </form>
+</app-shared-modal>

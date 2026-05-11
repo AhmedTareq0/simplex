@@ -1,21 +1,42 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
-import { ApiResponse } from '../../../core/interfaces/api-response.interface';
+import { ApiResponse, PagedResult } from '../../../core/interfaces/api-response.interface';
+import { buildHttpParams } from '../../../core/utils/http-params.util';
 import { Observable } from 'rxjs';
 
 export interface Employee {
   id: number;
+  odoo_user_id: number;
+  partner_id: number;
   name: string;
-  display_name: string;
   email: string;
-  phone: string;
+  phone: string | null;
+  role: string;
+  avatar_url: string | null;
+  employee_role: string;
+  department: string;
+  created_at: string;
+  last_login_at: string | null;
+}
+
+export interface EmployeeFilters {
+  page?: number;
+  page_size?: number;
+  search?: string;
+  department?: string;
+}
+
+export interface EmployeeDetails {
+  id: number;
+  name: string;
+  email: string;
   department: string;
   employee_role: string;
-  user_type: string;
-  active: boolean;
-  image_url: string | null;
-  last_login: string | null;
+  total_assigned_tickets: number;
+  total_assigned_visits: number;
+  avatar_url: string | null;
+  last_login_at: string | null;
 }
 
 @Injectable({
@@ -29,24 +50,30 @@ export class EmployeeService {
   readonly isLoading = signal(false);
   readonly total = signal(0);
 
-  loadEmployees(): void {
+  loadEmployees(filters: EmployeeFilters = {}): void {
     this.isLoading.set(true);
-    this.http.get<ApiResponse<Employee[]>>(`${this.apiUrl}/api/employees/all`)
+
+    const params = buildHttpParams({
+      page: filters.page,
+      pageSize: filters.page_size,
+      search: filters.search,
+      department: filters.department,
+    });
+
+    this.http.get<ApiResponse<PagedResult<Employee>>>(
+      `${this.apiUrl}/api/users/employees`, { params }
+    )
       .subscribe({
         next: (res) => {
-          this.employees.set(res.data || []);
-          this.total.set(res.data?.length || 0);
+          this.employees.set(res.data?.items || []);
+          this.total.set(res.data?.total || 0);
           this.isLoading.set(false);
         },
         error: () => this.isLoading.set(false)
       });
   }
 
-  updateEmployee(id: number, data: any): Observable<ApiResponse<Employee>> {
-    return this.http.put<ApiResponse<Employee>>(`${this.apiUrl}/api/employees/${id}`, data);
-  }
-
-  createEmployee(data: any): Observable<ApiResponse<Employee>> {
-    return this.http.post<ApiResponse<Employee>>(`${this.apiUrl}/api/employees/create`, data);
+  getEmployeeDetails(id: number): Observable<ApiResponse<EmployeeDetails>> {
+    return this.http.get<ApiResponse<EmployeeDetails>>(`${this.apiUrl}/api/users/employees/${id}/details`);
   }
 }

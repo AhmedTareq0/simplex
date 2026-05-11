@@ -1,7 +1,9 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { ApiResponse, PagedResult } from '../../../core/interfaces/api-response.interface';
+import { buildHttpParams } from '../../../core/utils/http-params.util';
 
 export interface Ticket {
   id: number;
@@ -47,15 +49,16 @@ export class TicketsService {
   loadTickets(filters: TicketFilters = {}): void {
     this.isLoading.set(true);
 
-    let params = new HttpParams();
-    if (filters.status) params = params.set('status', filters.status);
-    if (filters.priority) params = params.set('priority', filters.priority);
-    if (filters.from) params = params.set('from', filters.from);
-    if (filters.to) params = params.set('to', filters.to);
-    params = params.set('page', (filters.page ?? 1).toString());
-    params = params.set('page_size', (filters.page_size ?? 20).toString());
+    const params = buildHttpParams({
+      page: filters.page,
+      pageSize: filters.page_size,
+      status: filters.status,
+      priority: filters.priority,
+      from: filters.from,
+      to: filters.to,
+    });
 
-    this.http.get<any>(`${this.base}/api/tickets/customer-care`, { params })
+    this.http.get<ApiResponse<PagedResult<Ticket>>>(`${this.base}/api/tickets/all`, { params })
       .subscribe({
         next: (res) => {
           this.tickets.set(res.data?.items || []);

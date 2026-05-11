@@ -14,7 +14,7 @@ export interface TableColumn {
   field: string;
   header: string;
   type?: 'text' | 'number' | 'date' | 'status' | 'badge' | 'image' | 'link';
-  filterable?: boolean; // إيقاف أو تشغيل الفلتر لهذا العمود
+  filterable?: boolean;
   filterType?: 'text' | 'dropdown' | 'date' | 'boolean';
   filterOptions?: any[];
   placeholder?: string;
@@ -52,9 +52,9 @@ export class SharedTableComponent {
   @Input() showActions: boolean = true;
   @Input() showPaginator: boolean = true;
   @Input() rows: number = 10;
+  @Input() currentPage: number = 1;
   @Input() emptyMessage: string = 'لا توجد بيانات';
 
-  // Server-side pagination
   @Input() lazy: boolean = false;
   @Input() totalRecords: number = 0;
   @Input() showSync: boolean = false;
@@ -62,15 +62,11 @@ export class SharedTableComponent {
   @Output() onSync = new EventEmitter<void>();
   @Output() onPageChange = new EventEmitter<{ page: number; rows: number }>();
 
-  // Internal pagination state
-  currentPage: number = 1;
-
   @Input() showView: boolean = true;
   @Input() showEdit: boolean = true;
   @Input() showDelete: boolean = true;
   @Input() customActions: MenuItem[] = [];
-  
-  @Input() labels: any = {}; // To support the current dashboard passing labels
+  @Input() labels: any = {};
 
   @Output() onView = new EventEmitter<any>();
   @Output() onEdit = new EventEmitter<any>();
@@ -86,7 +82,7 @@ export class SharedTableComponent {
   private readonly colorPalette = ['#2563eb', '#4f46e5', '#7c3aed', '#db2777', '#059669', '#d97706'];
   private activeMenu: any;
 
-  get filterFields(): string[] { return this.columns.map(c => c.field); }
+  get filterFields(): string[] { return this.columns.map(column => column.field); }
 
   toggleFilters() {
     this.isFilterVisible = !this.isFilterVisible;
@@ -94,21 +90,21 @@ export class SharedTableComponent {
 
   get actionItems(): MenuItem[] {
     if (this.customActions && this.customActions.length > 0) {
-       return this.customActions
-         .filter(action => {
-           const actionAny = action as any;
-           if (typeof actionAny.showIf === 'function') {
-             return actionAny.showIf(this.selectedRow);
-           }
-           return action.visible !== false;
-         })
-         .map(action => ({
+      return this.customActions
+        .filter(action => {
+          const actionAny = action as any;
+          if (typeof actionAny.showIf === 'function') {
+            return actionAny.showIf(this.selectedRow);
+          }
+          return action.visible !== false;
+        })
+        .map(action => ({
           ...action,
           command: () => {
-             if (action.command) action.command({ item: action });
-             this.onAction.emit({ type: action.id || action.label || 'custom', data: this.selectedRow });
+            if (action.command) action.command({ item: action });
+            this.onAction.emit({ type: action.id || action.label || 'custom', data: this.selectedRow });
           }
-       }));
+        }));
     }
 
     const items: MenuItem[] = [];
@@ -130,14 +126,14 @@ export class SharedTableComponent {
   }
 
   setSelectedRow(row: any) { this.selectedRow = row; }
-  
+
   closeActiveMenu() {
     if (this.activeMenu) {
       this.activeMenu.hide();
       this.activeMenu = null;
     }
   }
-  
+
   setActiveMenu(menu: any) {
     this.closeActiveMenu();
     this.activeMenu = menu;
@@ -148,7 +144,7 @@ export class SharedTableComponent {
   }
 
   get totalPages(): number {
-    return Math.ceil(this.totalRecords / this.rows) || 1;
+    return Math.ceil(this.totalRecords / Number(this.rows || 10)) || 1;
   }
 
   get pageNumbers(): number[] {
@@ -156,29 +152,38 @@ export class SharedTableComponent {
     const current = this.currentPage;
     const pages: number[] = [];
     const delta = 2;
-    for (let i = Math.max(1, current - delta); i <= Math.min(total, current + delta); i++) {
-      pages.push(i);
+    for (let page = Math.max(1, current - delta); page <= Math.min(total, current + delta); page++) {
+      pages.push(page);
     }
     return pages;
   }
 
   goToPage(page: number) {
-    if (page < 1 || page > this.totalPages || page === this.currentPage) return;
-    this.currentPage = page;
-    this.onPageChange.emit({ page, rows: this.rows });
+    const nextPage = Number(page);
+    const nextRows = Number(this.rows || 10);
+    if (nextPage < 1 || nextPage > this.totalPages || nextPage === this.currentPage) return;
+    this.currentPage = nextPage;
+    this.onPageChange.emit({ page: nextPage, rows: nextRows });
   }
 
   onRowsChange(newRows: number) {
-    this.rows = newRows;
+    this.rows = Number(newRows || 10);
     this.currentPage = 1;
-    this.onPageChange.emit({ page: 1, rows: newRows });
+    this.onPageChange.emit({ page: 1, rows: this.rows });
   }
 
   onLazyLoad(event: any) {
-    const page = Math.floor((event.first ?? 0) / (event.rows ?? this.rows)) + 1;
-    this.onPageChange.emit({ page, rows: event.rows ?? this.rows });
+    const rows = Number(event.rows ?? this.rows ?? 10);
+    const page = Math.floor((event.first ?? 0) / rows) + 1;
+    this.currentPage = page;
+    this.rows = rows;
+    this.onPageChange.emit({ page, rows });
   }
-  
-  getColColor(index: number, isText: boolean): string { return this.colorPalette[index % this.colorPalette.length]; }
+
+  isLtrField(column: TableColumn): boolean {
+    return ['phone', 'mobile', 'telephone'].includes(column.field);
+  }
+
+  getColColor(index: number, _isText: boolean): string { return this.colorPalette[index % this.colorPalette.length]; }
   printTable() { window.print(); }
 }

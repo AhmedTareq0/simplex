@@ -1,23 +1,11 @@
-.employees {
+.visits {
   padding: var(--space-6);
 
   &__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: var(--space-8);
-
-    @media (max-width: 640px) {
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      gap: var(--space-4);
-    }
-  }
-
-  &__actions {
-    display: flex;
-    gap: var(--space-2);
+    margin-bottom: var(--space-6);
   }
 
   &__info {

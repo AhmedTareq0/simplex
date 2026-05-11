@@ -2,15 +2,20 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { ApiResponse, PagedResult } from '../../../core/interfaces/api-response.interface';
+import { buildHttpParams } from '../../../core/utils/http-params.util';
 
 export interface Machine {
   id: number;
+  odooId?: number;
+  odoo_id?: number;
   name: string;
   display_name: string;
   description: string;
   description_sale: string;
   list_price: number;
   category: string;
+  category_id?: number;
   type: string;
   active: boolean;
   create_date: string;
@@ -27,10 +32,10 @@ export interface MachineCategory {
   parent_id: number | null;
 }
 
-export interface ApiResponse<T> {
-  success: boolean;
-  message: string | null;
-  data: T;
+export interface MachineFilters {
+  page?: number;
+  pageSize?: number;
+  search?: string;
 }
 
 @Injectable({
@@ -44,13 +49,41 @@ export class MachineService {
   readonly isLoading = signal(false);
   readonly total = signal(0);
 
-  loadMachines(): void {
+  loadMachines(filters: MachineFilters = {}): void {
     this.isLoading.set(true);
-    this.http.get<ApiResponse<Machine[]>>(`${this.apiUrl}/api/machines/all`)
+    const page = filters.page ?? 1;
+    const pageSize = filters.pageSize ?? 10;
+
+    const params = buildHttpParams({
+      page,
+      pageSize,
+      search: filters.search,
+    });
+
+    this.http.get<ApiResponse<PagedResult<Machine> | Machine[]>>(
+      `${this.apiUrl}/api/machines/all`, { params }
+    )
       .subscribe({
         next: (res) => {
-          this.machines.set(res.data || []);
-          this.total.set(res.data?.length || 0);
+          const data = res.data;
+
+          if (Array.isArray(data)) {
+            const start = (page - 1) * pageSize;
+            const machines = data.map(machine => ({
+              ...machine,
+              odooId: machine.odooId ?? machine.odoo_id ?? machine.id
+            }));
+
+            this.machines.set(machines.slice(start, start + pageSize));
+            this.total.set(machines.length);
+          } else {
+            this.machines.set((data?.items || []).map(machine => ({
+              ...machine,
+              odooId: machine.odooId ?? machine.odoo_id ?? machine.id
+            })));
+            this.total.set(data?.total || 0);
+          }
+
           this.isLoading.set(false);
         },
         error: () => this.isLoading.set(false)
@@ -67,11 +100,15 @@ export class MachineService {
     return this.http.post<ApiResponse<any>>(`${this.apiUrl}/api/machines/sync`, {});
   }
 
-  updateMachine(id: number, data: FormData): Observable<ApiResponse<Machine>> {
-    return this.http.put<ApiResponse<Machine>>(`${this.apiUrl}/api/machines/${id}`, data);
+  updateMachine(odooId: number, data: FormData): Observable<ApiResponse<Machine>> {
+    return this.http.put<ApiResponse<Machine>>(`${this.apiUrl}/api/machines/${odooId}`, data);
   }
 
   createMachine(data: FormData): Observable<ApiResponse<Machine>> {
-    return this.http.post<ApiResponse<Machine>>(`${this.apiUrl}/api/machines/create`, data);
+    return this.http.post<ApiResponse<Machine>>(`${this.apiUrl}/api/machines`, data);
+  }
+
+  deleteMachine(odooId: number): Observable<ApiResponse<any>> {
+    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/api/machines/${odooId}`);
   }
 }

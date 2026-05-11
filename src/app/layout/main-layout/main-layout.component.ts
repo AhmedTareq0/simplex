@@ -16,9 +16,11 @@ export class MainLayoutComponent {
     { link: 'dashboard', title: 'لوحة التحكم', icon: 'chartPie' },
     { link: 'machines', title: 'الماكينات', icon: 'table' },
     { link: 'tickets', title: 'التذاكر', icon: 'calendarClock' },
+    { link: 'visits', title: 'الزيارات', icon: 'mapMarker' },
     { link: 'employees', title: 'الموظفين', icon: 'users' },
     { link: 'clients', title: 'العملاء', icon: 'user' },
     { link: 'chat', title: 'الدردشة', icon: 'chat' },
+    { link: 'notifications', title: 'الإشعارات', icon: 'bell' },
     { link: 'settings', title: 'الإعدادات', icon: 'cog' },
   ]);
 

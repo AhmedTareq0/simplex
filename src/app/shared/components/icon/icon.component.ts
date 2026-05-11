@@ -317,6 +317,28 @@ const ICONS = {
     paths: [
       { d: 'M4 16l4.586-4.586a2 2 0 0 1 2.828 0L16 16m-2-2l1.586-1.586a2 2 0 0 1 2.828 0L20 14m-6-6h.01M6 20h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z' }
     ]
+  },
+  mapMarker: {
+    viewBox: '0 0 24 24',
+    paths: [
+      { d: 'M12 21s-8-7-8-12a8 8 0 1 1 16 0c0 5-8 12-8 12Z' },
+      { d: 'M12 12a3 3 0 1 1 0-6a3 3 0 0 1 0 6Z' }
+    ]
+  },
+  xCircle: {
+    viewBox: '0 0 24 24',
+    paths: [
+      { d: 'm15 9-6 6M9 9l6 6' },
+      { d: 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z' }
+    ]
+  },
+  zap: {
+    viewBox: '0 0 24 24',
+    paths: [{ d: 'M13 2L3 14h9l-1 8 10-12h-9l1-8z' }]
+  },
+  messageSquare: {
+    viewBox: '0 0 24 24',
+    paths: [{ d: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z' }]
   }
 } satisfies Record<string, IconDefinition>; // Updated with image icon
 
