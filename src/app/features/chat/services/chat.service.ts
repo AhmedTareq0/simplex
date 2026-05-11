@@ -90,39 +90,39 @@ export class ChatService {
     });
 
     // Conversation ended by customer — append system message
-    this.ws.conversationEnded$.subscribe((payload) => {
-      if (payload.conversation_id === this.activeConversationId()) {
-        this.messages.update(prev => [
-          ...prev,
-          {
-            id: 'end-' + Date.now(),
-            role: 'system',
-            content: 'تم إنهاء المحادثة من قبل العميل',
-            attachment_url: null,
-            attachment_type: null,
-            timestamp: new Date().toISOString(),
-          },
-        ]);
-      }
-    });
+    // this.ws.conversationEnded$.subscribe((payload) => {
+    //   if (payload.conversation_id === this.activeConversationId()) {
+    //     this.messages.update(prev => [
+    //       ...prev,
+    //       {
+    //         id: 'end-' + Date.now(),
+    //         role: 'system',
+    //         content: 'تم إنهاء المحادثة من قبل العميل',
+    //         attachment_url: null,
+    //         attachment_type: null,
+    //         timestamp: new Date().toISOString(),
+    //       },
+    //     ]);
+    //   }
+    // });
 
     // Agent joined — append system message
-    this.ws.agentJoined$.subscribe((payload) => {
-      if (payload.conversation_id === this.activeConversationId()) {
-        const roleName = payload.role === 'engineer' ? 'المهندس' : 'خدمة العملاء';
-        this.messages.update(prev => [
-          ...prev,
-          {
-            id: 'join-' + Date.now(),
-            role: 'system',
-            content: `تم انضمام ${roleName} ${payload.name} للمحادثة`,
-            attachment_url: null,
-            attachment_type: null,
-            timestamp: new Date().toISOString(),
-          },
-        ]);
-      }
-    });
+    // this.ws.agentJoined$.subscribe((payload) => {
+    //   if (payload.conversation_id === this.activeConversationId()) {
+    //     const roleName = payload.role === 'engineer' ? 'المهندس' : 'خدمة العملاء';
+    //     this.messages.update(prev => [
+    //       ...prev,
+    //       {
+    //         id: 'join-' + Date.now(),
+    //         role: 'system',
+    //         content: `تم انضمام ${roleName} ${payload.name} للمحادثة`,
+    //         attachment_url: null,
+    //         attachment_type: null,
+    //         timestamp: new Date().toISOString(),
+    //       },
+    //     ]);
+    //   }
+    // });
 
     // Unread count updated
     this.ws.unreadCount$.subscribe((payload) => {

@@ -16,7 +16,8 @@ export class TicketsComponent implements OnInit {
 
   selectedTicket = signal<any>(null);
   showDetail = signal(false);
-  pageSize = signal(20);
+  currentPage = signal(1);
+  pageSize = signal(10);
 
   get isLoading(): boolean { return this.ticketsService.isLoading(); }
   get total(): number { return this.ticketsService.total(); }
@@ -26,7 +27,7 @@ export class TicketsComponent implements OnInit {
       field: 'customer', header: 'العميل', type: 'text',
       filterable: true, filterType: 'text', placeholder: 'ابحث عن عميل',
     },
-    { field: 'machine_id', header: 'المكنة', type: 'text', filterable: true, filterType: 'text' },
+    { field: 'machine_id', header: 'الماكينة', type: 'text', filterable: true, filterType: 'text' },
     {
       field: 'status', header: 'الحالة', type: 'badge',
       filterable: true, filterType: 'dropdown',
@@ -37,7 +38,7 @@ export class TicketsComponent implements OnInit {
         { label: 'مغلقة', value: 'closed' },
         { label: 'منتهية', value: 'solved' },
       ],
-      formatter: (v: string) => ({ open: 'مفتوحة', in_progress: 'قيد التنفيذ', resolved: 'محلولة', closed: 'مغلقة', solved: 'منتهية' } as Record<string, string>)[v] || v,
+      formatter: (value: string) => ({ open: 'مفتوحة', in_progress: 'قيد التنفيذ', resolved: 'محلولة', closed: 'مغلقة', solved: 'منتهية' } as Record<string, string>)[value] || value,
     },
     {
       field: 'priority', header: 'الأولوية', type: 'badge',
@@ -47,17 +48,17 @@ export class TicketsComponent implements OnInit {
         { label: 'متوسطة', value: 'medium' },
         { label: 'منخفضة', value: 'low' },
       ],
-      formatter: (v: string) => ({ high: 'عالية', medium: 'متوسطة', low: 'منخفضة' } as Record<string, string>)[v] || v,
+      formatter: (value: string) => ({ high: 'عالية', medium: 'متوسطة', low: 'منخفضة' } as Record<string, string>)[value] || value,
     },
     { field: 'engineer_name', header: 'المهندس', type: 'text', filterable: true, filterType: 'text' },
     { field: 'customer_care_name', header: 'خدمة العملاء', type: 'text', filterable: true, filterType: 'text' },
     {
       field: 'visit_date', header: 'تاريخ الزيارة', type: 'text',
-      formatter: (v) => v ? new Date(v).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }) : '—',
+      formatter: (value) => value ? new Date(value).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }) : '—',
     },
     {
       field: 'created_at', header: 'تاريخ الإنشاء', type: 'text',
-      formatter: (v) => v ? new Date(v).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }) : '—',
+      formatter: (value) => value ? new Date(value).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }) : '—',
     },
   ];
 
@@ -66,6 +67,7 @@ export class TicketsComponent implements OnInit {
   }
 
   onPageChange(event: { page: number; rows: number }) {
+    this.currentPage.set(event.page);
     this.pageSize.set(event.rows);
     this.ticketsService.loadTickets({ page: event.page, page_size: event.rows });
   }
@@ -88,28 +90,27 @@ export class TicketsComponent implements OnInit {
     this.selectedTicket.set(null);
   }
 
-  private mapTicket(t: Ticket): any {
-    // Extract customer name from title (format: "Support — Machine Name (Customer Name)")
-    const customerMatch = t.title.match(/\(([^)]+)\)/);
+  private mapTicket(ticket: Ticket): any {
+    const customerMatch = ticket.title.match(/\(([^)]+)\)/);
     const customer = customerMatch ? customerMatch[1] : '—';
 
     return {
-      id: String(t.id),
-      customer: customer,
-      machine_id: t.machine_id,
-      status: t.status,
-      visit_date: t.visit_date,
-      priority: t.priority,
-      engineer_name: t.engineer_name,
-      customer_care_name: t.customer_care_name,
-      created_at: t.created_at,
-      conversation_id: t.conversation_id,
-      description: t.description,
-      title: t.title,
+      id: String(ticket.id),
+      customer,
+      machine_id: ticket.machine_id,
+      status: ticket.status,
+      visit_date: ticket.visit_date,
+      priority: ticket.priority,
+      engineer_name: ticket.engineer_name,
+      customer_care_name: ticket.customer_care_name,
+      created_at: ticket.created_at,
+      conversation_id: ticket.conversation_id,
+      description: ticket.description,
+      title: ticket.title,
     };
   }
 
   get mappedTickets(): any[] {
-    return this.ticketsService.tickets().map(t => this.mapTicket(t));
+    return this.ticketsService.tickets().map(ticket => this.mapTicket(ticket));
   }
 }

@@ -1,88 +1,104 @@
 <app-shared-modal
   [visible]="visible()"
   [title]="machine().id === 0 ? 'إضافة ماكينة جديدة' : 'تعديل بيانات الماكينة'"
-  (closed)="cancel.emit()"
+  (visibleChange)="cancel.emit()"
 >
   <form [formGroup]="editForm" (ngSubmit)="onSubmit()" class="machine-form">
-    <div class="machine-form__content">
-      <!-- Image Upload Section -->
-      <div class="machine-form__image-section">
-        <div class="image-preview" [class.image-preview--empty]="!imagePreview()">
-          @if (imagePreview()) {
-            <img [src]="imagePreview()" alt="Machine Preview" />
-          } @else {
-            <app-icon name="camera" class="placeholder-icon" />
-          }
-          <label class="image-upload-btn">
-            <app-icon name="camera" />
-            <span>تغيير الصورة</span>
-            <input type="file" (change)="onImageSelected($event)" accept="image/*" hidden />
-          </label>
-        </div>
+    <div class="machine-form__media">
+      <button
+        type="button"
+        class="machine-form__preview"
+        (click)="imageInput.click()"
+        aria-label="اختيار صورة الماكينة"
+      >
+        @if (imagePreview()) {
+          <img [src]="imagePreview()" alt="صورة الماكينة" class="machine-form__img" />
+        } @else {
+          <span class="machine-form__placeholder">
+            <app-icon name="image" size="lg" />
+            <span>اختيار صورة</span>
+          </span>
+        }
+      </button>
+      <div class="machine-form__media-copy">
+        <h3>صورة الماكينة</h3>
+        <p>ارفع صورة واضحة للماكينة. يمكن تركها كما هي أثناء التعديل.</p>
+        <button type="button" class="machine-form__file-btn" (click)="imageInput.click()">
+          <app-icon name="image" size="sm" />
+          <span>رفع صورة</span>
+        </button>
       </div>
+      <input
+        #imageInput
+        type="file"
+        class="machine-form__hidden"
+        accept="image/*"
+        (change)="onImageSelected($event)"
+      />
+    </div>
 
-      <div class="machine-form__fields">
-        <app-shared-input
-          label="اسم الماكينة"
-          placeholder="أدخل اسم الماكينة"
-          formControlName="name"
-          [error]="editForm.get('name')?.touched && editForm.get('name')?.invalid ? 'هذا الحقل مطلوب' : ''"
-        />
+    <div class="machine-form__grid">
+      <app-shared-input
+        label="اسم الماكينة"
+        formControlName="name"
+        placeholder="مثال: CNC Router X1"
+        [required]="true"
+      />
 
-        <div class="form-row">
-          <app-shared-input
-            label="السعر (ر.س)"
-            type="number"
-            placeholder="0.00"
-            formControlName="listPrice"
-            class="flex-1"
-            [error]="editForm.get('listPrice')?.touched && editForm.get('listPrice')?.invalid ? 'هذا الحقل مطلوب' : ''"
-          />
-          <app-shared-select
-            label="النوع"
-            [options]="typeOptions"
-            formControlName="type"
-            class="flex-1"
-          />
-        </div>
+      <app-shared-select
+        label="الفئة"
+        formControlName="categoryId"
+        [options]="categoryOptions"
+        [required]="true"
+        placeholder="اختر الفئة"
+      />
 
-        <app-shared-input
-          label="الوصف"
-          placeholder="أدخل وصف الماكينة"
-          formControlName="description"
-        />
+      <app-shared-input
+        label="السعر"
+        type="number"
+        formControlName="price"
+        placeholder="0.00"
+        [required]="true"
+      />
+    </div>
 
-        <app-shared-input
-          label="وصف البيع"
-          placeholder="أدخل وصف البيع"
-          formControlName="descriptionSale"
-        />
+    <div class="machine-form__full">
+      <app-shared-input
+        label="الوصف"
+        formControlName="description"
+        placeholder="أدخل وصفًا تفصيليًا للماكينة"
+      />
+    </div>
 
-        <div class="document-section">
-          <label class="field-label">كتالوج الماكينة</label>
-          <div class="file-upload">
-            <label class="file-upload__btn">
-              <app-icon name="fileAlt" />
-              <span>{{ selectedDocument ? selectedDocument.name : 'اختر ملف الكتالوج' }}</span>
-              <input type="file" (change)="onDocumentSelected($event)" accept=".pdf,.doc,.docx" hidden />
-            </label>
-          </div>
-        </div>
+    <div class="machine-form__upload">
+      <div>
+        <label class="machine-form__label">كتالوج الماكينة</label>
+        <p class="machine-form__hint">ملف Word بصيغة .docx فقط</p>
       </div>
+      <button type="button" class="machine-form__file-drop" (click)="docInput.click()">
+        <app-icon name="fileAlt" size="sm" />
+        <span>{{ selectedDocument ? selectedDocument.name : 'اختر ملف الوورد' }}</span>
+      </button>
+      <input
+        #docInput
+        type="file"
+        class="machine-form__hidden"
+        accept=".docx"
+        (change)="onDocumentSelected($event)"
+      />
     </div>
 
     <div class="machine-form__actions">
       <app-button
+        type="button"
         label="إلغاء"
         variant="secondary"
         (pressed)="cancel.emit()"
-        [disabled]="isSubmitting()"
       />
       <app-button
-        [label]="isSubmitting() ? 'جاري الحفظ...' : 'حفظ التغييرات'"
         type="submit"
+        [label]="machine().id === 0 ? 'إضافة الماكينة' : 'حفظ التعديلات'"
         [loading]="isSubmitting()"
-        [disabled]="editForm.invalid"
       />
     </div>
   </form>

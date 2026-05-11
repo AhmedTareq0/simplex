@@ -4,15 +4,6 @@
       <h1 class="clients__title">دليل العملاء</h1>
       <p class="clients__subtitle">إدارة بيانات العملاء والشركات المتعاقد معها</p>
     </div>
-    <div class="clients__actions">
-      @if (auth.isSuperAdmin()) {
-        <app-button
-          label="إضافة عميل"
-          icon="plus"
-          (pressed)="onAdd()"
-        />
-      }
-    </div>
   </div>
 
   @if (isLoading) {
@@ -25,11 +16,15 @@
       [columns]="columns"
       title="قائمة العملاء"
       [showView]="true"
-      [showEdit]="auth.isSuperAdmin()"
+      [showEdit]="false"
       [showDelete]="false"
       [showActions]="true"
+      [lazy]="true"
+      [totalRecords]="total"
+      [rows]="pageSize()"
+      [currentPage]="currentPage()"
+      (onPageChange)="onPageChange($event)"
       (onView)="onRowClick($event)"
-      (onEdit)="onEdit($event)"
       (onRowClick)="onRowClick($event)"
     />
   }
@@ -40,16 +35,5 @@
     [visible]="showDetailModal()"
     [client]="selectedClient()"
     (close)="showDetailModal.set(false)"
-    (edit)="onEdit($event)"
-  />
-}
-
-@if (showEditModal() && selectedClient()) {
-  <app-client-edit-modal
-    [visible]="showEditModal()"
-    [client]="selectedClient()!"
-    [isSubmitting]="isSubmitting()"
-    (save)="handleSaveClient($event)"
-    (cancel)="showEditModal.set(false)"
   />
 }

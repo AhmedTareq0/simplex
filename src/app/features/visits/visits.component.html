@@ -1,0 +1,64 @@
+<div class="visits">
+  <div class="visits__header">
+    <div class="visits__info">
+      <h1 class="visits__title">زيارات المهندسين</h1>
+      <p class="visits__subtitle">متابعة وإدارة مواعيد زيارات الصيانة والدعم الفني</p>
+    </div>
+    <div class="visits__actions">
+      @if (auth.isSuperAdmin()) {
+        <app-button
+          label="إضافة زيارة"
+          icon="plus"
+          (pressed)="onAdd()"
+        />
+      }
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <div class="visits__skeleton">
+      <app-skeleton-loader type="table" [count]="8" />
+    </div>
+  } @else {
+    <app-shared-table
+      [data]="visits"
+      [columns]="columns"
+      title="قائمة الزيارات"
+      [showView]="true"
+      [showEdit]="true"
+      [showDelete]="false"
+      [showActions]="true"
+      [lazy]="true"
+      [totalRecords]="total"
+      [rows]="pageSize()"
+      [currentPage]="currentPage()"
+      [showSync]="true"
+      [isSyncing]="isSyncing()"
+      (onSync)="onSync()"
+      (onPageChange)="onPageChange($event)"
+      (onRowClick)="onRowClick($event)"
+      (onView)="onRowClick($event)"
+      (onEdit)="onEdit($event)"
+    />
+  }
+</div>
+
+@if (showDetailModal() && selectedVisit()) {
+  <app-visit-detail
+    [visible]="showDetailModal()"
+    [visit]="selectedVisit()!"
+    (close)="showDetailModal.set(false)"
+    (edit)="onEdit($event)"
+    (updated)="handleVisitUpdate($event)"
+  />
+}
+
+@if (showEditModal() && selectedVisit()) {
+  <app-visit-edit-modal
+    [visible]="showEditModal()"
+    [visit]="selectedVisit()!"
+    [isSubmitting]="isUpdatingVisit()"
+    (save)="handleSaveVisit($event)"
+    (cancel)="showEditModal.set(false)"
+  />
+}

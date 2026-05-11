@@ -22,6 +22,7 @@
       [lazy]="true"
       [totalRecords]="total"
       [rows]="pageSize()"
+      [currentPage]="currentPage()"
       (onPageChange)="onPageChange($event)"
       (onRowClick)="onRowClick($event)"
     />

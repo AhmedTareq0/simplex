@@ -30,9 +30,10 @@
       
       <app-notification-dropdown
         #notificationDropdown
-        [notifications]="[]"
-        [count]="0"
-        viewAllLink="/customer-support"
+        [notifications]="mappedNotifications()"
+        [count]="unreadNotifCount()"
+        viewAllLink="/notifications"
+        (itemClick)="onNotificationClick($event)"
       />
     </div>
 

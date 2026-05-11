@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, output, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '@/shared/components/icon/icon.component';
-import { NotificationDropdownComponent } from '@/shared/components/notification-dropdown/notification-dropdown.component';
+import { NotificationDropdownComponent, NotificationItem } from '@/shared/components/notification-dropdown/notification-dropdown.component';
 import { ChatService } from '../../../features/chat/services/chat.service';
+import { NotificationsService } from '../../../features/notifications/services/notifications.service';
 
 @Component({
   selector: 'app-main-layout-header',
@@ -18,6 +19,21 @@ export class MainLayoutHeaderComponent implements OnInit {
 
   readonly isArabic = signal(true);
   private readonly chatService = inject(ChatService);
+  private readonly notifService = inject(NotificationsService);
+
+  readonly mappedNotifications = computed<NotificationItem[]>(() => {
+    return this.notifService.notifications().slice(0, 5).map(n => ({
+      id: n.id,
+      title: n.title,
+      description: n.body,
+      avatarText: this.getInitial(n.type),
+      time: this.formatTime(n.created_at),
+      link: '/notifications',
+      queryParams: { id: n.id }
+    }));
+  });
+
+  readonly unreadNotifCount = computed(() => this.notifService.stats().unread);
 
   readonly chatUnreadCount = computed(() => {
     const counts = this.chatService.unreadCounts();
@@ -39,6 +55,37 @@ export class MainLayoutHeaderComponent implements OnInit {
         this.userData.set(null);
       }
     }
+
+    this.notifService.loadStats();
+    this.notifService.loadNotifications({ page_size: 5 });
+  }
+
+  onNotificationClick(item: NotificationItem) {
+    this.notifService.markAsRead(item.id).subscribe();
+  }
+
+  private getInitial(type: string): string {
+    const map: Record<string, string> = {
+      new_escalation: 'C',
+      ticket_update: 'T',
+      visit_scheduled: 'V',
+      visit_completed: 'D',
+      engineer_assigned: 'E',
+      message_received: 'M',
+      system_alert: 'S',
+      visit_cancelled: 'X',
+    };
+    return map[type] || 'N';
+  }
+
+  private formatTime(date: string): string {
+    const diff = new Date().getTime() - new Date(date).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'الآن';
+    if (mins < 60) return `منذ ${mins} د`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `منذ ${hours} س`;
+    return new Date(date).toLocaleDateString('ar-EG');
   }
 
   toggleLang() {

@@ -1,10 +1,12 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { ApiResponse } from '../../../core/interfaces/api-response.interface';
 
 export interface Machine {
   id: number;
+  odooId: number;
   name: string;
   display_name: string;
   description: string;
@@ -27,10 +29,10 @@ export interface MachineCategory {
   parent_id: number | null;
 }
 
-export interface ApiResponse<T> {
-  success: boolean;
-  message: string | null;
-  data: T;
+export interface MachineFilters {
+  page?: number;
+  pageSize?: number;
+  search?: string;
 }
 
 @Injectable({
@@ -40,9 +42,16 @@ export class MachineService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = environment.apiUrl;
 
-  getMachines(): Observable<Machine[]> {
-    return this.http.get<ApiResponse<Machine[]>>(`${this.apiUrl}/api/machines/all`).pipe(
-      map(res => res.data)
+  getMachines(filters: MachineFilters = {}): Observable<Machine[]> {
+    let params = new HttpParams()
+      .set('page', (filters.page ?? 1).toString())
+      .set('pageSize', (filters.pageSize ?? 20).toString());
+    if (filters.search) params = params.set('search', filters.search);
+
+    return this.http.get<ApiResponse<{ items: Machine[]; total: number; page: number; pageSize: number }>>(
+      `${this.apiUrl}/api/machines`, { params }
+    ).pipe(
+      map(res => res.data?.items || [])
     );
   }
 
@@ -56,7 +65,7 @@ export class MachineService {
     return this.http.post<ApiResponse<any>>(`${this.apiUrl}/api/machines/sync`, {});
   }
 
-  updateMachine(id: number, data: FormData): Observable<ApiResponse<Machine>> {
-    return this.http.put<ApiResponse<Machine>>(`${this.apiUrl}/api/machines/${id}`, data);
+  updateMachine(odooId: number, data: FormData): Observable<ApiResponse<Machine>> {
+    return this.http.put<ApiResponse<Machine>>(`${this.apiUrl}/api/machines/${odooId}`, data);
   }
 }

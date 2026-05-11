@@ -1,0 +1,92 @@
+<app-shared-modal [visible]="visible()" [title]="'تفاصيل الزيارة'" (visibleChange)="close.emit()">
+  @if (visit()) {
+  <div class="visit-detail">
+    <div class="visit-detail__section">
+      <!-- <h3 class="visit-detail__section-title">معلومات الزيارة</h3> -->
+      <div class="visit-detail__main-info">
+        <h2 class="visit-detail__name">{{ visit()?.name }}</h2>
+      </div>
+      <div class="visit-detail__grid">
+        <div class="visit-detail__item">
+          <span class="visit-detail__label">العميل</span>
+          <span class="visit-detail__value">{{ customerName }}</span>
+        </div>
+        <div class="visit-detail__item">
+          <span class="visit-detail__label">المهندس</span>
+          <span class="visit-detail__value">{{ engineerName }}</span>
+        </div>
+        <div class="visit-detail__item">
+          <span class="visit-detail__label">الماكينة</span>
+          <span class="visit-detail__value">{{ machineName }}</span>
+        </div>
+        <div class="visit-detail__item">
+          <span class="visit-detail__label">تاريخ الزيارة</span>
+          <span class="visit-detail__value">{{ formatDate(visitDate) }}</span>
+        </div>
+        <div class="visit-detail__item">
+          <span class="visit-detail__label">الحالة</span>
+          <span class="visit-detail__badge" [style.background-color]="getStatusColor(visit()?.status || '')">
+            {{ getStatusLabel(visit()?.status || '') }}
+          </span>
+        </div>
+        <div class="visit-detail__item">
+          <span class="visit-detail__label">المرحلة</span>
+          <span class="visit-detail__value">{{ visit()?.stage || '—' }}</span>
+        </div>
+        <div class="visit-detail__item">
+          <span class="visit-detail__label">الأولوية</span>
+          <span class="visit-detail__value">{{ getPriorityLabel(visit()?.priority || '') }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="visit-detail__section">
+      <h3 class="visit-detail__section-title">المواعيد</h3>
+      <div class="visit-detail__grid">
+        <div class="visit-detail__item">
+          <span class="visit-detail__label">تاريخ البداية المخطط</span>
+          <span class="visit-detail__value">{{ formatDate(visit()?.planned_start || null) }}</span>
+        </div>
+        <div class="visit-detail__item">
+          <span class="visit-detail__label">تاريخ النهاية المخطط</span>
+          <span class="visit-detail__value">{{ formatDate(visit()?.planned_end || null) }}</span>
+        </div>
+        <div class="visit-detail__item">
+          <span class="visit-detail__label">الموعد النهائي (Deadline)</span>
+          <span class="visit-detail__value">{{ formatDate(visit()?.deadline || null) }}</span>
+        </div>
+        <div class="visit-detail__item">
+          <span class="visit-detail__label">تاريخ الإنشاء</span>
+          <span class="visit-detail__value">{{ formatDate(visit()?.created_at || null) }}</span>
+        </div>
+      </div>
+    </div>
+
+    @if (visit()?.tags && visit()! .tags! .length > 0) {
+    <div class="visit-detail__section">
+      <h3 class="visit-detail__section-title">الوسوم (Tags)</h3>
+      <div class="visit-detail__tags">
+        @for (tag of visit()?.tags; track tag) {
+        <span class="visit-detail__tag">{{ tag }}</span>
+        }
+      </div>
+    </div>
+    }
+
+    @if (visit()?.notes) {
+    <div class="visit-detail__section">
+      <h3 class="visit-detail__section-title">ملاحظات</h3>
+      <p class="visit-detail__notes">{{ visit()?.notes }}</p>
+    </div>
+    }
+
+    <div class="visit-detail__actions">
+      <app-button label="تعديل" variant="secondary" icon="pencil" (pressed)="onEdit()" />
+      @if (visit()?.status === 'scheduled' || visit()?.status === 'in_progress') {
+      <app-button label="تمت الزيارة بنجاح" variant="primary" [loading]="isSaving()" (pressed)="onComplete()" />
+      }
+      <app-button label="إغلاق" variant="secondary" (pressed)="close.emit()" />
+    </div>
+  </div>
+  }
+</app-shared-modal>

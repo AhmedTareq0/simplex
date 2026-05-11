@@ -45,10 +45,9 @@ export class MachineEditModalComponent {
   constructor(private fb: FormBuilder) {
     this.editForm = this.fb.group({
       name: ['', Validators.required],
+      categoryId: [null, Validators.required],
       description: [''],
-      descriptionSale: [''],
-      listPrice: [null, Validators.required],
-      type: ['Goods', Validators.required]
+      price: [null, Validators.required]
     });
   }
 
@@ -57,8 +56,7 @@ export class MachineEditModalComponent {
     this.editForm.patchValue({
       name: m.display_name,
       description: m.description,
-      descriptionSale: m.description_sale,
-      type: m.type || 'Goods'
+      price: m.list_price
     });
     if (m.image_url) {
       this.imagePreview.set(m.image_url);
@@ -89,10 +87,9 @@ export class MachineEditModalComponent {
     const vals = this.editForm.value;
 
     formData.append('Name', vals.name);
+    formData.append('CategoryId', vals.categoryId.toString());
     formData.append('Description', vals.description || '');
-    formData.append('DescriptionSale', vals.descriptionSale || '');
-    formData.append('ListPrice', vals.listPrice.toString());
-    formData.append('Type', vals.type);
+    formData.append('Price', vals.price.toString());
 
     if (this.selectedImage) {
       formData.append('Image', this.selectedImage);

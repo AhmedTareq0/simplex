@@ -234,6 +234,10 @@
     white-space: nowrap;
   }
 
+  .p-datatable-table {
+    width: 100% !important;
+  }
+
   .p-datatable-tbody>tr>td {
     background: var(--color-card-bg) !important;
     color: var(--color-text-secondary);
@@ -366,6 +370,12 @@
   width: 4rem;
 }
 
+.st-td--number {
+  min-width: 8rem;
+  width: 1%;
+  white-space: nowrap;
+}
+
 /* ── Badges & Status ── */
 .st-badge {
   display: inline-flex;
@@ -404,6 +414,22 @@
 .st-td__primary {
   font-weight: 700;
   color: var(--color-text-primary);
+}
+
+.st-td__ltr {
+  direction: ltr;
+  unicode-bidi: plaintext;
+  display: inline-block;
+  text-align: start;
+  font-variant-numeric: tabular-nums;
+}
+
+.st-td__number {
+  display: block;
+  width: 100%;
+  text-align: end;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .st-td--actions {

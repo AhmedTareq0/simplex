@@ -32,6 +32,11 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'visits',
+        loadComponent: () =>
+          import('./features/visits/visits.component').then((m) => m.VisitsComponent),
+      },
+      {
         path: 'chat',
         loadComponent: () =>
           import('./features/chat/chat.component').then((m) => m.ChatComponent),
@@ -50,6 +55,11 @@ export const routes: Routes = [
         path: 'settings',
         loadComponent: () =>
           import('./features/settings/profile-settings.component').then((m) => m.ProfileSettingsComponent),
+      },
+      {
+        path: 'notifications',
+        loadComponent: () =>
+          import('./features/notifications/notifications.component').then((m) => m.NotificationsComponent),
       },
     ],
   },

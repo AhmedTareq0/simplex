@@ -17,30 +17,24 @@
           <input id="name" type="text" pInputText formControlName="name" placeholder="أدخل الاسم..." />
         </div>
 
-        <!-- Type -->
+        <!-- Category -->
         <div class="form-group">
-          <label for="type">النوع</label>
-          <p-select id="type" [options]="typeOptions" formControlName="type" optionLabel="label" optionValue="value"
-            placeholder="اختر النوع" styleClass="st-form-select" />
+          <label for="categoryId">الفئة</label>
+          <p-inputNumber id="categoryId" formControlName="categoryId" [min]="1" />
         </div>
 
         <!-- Price -->
         <div class="form-group">
           <label for="price">السعر</label>
-          <p-inputNumber id="price" formControlName="listPrice" [min]="0" mode="currency" currency="EGP"
+          <p-inputNumber id="price" formControlName="price" [min]="0" mode="currency" currency="EGP"
             locale="ar-SA" />
         </div>
       </div>
 
       <!-- Descriptions -->
       <div class="form-group">
-        <label for="desc">الوصف العام</label>
+        <label for="desc">الوصف</label>
         <textarea id="desc" pTextarea formControlName="description" rows="3" placeholder="وصف الماكينة..."></textarea>
-      </div>
-
-      <div class="form-group">
-        <label for="descSale">وصف البيع</label>
-        <textarea id="descSale" pTextarea formControlName="descriptionSale" rows="3" placeholder="وصف يظهر في الفواتير والطلبات..."></textarea>
       </div>
 
       <!-- File Uploads -->

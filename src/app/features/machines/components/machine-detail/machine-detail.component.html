@@ -7,53 +7,99 @@
     <div class="machine-detail">
       <div class="machine-detail__header">
         <div class="machine-detail__image">
-          <img [src]="machine()?.image_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'" alt="Machine Image" />
+          <img [src]="machine()?.image_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'" alt="صورة الماكينة" />
         </div>
+
         <div class="machine-detail__info">
-          <h2 class="machine-detail__name">{{ machine()?.display_name }}</h2>
-          <div class="machine-detail__badge">{{ machine()?.type }}</div>
+          <h2 class="machine-detail__name">{{ machine()?.display_name || machine()?.name }}</h2>
+          <div class="machine-detail__sub">{{ machine()?.name || '—' }}</div>
+
+          <div class="machine-detail__badges">
+            <span class="machine-detail__badge">{{ machine()?.type || '—' }}</span>
+            <span class="machine-detail__badge machine-detail__badge--muted">{{ machine()?.category || '—' }}</span>
+            <span class="machine-detail__badge" [class.machine-detail__badge--danger]="!machine()?.active">
+              {{ getStatusLabel(machine()?.active) }}
+            </span>
+          </div>
         </div>
       </div>
 
-      <div class="machine-detail__grid">
-        <div class="detail-item">
-          <label>السعر</label>
-          <div class="detail-item__value detail-item__value--price">
-            {{ formatPrice(machine()?.list_price || 0) }}
-          </div>
-        </div>
-
-        <div class="detail-item">
-          <label>تاريخ الإنشاء</label>
-          <div class="detail-item__value">
-            {{ formatDate(machine()?.create_date || null) }}
-          </div>
-        </div>
-
-        <div class="detail-item detail-item--full">
-          <label>الوصف</label>
-          <div class="detail-item__value">
-            {{ machine()?.description || 'لا يوجد وصف متاح' }}
-          </div>
-        </div>
-
-        <div class="detail-item detail-item--full">
-          <label>وصف البيع</label>
-          <div class="detail-item__value">
-            {{ machine()?.description_sale || 'لا يوجد وصف بيع متاح' }}
-          </div>
-        </div>
-
-        @if (machine()?.document_url) {
-          <div class="detail-item detail-item--full">
-            <label>الكتالوج</label>
-            <div class="detail-item__file">
-              <app-icon name="fileAlt" />
-              <span>كتالوج الماكينة.pdf</span>
-              <a [href]="machine()?.document_url" target="_blank" class="download-link">تحميل</a>
+      <div class="machine-detail__section">
+        <h3 class="machine-detail__section-title">البيانات الأساسية</h3>
+        <div class="machine-detail__grid">
+          <div class="detail-item">
+            <label>السعر</label>
+            <div class="detail-item__value detail-item__value--price">
+              {{ formatPrice(machine()?.list_price || 0) }}
             </div>
           </div>
-        }
+
+          <div class="detail-item">
+            <label>الفئة</label>
+            <div class="detail-item__value">{{ machine()?.category || '—' }}</div>
+          </div>
+
+          <div class="detail-item">
+            <label>النوع</label>
+            <div class="detail-item__value">{{ machine()?.type || '—' }}</div>
+          </div>
+
+          <div class="detail-item">
+            <label>الحالة</label>
+            <div class="detail-item__value">{{ getStatusLabel(machine()?.active) }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="machine-detail__section">
+        <h3 class="machine-detail__section-title">الوصف</h3>
+        <div class="machine-detail__text">
+          {{ machine()?.description || 'لا يوجد وصف متاح' }}
+        </div>
+      </div>
+
+      <div class="machine-detail__section">
+        <h3 class="machine-detail__section-title">وصف البيع</h3>
+        <div class="machine-detail__text">
+          {{ machine()?.description_sale || 'لا يوجد وصف بيع متاح' }}
+        </div>
+      </div>
+
+      <div class="machine-detail__section">
+        <h3 class="machine-detail__section-title">الملفات والروابط</h3>
+        <div class="machine-detail__grid">
+          <div class="detail-item detail-item--full">
+            <label>الكتالوج</label>
+            @if (machine()?.document_url) {
+              <a [href]="machine()?.document_url" target="_blank" class="detail-item__link">
+                <app-icon name="fileAlt" size="sm" />
+                <span>{{ getFileName(machine()?.document_url) }}</span>
+              </a>
+            } @else {
+              <div class="detail-item__value">لا يوجد كتالوج</div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="machine-detail__section">
+        <h3 class="machine-detail__section-title">التواريخ</h3>
+        <div class="machine-detail__grid">
+          <div class="detail-item">
+            <label>تاريخ الإنشاء</label>
+            <div class="detail-item__value">{{ formatDate(machine()?.create_date) }}</div>
+          </div>
+
+          <div class="detail-item">
+            <label>آخر تعديل</label>
+            <div class="detail-item__value">{{ formatDate(machine()?.write_date) }}</div>
+          </div>
+
+          <div class="detail-item">
+            <label>آخر مزامنة</label>
+            <div class="detail-item__value">{{ formatDate(machine()?.synced_at) }}</div>
+          </div>
+        </div>
       </div>
 
       <div class="machine-detail__actions">

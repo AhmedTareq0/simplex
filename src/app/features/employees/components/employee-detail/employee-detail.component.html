@@ -1,67 +1,67 @@
-<app-shared-modal
-  [visible]="visible()"
-  title="تفاصيل الموظف"
-  (closed)="close.emit()"
->
+<app-shared-modal [visible]="visible()" title="تفاصيل الموظف" (closed)="close.emit()">
   @if (employee()) {
-    <div class="employee-detail">
-      <div class="employee-detail__header">
-        <div class="employee-detail__image">
-          <img [src]="employee()?.image_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'" alt="Employee Image" />
-        </div>
-        <div class="employee-detail__info">
-          <h2 class="employee-detail__name">{{ employee()?.display_name }}</h2>
-          <div class="employee-detail__badges">
-            <span class="badge badge--primary">{{ employee()?.department }}</span>
-            <span class="badge badge--secondary">{{ employee()?.employee_role }}</span>
-          </div>
-        </div>
+  <div class="employee-detail">
+    <div class="employee-detail__header">
+      <div class="employee-detail__image">
+        <img [src]="employee()?.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'"
+          alt="Employee Image" />
       </div>
+      <div class="employee-detail__info">
+        <h2 class="employee-detail__name">{{ employee()?.name }}</h2>
+        <div class="employee-detail__badges">
+          <span class="badge badge--primary">
+            <app-icon name="user" size="sm" />
+            {{ employee()?.department }}
+          </span>
 
-      <div class="employee-detail__grid">
-        <div class="detail-item">
-          <label>الاسم بالكامل</label>
-          <div class="detail-item__value">{{ employee()?.name }}</div>
         </div>
-
-        <div class="detail-item">
-          <label>البريد الإلكتروني</label>
-          <div class="detail-item__value">{{ employee()?.email }}</div>
-        </div>
-
-        <div class="detail-item">
-          <label>رقم الهاتف</label>
-          <div class="detail-item__value">{{ employee()?.phone }}</div>
-        </div>
-
-        <div class="detail-item">
-          <label>آخر ظهور</label>
-          <div class="detail-item__value">{{ formatDate(employee()?.last_login || null) }}</div>
-        </div>
-
-        <div class="detail-item">
-          <label>الحالة</label>
-          <div class="detail-item__status" [class.active]="employee()?.active">
-            <span class="dot"></span>
-            {{ employee()?.active ? 'نشط' : 'غير نشط' }}
-          </div>
-        </div>
-      </div>
-
-      <div class="employee-detail__actions">
-        <app-button
-          label="إغلاق"
-          variant="secondary"
-          (pressed)="close.emit()"
-        />
-        @if (auth.isSuperAdmin()) {
-          <app-button
-            label="تعديل البيانات"
-            icon="pencil"
-            (pressed)="edit.emit(employee()!)"
-          />
-        }
       </div>
     </div>
+
+    <!-- Basic Info -->
+    <div class="employee-detail__grid">
+
+
+      <div class="detail-item">
+        <label>البريد الإلكتروني</label>
+        <div class="detail-item__value">
+          <app-icon name="mail" size="sm" />
+          {{ employee()?.email }}
+        </div>
+      </div>
+
+      <div class="detail-item">
+        <label>رقم الهاتف</label>
+        <div class="detail-item__value" dir="ltr">
+          <app-icon name="phone" size="sm" />
+          {{ employee()?.phone || '—' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Employee Statistics -->
+    @if (employeeDetails()) {
+    <div class="employee-detail__stats">
+      <h3>
+        <app-icon name="bar-chart-2" size="sm" />
+        إحصائيات الموظف
+      </h3>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">{{ employeeDetails()?.total_assigned_tickets }}</div>
+          <div class="stat-label">التذاكر المسندة</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">{{ employeeDetails()?.total_assigned_visits }}</div>
+          <div class="stat-label">الزيارات المسندة</div>
+        </div>
+      </div>
+    </div>
+    }
+
+    <div class="employee-detail__actions">
+      <app-button label="إغلاق" variant="secondary" (pressed)="close.emit()" />
+    </div>
+  </div>
   }
 </app-shared-modal>
