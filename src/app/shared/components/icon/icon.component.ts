@@ -311,8 +311,14 @@ const ICONS = {
   sync: {
     viewBox: '0 0 24 24',
     paths: [{ d: 'M4 4v5h.582m15.356 2A8.001 8.001 0 0 0 4.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 0 1-15.357-2m15.357 2H15' }]
+  },
+  image: {
+    viewBox: '0 0 24 24',
+    paths: [
+      { d: 'M4 16l4.586-4.586a2 2 0 0 1 2.828 0L16 16m-2-2l1.586-1.586a2 2 0 0 1 2.828 0L20 14m-6-6h.01M6 20h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z' }
+    ]
   }
-} satisfies Record<string, IconDefinition>;
+} satisfies Record<string, IconDefinition>; // Updated with image icon
 
 export type AppIconName = keyof typeof ICONS;
 export type IconSize = 'sm' | 'md' | 'lg';

@@ -1,0 +1,55 @@
+<div class="employees">
+  <div class="employees__header">
+    <div class="employees__info">
+      <h1 class="employees__title">قائمة الموظفين</h1>
+      <p class="employees__subtitle">إدارة بيانات وأدوار الموظفين في النظام</p>
+    </div>
+    <div class="employees__actions">
+      @if (auth.isSuperAdmin()) {
+        <app-button
+          label="إضافة موظف"
+          icon="plus"
+          (pressed)="onAdd()"
+        />
+      }
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <div class="employees__skeleton">
+      <app-skeleton-loader type="table" [count]="8" />
+    </div>
+  } @else {
+    <app-shared-table
+      [data]="employees"
+      [columns]="columns"
+      title="دليل الموظفين"
+      [showView]="true"
+      [showEdit]="auth.isSuperAdmin()"
+      [showDelete]="false"
+      [showActions]="true"
+      (onView)="onRowClick($event)"
+      (onEdit)="onEdit($event)"
+      (onRowClick)="onRowClick($event)"
+    />
+  }
+</div>
+
+@if (showDetailModal() && selectedEmployee()) {
+  <app-employee-detail
+    [visible]="showDetailModal()"
+    [employee]="selectedEmployee()"
+    (close)="showDetailModal.set(false)"
+    (edit)="onEdit($event)"
+  />
+}
+
+@if (showEditModal() && selectedEmployee()) {
+  <app-employee-edit-modal
+    [visible]="showEditModal()"
+    [employee]="selectedEmployee()!"
+    [isSubmitting]="isSubmitting()"
+    (save)="handleSaveEmployee($event)"
+    (cancel)="showEditModal.set(false)"
+  />
+}

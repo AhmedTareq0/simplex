@@ -1,0 +1,72 @@
+<app-shared-modal
+  [visible]="visible()"
+  title="تفاصيل العميل"
+  (closed)="close.emit()"
+>
+  @if (client()) {
+    <div class="client-detail">
+      <div class="client-detail__header">
+        <div class="client-detail__image">
+          <img [src]="client()?.image_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'" alt="Client Image" />
+        </div>
+        <div class="client-detail__info">
+          <h2 class="client-detail__name">{{ client()?.display_name }}</h2>
+          <div class="client-detail__company">
+            <app-icon name="briefcase" />
+            {{ client()?.company_name }}
+          </div>
+        </div>
+      </div>
+
+      <div class="client-detail__grid">
+        <div class="detail-item">
+          <label>البريد الإلكتروني</label>
+          <div class="detail-item__value">{{ client()?.email }}</div>
+        </div>
+
+        <div class="detail-item">
+          <label>رقم الهاتف</label>
+          <div class="detail-item__value">{{ client()?.phone }}</div>
+        </div>
+
+        <div class="detail-item">
+          <label>المدينة</label>
+          <div class="detail-item__value">{{ client()?.city }}</div>
+        </div>
+
+        <div class="detail-item">
+          <label>العنوان</label>
+          <div class="detail-item__value">{{ client()?.address || 'غير محدد' }}</div>
+        </div>
+
+        <div class="detail-item">
+          <label>إجمالي التذاكر</label>
+          <div class="detail-item__badge">{{ client()?.total_tickets }} تذكرة</div>
+        </div>
+
+        <div class="detail-item">
+          <label>الحالة</label>
+          <div class="detail-item__status" [class.active]="client()?.active">
+            <span class="dot"></span>
+            {{ client()?.active ? 'نشط' : 'غير نشط' }}
+          </div>
+        </div>
+      </div>
+
+      <div class="client-detail__actions">
+        <app-button
+          label="إغلاق"
+          variant="secondary"
+          (pressed)="close.emit()"
+        />
+        @if (auth.isSuperAdmin()) {
+          <app-button
+            label="تعديل البيانات"
+            icon="pencil"
+            (pressed)="edit.emit(client()!)"
+          />
+        }
+      </div>
+    </div>
+  }
+</app-shared-modal>

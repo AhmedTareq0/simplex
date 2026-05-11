@@ -1,0 +1,73 @@
+<app-shared-modal
+  [visible]="visible()"
+  title="تفاصيل الماكينة"
+  (closed)="close.emit()"
+>
+  @if (machine()) {
+    <div class="machine-detail">
+      <div class="machine-detail__header">
+        <div class="machine-detail__image">
+          <img [src]="machine()?.image_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'" alt="Machine Image" />
+        </div>
+        <div class="machine-detail__info">
+          <h2 class="machine-detail__name">{{ machine()?.display_name }}</h2>
+          <div class="machine-detail__badge">{{ machine()?.type }}</div>
+        </div>
+      </div>
+
+      <div class="machine-detail__grid">
+        <div class="detail-item">
+          <label>السعر</label>
+          <div class="detail-item__value detail-item__value--price">
+            {{ formatPrice(machine()?.list_price || 0) }}
+          </div>
+        </div>
+
+        <div class="detail-item">
+          <label>تاريخ الإنشاء</label>
+          <div class="detail-item__value">
+            {{ formatDate(machine()?.create_date || null) }}
+          </div>
+        </div>
+
+        <div class="detail-item detail-item--full">
+          <label>الوصف</label>
+          <div class="detail-item__value">
+            {{ machine()?.description || 'لا يوجد وصف متاح' }}
+          </div>
+        </div>
+
+        <div class="detail-item detail-item--full">
+          <label>وصف البيع</label>
+          <div class="detail-item__value">
+            {{ machine()?.description_sale || 'لا يوجد وصف بيع متاح' }}
+          </div>
+        </div>
+
+        @if (machine()?.document_url) {
+          <div class="detail-item detail-item--full">
+            <label>الكتالوج</label>
+            <div class="detail-item__file">
+              <app-icon name="fileAlt" />
+              <span>كتالوج الماكينة.pdf</span>
+              <a [href]="machine()?.document_url" target="_blank" class="download-link">تحميل</a>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="machine-detail__actions">
+        <app-button
+          label="إغلاق"
+          variant="secondary"
+          (pressed)="close.emit()"
+        />
+        <app-button
+          label="تعديل البيانات"
+          icon="pencil"
+          (pressed)="edit.emit(machine()!)"
+        />
+      </div>
+    </div>
+  }
+</app-shared-modal>

@@ -20,6 +20,11 @@ export const routes: Routes = [
           import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
       },
       {
+        path: 'machines',
+        loadComponent: () =>
+          import('./features/machines/machines.component').then((m) => m.MachinesComponent),
+      },
+      {
         path: 'tickets',
         loadComponent: () =>
           import('./features/tickets/tickets.component').then(
@@ -30,6 +35,16 @@ export const routes: Routes = [
         path: 'chat',
         loadComponent: () =>
           import('./features/chat/chat.component').then((m) => m.ChatComponent),
+      },
+      {
+        path: 'employees',
+        loadComponent: () =>
+          import('./features/employees/employees.component').then((m) => m.EmployeesComponent),
+      },
+      {
+        path: 'clients',
+        loadComponent: () =>
+          import('./features/clients/clients.component').then((m) => m.ClientsComponent),
       },
       {
         path: 'settings',
