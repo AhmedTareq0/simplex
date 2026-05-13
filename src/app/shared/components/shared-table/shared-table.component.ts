@@ -22,6 +22,7 @@ export interface TableColumn {
   icon?: string;
   linkText?: string;
   formatter?: (value: any, row: any) => string;
+  colorFormatter?: (value: any, row: any) => string;
 }
 
 @Component({

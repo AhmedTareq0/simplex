@@ -9,13 +9,17 @@
       </div>
     } @else {
       <app-chat-list
-        [users]="sortedUsers()"
+        [users]="users()"
+        [total]="total()"
         [currentUserId]="currentUserId()"
         [accountPicture]="accountPicture()"
         [lastMessages]="lastMessages()"
         [selectedUserId]="selectedPerson()?.sub || ''"
         [unreadCounts]="unreadCounts()"
         (selectUser)="onSelectUser($event)"
+        (search)="onSearch($event)"
+        (filterChange)="onFiltersChange($event)"
+        (loadMore)="loadMore()"
       />
     }
   </div>
@@ -38,6 +42,7 @@
           [isTyping]="isTyping()"
           [userName]="userData()?.name || ''"
           [users]="users()"
+          (deleted)="onConversationDeleted($any($event))"
         />
       }
     } @else {

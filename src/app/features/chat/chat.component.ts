@@ -63,6 +63,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly messagesError = signal('');
   readonly unreadCounts = this.chatService.unreadCounts;
   readonly isTyping = signal(false);
+
+  readonly page = signal(1);
+  readonly pageSize = signal(20);
+  readonly total = this.chatService.total;
+  readonly filters = signal<any>({});
+  readonly searchText = signal('');
   private typingTimeout?: ReturnType<typeof setTimeout>;
 
   ngOnInit() {
@@ -88,11 +94,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe((payload) => {
         const exists = this.users().some(u => u.sub === payload.conversation_id);
         if (exists) return;
-        this.users.update(prev => [...prev, {
+        this.users.update(prev => [{
           sub: payload.conversation_id,
           name: payload.customer_name,
           picture: `https://ui-avatars.com/api/?name=${encodeURIComponent(payload.customer_name)}&background=random`,
-          status: 'with_customer_care',
+          status: 'pending_customer_care',
           machineId: payload.machine_id,
           machineName: null,
           machineImage: null,
@@ -101,7 +107,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           escalationReason: payload.escalation_reason,
           createdAt: payload.escalated_at,
           endedAt: null,
-        }]);
+        }, ...prev]);
       });
 
     this.chatService.statusChanged$
@@ -113,18 +119,27 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             : u
           )
         );
+
+        if (this.selectedPerson()?.sub === payload.conversation_id) {
+          this.selectedPerson.update(p => p ? { ...p, status: payload.status } : p);
+        }
       });
 
     this.chatService.agentJoined$
       .pipe(takeUntil(this.destroy$))
       .subscribe((payload) => {
-        if (payload.role === 'engineer') {
-          this.users.update(prev =>
-            prev.map(u => u.sub === payload.conversation_id
-              ? { ...u, engineerName: payload.name }
-              : u
-            )
-          );
+        this.users.update(prev =>
+          prev.map(u => u.sub === payload.conversation_id
+            ? { ...u, [payload.role === 'engineer' ? 'engineerName' : 'customerCareName']: payload.name }
+            : u
+          )
+        );
+
+        if (this.selectedPerson()?.sub === payload.conversation_id) {
+          this.selectedPerson.update(p => p ? {
+            ...p,
+            [payload.role === 'engineer' ? 'engineerName' : 'customerCareName']: payload.name
+          } : p);
         }
       });
 
@@ -157,13 +172,27 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     clearTimeout(this.typingTimeout);
   }
 
-  loadConversations() {
-    this.isLoading.set(true);
+  loadConversations(append = false) {
+    if (!append) {
+      this.isLoading.set(true);
+      this.page.set(1);
+    }
+
     this.errorMessage.set('');
-    this.chatService.getConversations().subscribe({
+
+    this.chatService.getConversations({
+      page: this.page(),
+      page_size: this.pageSize(),
+      search: this.searchText(),
+      ...this.filters()
+    }).subscribe({
       next: (res) => {
         const mapped = (res.data?.items || []).map((c: any) => this.mapConversation(c));
-        this.users.set(mapped);
+        if (append) {
+          this.users.update(prev => [...prev, ...mapped]);
+        } else {
+          this.users.set(mapped);
+        }
         this.isLoading.set(false);
         this.checkPendingConversation();
       },
@@ -172,6 +201,23 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isLoading.set(false);
       },
     });
+  }
+
+  onFiltersChange(filters: any) {
+    this.filters.set(filters);
+    this.loadConversations();
+  }
+
+  onSearch(text: string) {
+    this.searchText.set(text);
+    this.loadConversations();
+  }
+
+  loadMore() {
+    if (this.users().length < this.total()) {
+      this.page.update(p => p + 1);
+      this.loadConversations(true);
+    }
   }
 
   private checkPendingConversation() {
@@ -216,8 +262,27 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   onSelectUser(user: any) {
     this.selectedPerson.set(user);
     this.messagesError.set('');
+
+    if (user.status === 'pending_customer_care') {
+      this.chatService.acceptConversation(user.sub).subscribe({
+        next: () => {
+
+          this.users.update(prev =>
+            prev.map(u => u.sub === user.sub ? { ...u, status: 'with_customer_care' } : u)
+          );
+          this.selectedPerson.update(p => p ? { ...p, status: 'with_customer_care' } : p);
+        },
+        error: () => { }
+      });
+    }
+
     this.chatService.loadMessages(user.sub);
     this.chatService.markRead(user.sub);
+  }
+
+  onConversationDeleted(id: string) {
+    this.users.update(prev => prev.filter(u => u.sub !== id));
+    this.selectedPerson.set(null);
   }
 
   private mapApiMessage(m: ApiMessage, person: any): any {
@@ -240,7 +305,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     else if (role === 'ai') senderId = 'ai';
 
     const isFile = !!m.attachment_url;
-    
+
     // Map reply_to if exists
     const replyTo = m.reply_to ? this.mapApiMessage(m.reply_to, person) : null;
 

@@ -5,6 +5,7 @@ import { MachineService, Machine } from './services/machine.service';
 import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader.component';
 import { MachineEditModalComponent } from './components/machine-edit-modal/machine-edit-modal.component';
 import { MachineDetailComponent } from './components/machine-detail/machine-detail.component';
+import { AdminSyncService } from '../../core/services/admin-sync.service';
 import { ApiResponse } from '../../core/interfaces/api-response.interface';
 
 @Component({
@@ -17,12 +18,13 @@ import { ApiResponse } from '../../core/interfaces/api-response.interface';
 })
 export class MachinesComponent implements OnInit {
   readonly machineService = inject(MachineService);
+  private readonly syncService = inject(AdminSyncService);
 
   selectedMachine = signal<Machine | null>(null);
   showEditModal = signal(false);
   showDetailModal = signal(false);
   isUpdatingMachine = signal(false);
-  isSyncing = signal(false);
+  isSyncing = this.syncService.isSyncing;
   currentPage = signal(1);
   pageSize = signal(10);
 
@@ -61,7 +63,17 @@ export class MachinesComponent implements OnInit {
   }
 
   onAdd() {
-    this.selectedMachine.set({ id: 0 } as Machine);
+    const newMachine: Partial<Machine> = {
+      id: 0,
+      name: '',
+      display_name: '',
+      description: '',
+      description_sale: '',
+      list_price: 0,
+      active: true,
+      type: 'Goods'
+    };
+    this.selectedMachine.set(newMachine as Machine);
     this.showEditModal.set(true);
     this.showDetailModal.set(false);
   }
@@ -99,15 +111,12 @@ export class MachinesComponent implements OnInit {
   }
 
   onSync() {
-    this.isSyncing.set(true);
-    this.machineService.syncMachines().subscribe({
+    this.syncService.syncModule('machines').subscribe({
       next: (res) => {
-        this.isSyncing.set(false);
         if (res.success) {
           this.machineService.loadMachines({ page: 1, pageSize: this.pageSize() });
         }
-      },
-      error: () => this.isSyncing.set(false)
+      }
     });
   }
 

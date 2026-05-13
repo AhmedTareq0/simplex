@@ -35,6 +35,7 @@ export interface Visit {
   tags?: string[];
   created_at?: string;
   updated_at?: string;
+  activities?: any[];
 }
 
 export interface VisitFilters {
@@ -95,4 +96,39 @@ export class VisitsService {
   updateVisit(id: number, data: Partial<Visit>): Observable<ApiResponse<Visit>> {
     return this.http.put<ApiResponse<Visit>>(`${this.base}/api/visits/${id}`, data);
   }
+
+  rescheduleVisit(id: number, newDate: string, note?: string): Observable<ApiResponse<Visit>> {
+    return this.updateVisit(id, { 
+      planned_start: newDate,
+      notes: note || undefined
+    } as any);
+  }
+
+  reassignVisit(id: number, engineerId: number): Observable<ApiResponse<Visit>> {
+    return this.updateVisit(id, { 
+      engineer_id: engineerId
+    } as any);
+  }
+
+  cancelVisit(id: number, reason: string): Observable<ApiResponse<Visit>> {
+    return this.updateVisit(id, { 
+      status: 'cancelled',
+      notes: `سبب الإلغاء: ${reason}`
+    });
+  }
+
+  getVisitActivities(id: number): Observable<ApiResponse<any[]>> {
+    return this.http.get<ApiResponse<any[]>>(`${this.base}/api/visits/${id}/activities`);
+  }
+}
+
+export interface TimelineItem {
+  id: number;
+  type: 'status_change' | 'note' | 'assignment' | 'cancellation' | 'reschedule' | 'sync';
+  title: string;
+  description?: string;
+  user?: string;
+  date: string;
+  statusFrom?: string;
+  statusTo?: string;
 }

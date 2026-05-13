@@ -32,7 +32,7 @@
       [totalRecords]="total"
       [rows]="pageSize()"
       [currentPage]="currentPage()"
-      [showSync]="true"
+      [showSync]="auth.isSuperAdmin()"
       [isSyncing]="isSyncing()"
       (onSync)="onSync()"
       (onPageChange)="onPageChange($event)"

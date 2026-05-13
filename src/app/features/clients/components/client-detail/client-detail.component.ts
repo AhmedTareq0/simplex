@@ -1,22 +1,34 @@
-import { Component, input, output, inject, signal, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, input, output, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SharedModalComponent, ButtonComponent } from '../../../../shared/components';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ButtonComponent, IconComponent, SharedTableComponent, TableColumn, SkeletonLoaderComponent } from '../../../../shared/components';
+import { TicketDetailComponent } from '../../../tickets/components/ticket-detail/ticket-detail.component';
+import { VisitDetailComponent } from '../../../visits/components/visit-detail/visit-detail.component';
 import { Client, ClientService, ClientDetails, PartnerMachine, SupportTicket, Visit } from '../../services/client.service';
 import { AuthLocalService } from '../../../../auth/services/auth-local.service';
 
 @Component({
   selector: 'app-client-detail',
   standalone: true,
-  imports: [CommonModule, SharedModalComponent, ButtonComponent],
+  imports: [
+    CommonModule,
+    ButtonComponent,
+    IconComponent,
+    SharedTableComponent,
+    SkeletonLoaderComponent,
+    TicketDetailComponent,
+    VisitDetailComponent
+  ],
   templateUrl: './client-detail.component.html',
   styleUrl: './client-detail.component.scss'
 })
-export class ClientDetailComponent implements OnInit, OnChanges {
+export class ClientDetailComponent implements OnInit {
   readonly auth = inject(AuthLocalService);
   readonly clientService = inject(ClientService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   
-  client = input.required<Client | null>();
-  visible = input<boolean>(false);
+  client = signal<any | null>(null);
   
   close = output<void>();
   edit = output<Client>();
@@ -30,30 +42,69 @@ export class ClientDetailComponent implements OnInit, OnChanges {
   isLoadingTickets = signal(false);
   isLoadingVisits = signal(false);
 
+  // Modal States
+  showTicketDetail = signal(false);
+  selectedTicket = signal<any>(null);
+  showVisitDetail = signal(false);
+  selectedVisit = signal<any>(null);
+
+  ticketColumns: TableColumn[] = [
+    { field: 'title', header: 'عنوان التذكرة', type: 'text' },
+    {
+      field: 'status', header: 'الحالة', type: 'badge',
+      formatter: (val: string) => ({ open: 'مفتوحة', in_progress: 'قيد التنفيذ', resolved: 'محلولة', closed: 'مغلقة', solved: 'منتهية' } as any)[val] || val
+    },
+    {
+      field: 'priority', header: 'الأولوية', type: 'badge',
+      formatter: (val: string) => ({ high: 'عالية', medium: 'متوسطة', low: 'منخفضة' } as any)[val] || val
+    },
+    {
+      field: 'created_at', header: 'تاريخ الإنشاء', type: 'text',
+      formatter: (val: any) => val ? new Date(val).toLocaleDateString('ar-EG') : '—'
+    }
+  ];
+
+  visitColumns: TableColumn[] = [
+    { field: 'name', header: 'اسم الزيارة', type: 'text' },
+    {
+      field: 'visit_date', header: 'تاريخ الزيارة', type: 'text',
+      formatter: (val: any) => val ? new Date(val).toLocaleDateString('ar-EG') : '—'
+    },
+    {
+      field: 'status', header: 'الحالة', type: 'badge',
+      formatter: (val: string) => ({ new: 'جديدة', in_progress: 'قيد التنفيذ', done: 'مكتمل', cancelled: 'ملغى', scheduled: 'مجدول', completed: 'مكتمل' } as any)[val] || val
+    }
+  ];
+
   ngOnInit() {
-    if (this.visible() && this.client()?.id) {
-      this.loadClientData();
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.fetchClient(Number(id));
     }
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['client'] && this.visible() && this.client()?.id) {
-      this.loadClientData();
-    }
+  fetchClient(id: number) {
+    this.isLoadingDetails.set(true);
+    this.clientService.getClientDetails(id).subscribe({
+      next: (res) => {
+        if (res.data) {
+          this.client.set(res.data);
+          this.clientDetails.set(res.data);
+          this.loadClientData();
+        }
+        this.isLoadingDetails.set(false);
+      },
+      error: () => this.isLoadingDetails.set(false)
+    });
+  }
+
+  onBack() {
+    this.router.navigate(['/clients']);
   }
 
   loadClientData() {
     const clientId = this.client()?.id;
     if (!clientId) return;
-
-    this.isLoadingDetails.set(true);
-    this.clientService.getClientDetails(clientId).subscribe({
-      next: (res) => {
-        this.clientDetails.set(res.data || null);
-        this.isLoadingDetails.set(false);
-      },
-      error: () => this.isLoadingDetails.set(false)
-    });
 
     this.isLoadingMachines.set(true);
     this.clientService.getClientMachines(clientId).subscribe({
@@ -81,5 +132,25 @@ export class ClientDetailComponent implements OnInit, OnChanges {
       },
       error: () => this.isLoadingVisits.set(false)
     });
+  }
+
+  onTicketClick(ticket: any) {
+    this.selectedTicket.set(ticket);
+    this.showTicketDetail.set(true);
+  }
+
+  onVisitClick(visit: any) {
+    this.selectedVisit.set(visit);
+    this.showVisitDetail.set(true);
+  }
+
+  handleTicketUpdate() {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    if (id) this.loadClientData();
+  }
+
+  handleVisitUpdate() {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    if (id) this.loadClientData();
   }
 }

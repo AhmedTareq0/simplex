@@ -135,6 +135,10 @@ const ICONS = {
     viewBox: '0 0 24 24',
     paths: [{ d: 'm6 9 6 6 6-6' }]
   },
+  chevronLeft: {
+    viewBox: '0 0 24 24',
+    paths: [{ d: 'm15 18-6-6 6-6' }]
+  },
   plus: {
     viewBox: '0 0 24 24',
     paths: [{ d: 'M12 5v14M5 12h14' }]

@@ -58,13 +58,35 @@
         <div class="chat-header__dropdown">
           <div class="chat-header__dropdown-backdrop" (click)="showMenu.set(false)"></div>
           <div class="chat-header__dropdown-content">
-            <div class="chat-header__dropdown-item chat-header__dropdown-item--info">
-              <app-icon name="info" size="sm" />
-              <span>لا توجد خيارات إضافية</span>
-            </div>
+            @if (isSuperAdmin()) {
+              <button
+                class="chat-header__dropdown-item chat-header__dropdown-item--danger"
+                (click)="onDeleteClick()"
+                [disabled]="isDeleting()"
+              >
+                <app-icon name="trash" size="sm" />
+                <span>حذف المحادثة نهائياً</span>
+              </button>
+            } @else {
+              <div class="chat-header__dropdown-item chat-header__dropdown-item--info">
+                <app-icon name="info" size="sm" />
+                <span>لا توجد خيارات إضافية</span>
+              </div>
+            }
           </div>
         </div>
       }
     </div>
   </div>
+
+  <app-shared-confirmation
+    [visible]="showDeleteConfirm()"
+    (visibleChange)="showDeleteConfirm.set($event)"
+    title="حذف المحادثة"
+    message="هل أنت متأكد من حذف هذه المحادثة نهائياً؟ لا يمكن التراجع عن هذا الإجراء."
+    confirmLabel="حذف نهائي"
+    type="danger"
+    [isLoading]="isDeleting()"
+    (confirmed)="confirmDelete()"
+  />
 </header>

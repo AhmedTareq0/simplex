@@ -1,6 +1,6 @@
 <app-shared-modal
   [(visible)]="visible"
-  [title]="isEditMode ? 'تعديل التذكرة' : 'إنشاء تذكرة جديدة'"
+  [title]="isEditMode ? 'تعديل التذكرة #' + (editData?.id || '') : 'إنشاء تذكرة جديدة'"
   [maxWidth]="'32rem'"
   (closed)="close()"
 >
@@ -8,54 +8,106 @@
     <app-shared-input
       label="العنوان"
       type="text"
-      [(ngModel)]="newTicket.name"
+      [(ngModel)]="formData.title"
       placeholder="أدخل عنوان التذكرة"
       class="ticket-create__field"
     ></app-shared-input>
 
     <app-shared-input
-      label="المكنة"
+      label="الوصف"
       type="text"
-      [(ngModel)]="newTicket.machine"
-      placeholder="أدخل رقم المكنة"
+      [(ngModel)]="formData.description"
+      placeholder="أدخل وصف المشكلة"
       class="ticket-create__field"
     ></app-shared-input>
+
+    <app-shared-select
+      label="المكينة"
+      [options]="machineOptions()"
+      [(ngModel)]="formData.machine_id"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="اختر المكينة"
+      [showClear]="true"
+      [filter]="true"
+      class="ticket-create__field"
+    ></app-shared-select>
+
+    <app-shared-select
+      label="ربط بمحادثة"
+      [options]="conversationOptions()"
+      [(ngModel)]="formData.conversation_id"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="اختر المحادثة (اختياري)"
+      [showClear]="true"
+      [filter]="true"
+      class="ticket-create__field"
+    ></app-shared-select>
+
+    <app-shared-select
+      label="المهندس المسؤول"
+      [options]="engineerOptions()"
+      [(ngModel)]="formData.engineer_id"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="تعيين مهندس"
+      [showClear]="true"
+      [filter]="true"
+      class="ticket-create__field"
+    ></app-shared-select>
 
     <app-shared-input
-      label="تاريخ الزيارة"
+      label="تاريخ الزيارة المتوقع"
       type="date"
-      [(ngModel)]="newTicket.visitDate"
+      [(ngModel)]="formData.visit_date"
       class="ticket-create__field"
     ></app-shared-input>
 
-    <app-shared-select
-      label="الحالة"
-      [options]="statusOptions"
-      [(ngModel)]="newTicket.status"
-      optionLabel="label"
-      optionValue="value"
-      placeholder="اختر الحالة"
-      [showClear]="false"
-      class="ticket-create__field"
-    ></app-shared-select>
+    <div class="ticket-create__row">
+      <app-shared-select
+        label="الأولوية"
+        [options]="priorityOptions"
+        [(ngModel)]="formData.priority"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="اختر الأولوية"
+        [showClear]="false"
+        class="ticket-create__field"
+      ></app-shared-select>
 
-    <app-shared-select
-      label="الأولوية"
-      [options]="priorityOptions"
-      [(ngModel)]="newTicket.priority"
-      optionLabel="label"
-      optionValue="value"
-      placeholder="اختر الأولوية"
-      [showClear]="false"
-      class="ticket-create__field"
-    ></app-shared-select>
+      <app-shared-select
+        label="الحالة"
+        [options]="statusOptions"
+        [(ngModel)]="formData.status"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="اختر الحالة"
+        [showClear]="false"
+        class="ticket-create__field"
+      ></app-shared-select>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="ticket-create__error">{{ errorMessage() }}</div>
+    }
 
     <div class="ticket-create__actions">
       <button class="ticket-create__btn ticket-create__btn--secondary" (click)="close()">
         إلغاء
       </button>
-      <button class="ticket-create__btn ticket-create__btn--primary" (click)="onSave()">
-        حفظ
+      <button
+        class="ticket-create__btn ticket-create__btn--primary"
+        (click)="onSave()"
+        [disabled]="isSaving()"
+      >
+        @if (isSaving()) {
+          جاري الحفظ...
+        } @else if (isEditMode) {
+          حفظ التعديلات
+        } @else {
+          إنشاء التذكرة
+        }
       </button>
     </div>
   </div>

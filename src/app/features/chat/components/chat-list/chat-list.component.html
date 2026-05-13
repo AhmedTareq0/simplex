@@ -1,8 +1,18 @@
 <div class="chat-list">
   <app-chat-list-header [accountPicture]="accountPicture()" />
-  <app-chat-search (search)="onSearch($event)" />
+  <div class="chat-list__search-row">
+    <app-chat-search (search)="onSearch($event)" />
+    <button class="filter-toggle" [class.active]="showFilters()" (click)="toggleFilters()">
+      <i class="pi pi-filter"></i>
+    </button>
+  </div>
+
+  @if (showFilters()) {
+    <app-chat-filters (filterChange)="filterChange.emit($event)" />
+  }
+
   <div class="chat-list__conversations">
-    @for (user of filteredUsers(); track user.sub) {
+    @for (user of users(); track user.sub) {
       <app-chat-conversation
         [user]="user"
         [lastMessage]="getLastMessage(user.sub)"
@@ -13,7 +23,14 @@
         (select)="selectUser.emit(user)"
       />
     }
-    @if (filteredUsers().length === 0) {
+    
+    @if (users().length < total()) {
+      <div class="chat-list__load-more">
+        <button (click)="loadMore.emit()">تحميل المزيد ({{ total() - users().length }} متبقي)</button>
+      </div>
+    }
+
+    @if (users().length === 0) {
       <div class="chat-list__empty">
         لم يتم العثور على محادثات
       </div>

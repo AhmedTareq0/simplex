@@ -1,18 +1,30 @@
 import { Component, input, output, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SharedModalComponent, ButtonComponent } from '@/shared/components';
-import { Visit, VisitsService } from '../../services/visits.service';
+import { SharedModalComponent, ButtonComponent, SharedConfirmationComponent, SharedInputComponent, SharedSelectComponent } from '@/shared/components';
+import { Visit, VisitsService, TimelineItem } from '../../services/visits.service';
+import { VisitTimelineComponent } from '../visit-timeline/visit-timeline.component';
+import { EmployeeService, Employee } from '@/features/employees/services/employee.service';
 
 @Component({
   selector: 'app-visit-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, SharedModalComponent, ButtonComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    SharedModalComponent,
+    ButtonComponent,
+    VisitTimelineComponent,
+    SharedConfirmationComponent,
+    SharedInputComponent,
+    SharedSelectComponent
+  ],
   templateUrl: './visit-detail.component.html',
   styleUrl: './visit-detail.component.scss'
 })
 export class VisitDetailComponent {
   private readonly visitsService = inject(VisitsService);
+  private readonly employeeService = inject(EmployeeService);
 
   visit = input.required<Visit | null>();
   visible = input<boolean>(false);
@@ -22,6 +34,51 @@ export class VisitDetailComponent {
   updated = output<Visit>();
 
   isSaving = signal(false);
+  activities = signal<TimelineItem[]>([]);
+  isLoadingActivities = signal(false);
+
+  // Action states
+  showCancelConfirm = signal(false);
+  cancelReason = signal('');
+
+  showRescheduleModal = signal(false);
+  newPlannedDate = signal('');
+  rescheduleNote = signal('');
+
+  showReassignModal = signal(false);
+  selectedEngineerId = signal<number | null>(null);
+  engineers = signal<Employee[]>([]);
+
+  ngOnChanges() {
+    if (this.visible() && this.visit()) {
+      this.loadActivities();
+      this.loadEngineers();
+    }
+  }
+
+  loadEngineers() {
+    this.employeeService.loadEmployees({ page_size: 100 });
+  }
+
+  get engineerOptions() {
+    return this.employeeService.employees()
+      .filter((e: Employee) => e.department === 'Maintenance' || e.employee_role === 'engineer')
+      .map((e: Employee) => ({ label: e.name, value: e.odoo_user_id }));
+  }
+
+  loadActivities() {
+    const visit = this.visit();
+    if (!visit) return;
+
+    this.isLoadingActivities.set(true);
+    this.visitsService.getVisitActivities(visit.id).subscribe({
+      next: (res) => {
+        this.activities.set(res.data);
+        this.isLoadingActivities.set(false);
+      },
+      error: () => this.isLoadingActivities.set(false)
+    });
+  }
 
   getStatusLabel(status: string): string {
     return ({
@@ -101,5 +158,74 @@ export class VisitDetailComponent {
   onEdit() {
     const visit = this.visit();
     if (visit) this.edit.emit(visit);
+  }
+
+  onCancelVisit() {
+    const visit = this.visit();
+    if (!visit || !this.cancelReason()) return;
+
+    this.isSaving.set(true);
+    this.visitsService.cancelVisit(visit.id, this.cancelReason()).subscribe({
+      next: (res) => {
+        this.isSaving.set(false);
+        this.showCancelConfirm.set(false);
+        this.updated.emit(res.data);
+        this.loadActivities();
+      },
+      error: () => this.isSaving.set(false)
+    });
+  }
+
+  onReschedule() {
+    const visit = this.visit();
+    if (!visit || !this.newPlannedDate()) return;
+
+    this.isSaving.set(true);
+    this.visitsService.rescheduleVisit(visit.id, this.newPlannedDate(), this.rescheduleNote()).subscribe({
+      next: (res) => {
+        this.isSaving.set(false);
+        this.showRescheduleModal.set(false);
+        this.updated.emit(res.data);
+        this.loadActivities();
+      },
+      error: () => this.isSaving.set(false)
+    });
+  }
+
+  onReassign() {
+    const visit = this.visit();
+    if (!visit || !this.selectedEngineerId()) return;
+
+    this.isSaving.set(true);
+    this.visitsService.reassignVisit(visit.id, this.selectedEngineerId()!).subscribe({
+      next: (res) => {
+        this.isSaving.set(false);
+        this.showReassignModal.set(false);
+        this.updated.emit(res.data);
+        this.loadActivities();
+      },
+      error: () => this.isSaving.set(false)
+    });
+  }
+
+  // Dynamic buttons logic
+  get showStartBtn(): boolean {
+    return this.visit()?.status === 'scheduled';
+  }
+
+  get showCompleteBtn(): boolean {
+    return this.visit()?.status === 'in_progress' || this.visit()?.status === 'scheduled';
+  }
+
+  get showRescheduleBtn(): boolean {
+    return ['new', 'scheduled'].includes(this.visit()?.status || '');
+  }
+
+  get showReassignBtn(): boolean {
+    return ['new', 'scheduled'].includes(this.visit()?.status || '');
+  }
+
+  get showCancelBtn(): boolean {
+    return ['new', 'scheduled', 'in_progress'].includes(this.visit()?.status || '');
   }
 }

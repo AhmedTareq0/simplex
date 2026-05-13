@@ -19,6 +19,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
       },
+
+      {
+        path: 'reports',
+        loadComponent: () =>
+          import('./features/dashboard/reports/reports.component').then((m) => m.ReportsComponent),
+      },
       {
         path: 'machines',
         loadComponent: () =>
@@ -43,13 +49,37 @@ export const routes: Routes = [
       },
       {
         path: 'employees',
-        loadComponent: () =>
-          import('./features/employees/employees.component').then((m) => m.EmployeesComponent),
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/employees/employees.component').then((m) => m.EmployeesComponent),
+          },
+          {
+            path: ':id',
+            loadComponent: () =>
+              import('./features/employees/components/employee-detail/employee-detail.component').then(
+                (m) => m.EmployeeDetailComponent
+              ),
+          },
+        ],
       },
       {
         path: 'clients',
-        loadComponent: () =>
-          import('./features/clients/clients.component').then((m) => m.ClientsComponent),
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/clients/clients.component').then((m) => m.ClientsComponent),
+          },
+          {
+            path: ':id',
+            loadComponent: () =>
+              import('./features/clients/components/client-detail/client-detail.component').then(
+                (m) => m.ClientDetailComponent
+              ),
+          },
+        ],
       },
       {
         path: 'settings',

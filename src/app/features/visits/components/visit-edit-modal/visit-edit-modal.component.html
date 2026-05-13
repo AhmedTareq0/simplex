@@ -10,12 +10,14 @@
         formControlName="customer_name"
         placeholder="أدخل اسم العميل"
         [required]="true"
+        [error]="getErrorMessage('customer_name')"
       />
       <app-shared-input
         label="اسم المهندس"
         formControlName="engineer_name"
         placeholder="أدخل اسم المهندس"
         [required]="true"
+        [error]="getErrorMessage('engineer_name')"
       />
       <app-shared-input
         label="اسم الماكينة"
@@ -27,18 +29,21 @@
         type="date"
         formControlName="planned_start"
         [required]="true"
+        [error]="getErrorMessage('planned_start')"
       />
       <app-shared-select
         label="الحالة"
         formControlName="status"
         [options]="statusOptions"
         [required]="true"
+        [error]="getErrorMessage('status')"
       />
       <app-shared-select
         label="الأولوية"
         formControlName="priority"
         [options]="priorityOptions"
         [required]="true"
+        [error]="getErrorMessage('priority')"
       />
     </div>
 
