@@ -5,6 +5,7 @@
     [isTyping]="isTyping()"
     [conversationId]="conversationId()"
     [status]="person()?.status"
+    (deleted)="deleted.emit($event)"
   />
   <app-chat-messages
     [messages]="messages()"

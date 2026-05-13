@@ -23,6 +23,11 @@ export interface Machine {
   synced_at: string;
   image_url: string | null;
   document_url: string | null;
+  model_number?: string;
+  serial_number?: string;
+  warranty_period?: number;
+  origin_country?: string;
+  technical_specs?: string;
 }
 
 export interface MachineCategory {

@@ -6,19 +6,25 @@
     </div>
   </div>
 
+  <div class="employees__tabs">
+    @for (tab of tabs; track tab.value) {
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === tab.value"
+        (click)="setTab(tab.value)">
+        {{ tab.label }}
+      </button>
+    }
+  </div>
+
   @if (isLoading) {
   <div class="employees__skeleton">
     <app-skeleton-loader type="table" [count]="8" />
   </div>
   } @else {
-  <app-shared-table [data]="employees" [columns]="columns" title="دليل الموظفين" [showView]="true" [showEdit]="false"
+  <app-shared-table [data]="filteredEmployees()" [columns]="columns" title="دليل الموظفين" [showView]="true" [showEdit]="false"
     [showDelete]="false" [showActions]="true" [lazy]="true" [totalRecords]="total" [rows]="pageSize()"
     [currentPage]="currentPage()" (onPageChange)="onPageChange($event)" (onView)="onRowClick($event)"
     (onRowClick)="onRowClick($event)" />
   }
 </div>
-
-@if (showDetailModal() && selectedEmployee()) {
-<app-employee-detail [visible]="showDetailModal()" [employee]="selectedEmployee()"
-  (close)="showDetailModal.set(false)" />
-}

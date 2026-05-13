@@ -1,26 +1,36 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { SharedTableComponent, TableColumn } from '../../shared/components/shared-table/shared-table.component';
+import { SharedTableComponent, TableColumn, ButtonComponent } from '../../shared/components';
 import { TicketDetailComponent } from './components/ticket-detail/ticket-detail.component';
+import { TicketCreateComponent } from './components/ticket-create/ticket-create.component';
 import { TicketsService, Ticket } from './services/tickets.service';
 import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader.component';
+import { AuthLocalService } from '../../auth/services/auth-local.service';
+import { AdminSyncService } from '../../core/services/admin-sync.service';
 
 @Component({
   selector: 'app-tickets',
   standalone: true,
-  imports: [SharedTableComponent, TicketDetailComponent, SkeletonLoaderComponent],
+  imports: [SharedTableComponent, TicketDetailComponent, TicketCreateComponent, SkeletonLoaderComponent, ButtonComponent],
   templateUrl: './tickets.component.html',
   styleUrl: './tickets.component.scss',
 })
 export class TicketsComponent implements OnInit {
   readonly ticketsService = inject(TicketsService);
+  private readonly auth = inject(AuthLocalService);
+  private readonly syncService = inject(AdminSyncService);
 
   selectedTicket = signal<any>(null);
   showDetail = signal(false);
+  showCreate = signal(false);
+  showEdit = signal(false);
+  editTicket = signal<any>(null);
+  isSyncing = this.syncService.isSyncing;
   currentPage = signal(1);
   pageSize = signal(10);
 
   get isLoading(): boolean { return this.ticketsService.isLoading(); }
   get total(): number { return this.ticketsService.total(); }
+  get isSuperAdmin(): boolean { return this.auth.isSuperAdmin(); }
 
   columns: TableColumn[] = [
     {
@@ -63,18 +73,58 @@ export class TicketsComponent implements OnInit {
   ];
 
   ngOnInit() {
-    this.ticketsService.loadTickets({ page: 1, page_size: this.pageSize() });
+    this.loadData();
+  }
+
+  private loadData() {
+    const filters = { page: this.currentPage(), page_size: this.pageSize() };
+    if (this.isSuperAdmin) {
+      this.ticketsService.loadTickets(filters);
+    } else {
+      this.ticketsService.loadMyTickets(filters);
+    }
   }
 
   onPageChange(event: { page: number; rows: number }) {
     this.currentPage.set(event.page);
     this.pageSize.set(event.rows);
-    this.ticketsService.loadTickets({ page: event.page, page_size: event.rows });
+    const filters = { page: event.page, page_size: event.rows };
+    if (this.isSuperAdmin) {
+      this.ticketsService.loadTickets(filters);
+    } else {
+      this.ticketsService.loadMyTickets(filters);
+    }
+  }
+
+  onSync() {
+    this.syncService.syncModule('tickets').subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.loadData();
+        }
+      }
+    });
   }
 
   onRowClick(ticket: any) {
     this.selectedTicket.set(ticket);
     this.showDetail.set(true);
+  }
+
+  onTicketCreated() {
+    this.loadData();
+  }
+
+  onEditTicket(ticket: any) {
+    this.showDetail.set(false);
+    this.editTicket.set(ticket);
+    this.showEdit.set(true);
+  }
+
+  onTicketEditUpdated(updatedTicket: any) {
+    this.loadData();
+    this.showEdit.set(false);
+    this.editTicket.set(null);
   }
 
   onTicketUpdated(ticket: Ticket) {

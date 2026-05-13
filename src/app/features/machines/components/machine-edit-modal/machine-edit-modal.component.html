@@ -43,6 +43,7 @@
         formControlName="name"
         placeholder="مثال: CNC Router X1"
         [required]="true"
+        [error]="getErrorMessage('name')"
       />
 
       <app-shared-select
@@ -51,6 +52,15 @@
         [options]="categoryOptions"
         [required]="true"
         placeholder="اختر الفئة"
+        [error]="getErrorMessage('categoryId')"
+      />
+
+      <app-shared-select
+        label="نوع المنتج"
+        formControlName="type"
+        [options]="typeOptions"
+        [required]="true"
+        [error]="getErrorMessage('type')"
       />
 
       <app-shared-input
@@ -59,15 +69,65 @@
         formControlName="price"
         placeholder="0.00"
         [required]="true"
+        [error]="getErrorMessage('price')"
+      />
+    </div>
+
+    <div class="machine-form__grid">
+      <app-shared-input
+        label="رقم الموديل"
+        formControlName="model_number"
+        placeholder="مثال: SLX-2025"
+      />
+      <app-shared-input
+        label="الرقم التسلسلي"
+        formControlName="serial_number"
+        placeholder="أدخل الرقم التسلسلي..."
+      />
+      <app-shared-input
+        label="فترة الضمان (بالأشهر)"
+        type="number"
+        formControlName="warranty_period"
+        placeholder="مثال: 12"
+      />
+      <app-shared-input
+        label="بلد المنشأ"
+        formControlName="origin_country"
+        placeholder="مثال: مصر، ألمانيا..."
       />
     </div>
 
     <div class="machine-form__full">
       <app-shared-input
-        label="الوصف"
-        formControlName="description"
-        placeholder="أدخل وصفًا تفصيليًا للماكينة"
+        label="وصف المبيعات (يظهر للعملاء)"
+        formControlName="description_sale"
+        placeholder="أدخل الوصف الذي سيظهر في الموقع والكتالوج"
+        [error]="getErrorMessage('description_sale')"
       />
+    </div>
+
+    <div class="machine-form__full">
+      <app-shared-input
+        label="وصف داخلي (ملاحظات)"
+        formControlName="description"
+        placeholder="أدخل ملاحظات فنية أو داخلية"
+        [error]="getErrorMessage('description')"
+      />
+    </div>
+
+    <div class="machine-form__full">
+      <app-shared-input
+        label="المواصفات الفنية التفصيلية"
+        formControlName="technical_specs"
+        placeholder="أدخل المواصفات التقنية (أبعاد، قدرة، إلخ)..."
+      />
+    </div>
+
+    <div class="machine-form__status">
+      <label class="machine-form__status-toggle">
+        <input type="checkbox" formControlName="active" />
+        <span class="machine-form__status-label">ماكينة نشطة (تظهر في الموقع للعملاء)</span>
+      </label>
     </div>
 
     <div class="machine-form__upload">

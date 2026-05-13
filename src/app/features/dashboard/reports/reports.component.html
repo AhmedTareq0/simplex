@@ -1,0 +1,144 @@
+<div class="reports">
+  <!-- Header -->
+  <header class="reports__header">
+    <div class="reports__header-info">
+      <h1 class="reports__title">التقارير والتحليلات</h1>
+      <p class="reports__subtitle">رؤية شاملة لأداء المؤسسة ومستوى رضا العملاء</p>
+    </div>
+
+    <div class="reports__header-actions">
+      <app-button variant="secondary" (pressed)="exportReport('excel')" icon="table">
+        تصدير Excel
+      </app-button>
+      <app-button variant="primary" (pressed)="exportReport('pdf')" icon="check-circle">
+        تصدير PDF
+      </app-button>
+    </div>
+  </header>
+
+  <!-- Filters -->
+  <section class="reports__filters">
+    <app-shared-select 
+      label="الفترة الزمنية" 
+      [options]="timeRangeOptions()" 
+      [showClear]="false"
+      [ngModel]="selectedTimeRange()"
+      (valueChange)="selectedTimeRange.set($any($event)); onFilterChange()"
+    />
+    
+    <app-shared-select 
+      label="القسم / الفئة" 
+      [options]="departmentOptions()" 
+      [showClear]="false"
+      [ngModel]="selectedDepartment()"
+      (valueChange)="selectedDepartment.set($any($event)); onFilterChange()"
+    />
+
+    <app-shared-select 
+      label="الموظف" 
+      [options]="(reportData()?.topAgents || [])" 
+      optionLabel="name"
+      optionValue="name"
+      placeholder="الكل"
+      [showClear]="true"
+      [ngModel]="selectedAgent()"
+      (valueChange)="selectedAgent.set($any($event)); onFilterChange()"
+    />
+  </section>
+
+  <!-- Stats Grid -->
+  <section class="reports__stats">
+    <div class="stat-card">
+      <span class="stat-card__label">معدل حل التذاكر</span>
+      <div class="stat-card__body">
+        @if (isLoading()) {
+          <app-skeleton-loader type="text" style="width: 80px" />
+        } @else {
+          <span class="stat-card__value">94.2%</span>
+          <span class="stat-card__trend up">
+            <app-icon name="plus" size="sm" /> 2.4%
+          </span>
+        }
+      </div>
+      <div class="stat-card__progress">
+        <div class="stat-card__progress-bar" [style.width]="isLoading() ? '0%' : '94.2%'"></div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <span class="stat-card__label">متوسط وقت الاستجابة</span>
+      <div class="stat-card__body">
+        @if (isLoading()) {
+          <app-skeleton-loader type="text" style="width: 80px" />
+        } @else {
+          <span class="stat-card__value">14 د</span>
+          <span class="stat-card__trend up">
+            أسرع بـ 12%
+          </span>
+        }
+      </div>
+      <p style="font-size: 0.8125rem; color: #9ca3af; margin: 0;">مقارنة بمتوسط الشهر الماضي (16 د)</p>
+    </div>
+
+    <div class="stat-card">
+      <span class="stat-card__label">تقييم رضا العملاء</span>
+      <div class="stat-card__body">
+        @if (isLoading()) {
+          <app-skeleton-loader type="text" style="width: 80px" />
+        } @else {
+          <span class="stat-card__value">4.8/5</span>
+        }
+      </div>
+      <div class="stat-card__stars">
+        @if (isLoading()) {
+          <app-skeleton-loader type="text" style="width: 120px" />
+        } @else {
+          @for (i of [1,2,3,4,5]; track i) {
+            <app-icon name="star" size="sm" [style.color]="i <= 4 ? '#f59e0b' : '#e5e7eb'" />
+          }
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Grid -->
+  <div class="reports__grid">
+    <!-- Performance Table -->
+    <div class="report-section">
+      <div class="report-section__header">
+        <h3>أداء فريق العمل</h3>
+      </div>
+
+      @if (isLoading()) {
+        <app-skeleton-loader type="table" [rows]="6" />
+      } @else if (reportData()) {
+        <div class="table-wrapper">
+          <app-shared-table [data]="reportData()?.topAgents || []" [columns]="performanceColumns" [showActions]="false"
+            [rows]="6" />
+        </div>
+      }
+    </div>
+
+    <!-- Workload Distribution -->
+    <div class="report-section">
+      <div class="report-section__header">
+        <h3>توزيع ضغط العمل</h3>
+      </div>
+
+      <div class="chart-container">
+        @if (isLoading()) {
+          <app-skeleton-loader type="card" style="width: 100%; height: 300px" />
+        } @else if (workloadChartOptions().series.length) {
+          <apx-chart style="width: 100%" [series]="workloadChartOptions().series" [chart]="workloadChartOptions().chart"
+            [labels]="workloadChartOptions().labels" [colors]="workloadChartOptions().colors"
+            [plotOptions]="workloadChartOptions().plotOptions" [legend]="workloadChartOptions().legend" />
+        } @else {
+          <div class="chart-container--empty">
+            <app-icon name="chartPie" size="lg" />
+            <p>لا توجد تذاكر نشطة حالياً لتوزيعها</p>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

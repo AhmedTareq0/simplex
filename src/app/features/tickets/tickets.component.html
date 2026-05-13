@@ -4,6 +4,13 @@
       <h1 class="tickets__title">التذاكر</h1>
       <p class="tickets__subtitle">إدارة تذاكر دعم العملاء</p>
     </div>
+    <div class="tickets__actions">
+      <app-button
+        label="إنشاء تذكرة"
+        icon="plus"
+        (pressed)="showCreate.set(true)"
+      />
+    </div>
   </div>
 
   @if (isLoading) {
@@ -23,6 +30,9 @@
       [totalRecords]="total"
       [rows]="pageSize()"
       [currentPage]="currentPage()"
+      [showSync]="isSuperAdmin"
+      [isSyncing]="isSyncing()"
+      (onSync)="onSync()"
       (onPageChange)="onPageChange($event)"
       (onRowClick)="onRowClick($event)"
     />
@@ -31,6 +41,20 @@
 
 <app-ticket-detail
   [(visible)]="showDetail"
-  [user]="selectedTicket()"
+  [ticket]="selectedTicket()"
+  (updated)="onTicketUpdated($event)"
   (delete)="onTicketDeleted($event)"
+  (edit)="onEditTicket($event)"
+/>
+
+<app-ticket-create
+  [(visible)]="showCreate"
+  (created)="onTicketCreated()"
+/>
+
+<app-ticket-create
+  [(visible)]="showEdit"
+  [isEditMode]="true"
+  [editData]="editTicket()"
+  (updated)="onTicketEditUpdated($event)"
 />

@@ -29,11 +29,3 @@
     />
   }
 </div>
-
-@if (showDetailModal() && selectedClient()) {
-  <app-client-detail
-    [visible]="showDetailModal()"
-    [client]="selectedClient()"
-    (close)="showDetailModal.set(false)"
-  />
-}

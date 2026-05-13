@@ -1,15 +1,25 @@
 <div class="dashboard">
   <!-- Header -->
-  <!-- <div class="dashboard__header">
-    <div>
+  <header class="dashboard__header">
+    <div class="dashboard__header-info">
       <h1 class="dashboard__title">لوحة التحكم</h1>
-      <p class="dashboard__subtitle">ملخص النظام والأداء العام</p>
+      <p class="dashboard__subtitle">ملخص النظام والأداء العام من Odoo</p>
     </div>
-  </div> -->
+    <div class="dashboard__header-actions">
+      <app-button 
+        variant="secondary" 
+        (click)="onSyncAll()" 
+        [loading]="isSyncing()"
+        icon="sync"
+      >
+        مزامنة البيانات
+      </app-button>
+    </div>
+  </header>
 
   <!-- Summary Cards -->
   <div class="dashboard__cards">
-    @for (card of summaryCards; track card.title) {
+    @for (card of summaryCards(); track card.title) {
     <div class="summary-card">
       <div class="summary-card__icon" [style.background]="card.bg" [style.color]="card.color">
         <app-icon [name]="card.icon" size="md" />
@@ -32,10 +42,12 @@
         <h3>حالة التذاكر</h3>
         <span class="dashboard__chart-badge">الشهر الحالي</span>
       </div>
-      <apx-chart [series]="ticketStatusOptions.series" [chart]="ticketStatusOptions.chart"
-        [labels]="ticketStatusOptions.labels" [colors]="ticketStatusOptions.colors"
-        [plotOptions]="ticketStatusOptions.plotOptions" [dataLabels]="ticketStatusOptions.dataLabels"
-        [legend]="ticketStatusOptions.legend" [tooltip]="ticketStatusOptions.tooltip" />
+      @if (ticketStatusOptions().series.length) {
+        <apx-chart [series]="ticketStatusOptions().series" [chart]="ticketStatusOptions().chart"
+          [labels]="ticketStatusOptions().labels" [colors]="ticketStatusOptions().colors"
+          [plotOptions]="ticketStatusOptions().plotOptions" [dataLabels]="ticketStatusOptions().dataLabels"
+          [legend]="ticketStatusOptions().legend" [tooltip]="ticketStatusOptions().tooltip" />
+      }
     </div>
 
     <div class="dashboard__chart-card dashboard__chart-card--wide">
@@ -43,11 +55,13 @@
         <h3>التذاكر والمحادثات الشهرية</h3>
         <span class="dashboard__chart-badge">2025</span>
       </div>
-      <apx-chart [series]="monthlyTicketsOptions.series" [chart]="monthlyTicketsOptions.chart"
-        [plotOptions]="monthlyTicketsOptions.plotOptions" [colors]="monthlyTicketsOptions.colors"
-        [dataLabels]="monthlyTicketsOptions.dataLabels" [stroke]="monthlyTicketsOptions.stroke"
-        [xaxis]="monthlyTicketsOptions.xaxis" [yaxis]="monthlyTicketsOptions.yaxis"
-        [legend]="monthlyTicketsOptions.legend" [tooltip]="monthlyTicketsOptions.tooltip" />
+      @if (monthlyTicketsOptions().series.length) {
+        <apx-chart [series]="monthlyTicketsOptions().series" [chart]="monthlyTicketsOptions().chart"
+          [plotOptions]="monthlyTicketsOptions().plotOptions" [colors]="monthlyTicketsOptions().colors"
+          [dataLabels]="monthlyTicketsOptions().dataLabels" [stroke]="monthlyTicketsOptions().stroke"
+          [xaxis]="monthlyTicketsOptions().xaxis" [yaxis]="monthlyTicketsOptions().yaxis"
+          [legend]="monthlyTicketsOptions().legend" [tooltip]="monthlyTicketsOptions().tooltip" />
+      }
     </div>
   </div>
 
@@ -58,18 +72,20 @@
         <h3>تدفق الزيارات</h3>
         <span class="dashboard__chart-badge">24 ساعة</span>
       </div>
-      <apx-chart [series]="visitsTrendOptions.series" [chart]="visitsTrendOptions.chart"
-        [colors]="visitsTrendOptions.colors" [fill]="visitsTrendOptions.fill"
-        [dataLabels]="visitsTrendOptions.dataLabels" [stroke]="visitsTrendOptions.stroke"
-        [xaxis]="visitsTrendOptions.xaxis" [yaxis]="visitsTrendOptions.yaxis" [grid]="visitsTrendOptions.grid"
-        [tooltip]="visitsTrendOptions.tooltip" />
+      @if (visitsTrendOptions().series.length) {
+        <apx-chart [series]="visitsTrendOptions().series" [chart]="visitsTrendOptions().chart"
+          [colors]="visitsTrendOptions().colors" [fill]="visitsTrendOptions().fill"
+          [dataLabels]="visitsTrendOptions().dataLabels" [stroke]="visitsTrendOptions().stroke"
+          [xaxis]="visitsTrendOptions().xaxis" [yaxis]="visitsTrendOptions().yaxis" [grid]="visitsTrendOptions().grid"
+          [tooltip]="visitsTrendOptions().tooltip" />
+      }
     </div>
   </div>
 
   <!-- Row 3: Daily Visits Table (Full Width) -->
   <div class="dashboard__row">
     <div class="dashboard__chart-card dashboard__chart-card--full">
-      <app-shared-table [title]="'سجل الزيارات اليومية'" [data]="dailyVisits" [columns]="visitColumns"
+      <app-shared-table [title]="'سجل الزيارات اليومية'" [data]="dailyVisits()" [columns]="visitColumns"
         [labels]="tableLabels" [showActions]="false" [rows]="5" />
     </div>
   </div>
@@ -82,7 +98,7 @@
         <span class="dashboard__chart-badge">الشهر الحالي</span>
       </div>
       <div class="agents-grid">
-        @for (agent of topAgents; track agent.name) {
+        @for (agent of topAgents(); track agent.name) {
         <div class="agent-card">
           <img [src]="agent.avatar" [alt]="agent.name" class="agent-card__avatar" />
           <div class="agent-card__info">

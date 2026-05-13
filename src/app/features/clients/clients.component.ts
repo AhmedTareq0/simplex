@@ -1,10 +1,10 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { SharedTableComponent, TableColumn } from '../../shared/components';
 import { ClientService, Client } from './services/client.service';
 import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader.component';
 import { AuthLocalService } from '../../auth/services/auth-local.service';
-import { ClientDetailComponent } from './components/client-detail/client-detail.component';
 
 @Component({
   selector: 'app-clients',
@@ -12,8 +12,7 @@ import { ClientDetailComponent } from './components/client-detail/client-detail.
   imports: [
     CommonModule,
     SharedTableComponent,
-    SkeletonLoaderComponent,
-    ClientDetailComponent
+    SkeletonLoaderComponent
   ],
   templateUrl: './clients.component.html',
   styleUrl: './clients.component.scss',
@@ -22,9 +21,8 @@ import { ClientDetailComponent } from './components/client-detail/client-detail.
 export class ClientsComponent implements OnInit {
   readonly clientService = inject(ClientService);
   readonly auth = inject(AuthLocalService);
+  private readonly router = inject(Router);
 
-  selectedClient = signal<Client | null>(null);
-  showDetailModal = signal(false);
   currentPage = signal(1);
   pageSize = signal(10);
 
@@ -44,8 +42,7 @@ export class ClientsComponent implements OnInit {
   }
 
   onRowClick(client: Client) {
-    this.selectedClient.set(client);
-    this.showDetailModal.set(true);
+    this.router.navigate(['/clients', client.id]);
   }
 
   onPageChange(event: { page: number; rows: number }) {

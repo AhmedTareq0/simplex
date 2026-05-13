@@ -1,67 +1,102 @@
-<app-shared-modal [visible]="visible()" title="تفاصيل الموظف" (closed)="close.emit()">
-  @if (employee()) {
+@if (employee()) {
+<div class="employee-detail-page">
+  <!-- Top Navigation Bar -->
+  <div class="detail-nav">
+    <h1 class="nav-title">تفاصيل الموظف</h1>
+    <app-button label="رجوع" variant="secondary" (pressed)="onBack()" class="back-btn" />
+  </div>
+
   <div class="employee-detail">
-    <div class="employee-detail__header">
-      <div class="employee-detail__image">
-        <img [src]="employee()?.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'"
-          alt="Employee Image" />
-      </div>
-      <div class="employee-detail__info">
-        <h2 class="employee-detail__name">{{ employee()?.name }}</h2>
-        <div class="employee-detail__badges">
-          <span class="badge badge--primary">
-            <app-icon name="user" size="sm" />
-            {{ employee()?.department }}
-          </span>
-
+    <!-- Header Section with Profile Card -->
+    <div class="employee-detail__hero">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="profile-card">
+          <div class="profile-card__image">
+            <img [src]="employee()?.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'"
+              alt="Employee Image" />
+          </div>
+          <div class="profile-card__info">
+            <h2 class="profile-card__name">{{ employee()?.name }}</h2>
+            <div class="profile-card__contact">
+              <div class="contact-item">
+                <span>{{ employee()?.email }}</span>
+                <app-icon name="mail" size="sm" />
+              </div>
+              <div class="contact-item">
+                <span dir="ltr">{{ employee()?.phone || '—' }}</span>
+                <app-icon name="phone" size="sm" />
+              </div>
+            </div>
+            <div class="profile-card__tags">
+              <span class="tag">{{ employeeDetails()?.department }}</span>
+              <!-- <span class="tag">{{ employeeDetails()?.employee_role }}</span> -->
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Basic Info -->
-    <div class="employee-detail__grid">
-
-
-      <div class="detail-item">
-        <label>البريد الإلكتروني</label>
-        <div class="detail-item__value">
-          <app-icon name="mail" size="sm" />
-          {{ employee()?.email }}
-        </div>
-      </div>
-
-      <div class="detail-item">
-        <label>رقم الهاتف</label>
-        <div class="detail-item__value" dir="ltr">
-          <app-icon name="phone" size="sm" />
-          {{ employee()?.phone || '—' }}
-        </div>
-      </div>
-    </div>
-
-    <!-- Employee Statistics -->
+    <!-- Stats Section -->
     @if (employeeDetails()) {
     <div class="employee-detail__stats">
-      <h3>
-        <app-icon name="bar-chart-2" size="sm" />
-        إحصائيات الموظف
-      </h3>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-number">{{ employeeDetails()?.total_assigned_tickets }}</div>
-          <div class="stat-label">التذاكر المسندة</div>
+      <div class="stat-card">
+        <div class="stat-card__icon icon--primary">
+          <app-icon name="ticket" />
         </div>
-        <div class="stat-card">
-          <div class="stat-number">{{ employeeDetails()?.total_assigned_visits }}</div>
-          <div class="stat-label">الزيارات المسندة</div>
+        <div class="stat-card__body">
+          <div class="stat-card__number">{{ employeeDetails()?.total_assigned_tickets }}</div>
+          <div class="stat-card__label">تذاكر الدعم</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon icon--warning">
+          <app-icon name="calendarClock" />
+        </div>
+        <div class="stat-card__body">
+          <div class="stat-card__number">{{ employeeDetails()?.total_assigned_visits }}</div>
+          <div class="stat-card__label">إجمالي الزيارات</div>
         </div>
       </div>
     </div>
     }
 
-    <div class="employee-detail__actions">
-      <app-button label="إغلاق" variant="secondary" (pressed)="close.emit()" />
+    <div class="employee-detail__content-grid">
+      <!-- Assigned Tickets Section -->
+      <div class="employee-detail__section">
+        <h3 class="section-title">
+          <app-icon name="ticket" />
+          أحدث التذاكر
+        </h3>
+        @if (isLoadingTickets()) {
+        <app-skeleton-loader type="table" [count]="5" />
+        } @else {
+        <app-shared-table [data]="assignedTickets()" [columns]="ticketColumns" [showView]="false" [showEdit]="false"
+          [showDelete]="false" [showActions]="false" (onRowClick)="onTicketClick($event)" />
+        }
+      </div>
+
+      <!-- Assigned Visits Section -->
+      <div class="employee-detail__section">
+        <h3 class="section-title">
+          <app-icon name="calendarClock" />
+          الزيارات الأخيرة
+        </h3>
+        @if (isLoadingVisits()) {
+        <app-skeleton-loader type="table" [count]="5" />
+        } @else {
+        <app-shared-table [data]="assignedVisits()" [columns]="visitColumns" [showView]="false" [showEdit]="false"
+          [showDelete]="false" [showActions]="false" (onRowClick)="onVisitClick($event)" />
+        }
+      </div>
     </div>
   </div>
-  }
-</app-shared-modal>
+</div>
+
+<!-- Ticket Detail Modal -->
+<app-ticket-detail [(visible)]="showTicketDetail" [ticket]="selectedTicket()" (updated)="handleTicketUpdate()" />
+
+<!-- Visit Detail Modal -->
+<app-visit-detail [visible]="showVisitDetail()" [visit]="selectedVisit()" (close)="showVisitDetail.set(false)"
+  (updated)="handleVisitUpdate()" />
+}

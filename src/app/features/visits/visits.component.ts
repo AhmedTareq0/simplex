@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { SharedTableComponent, TableColumn, ButtonComponent, SkeletonLoaderComponent } from '@/shared/components';
 import { ApiResponse } from '@/core/interfaces/api-response.interface';
 import { AuthLocalService } from '@/auth/services/auth-local.service';
+import { AdminSyncService } from '@/core/services/admin-sync.service';
 import { VisitsService, Visit } from './services/visits.service';
 import { VisitDetailComponent } from './components/visit-detail/visit-detail.component';
 import { VisitEditModalComponent } from './components/visit-edit-modal/visit-edit-modal.component';
@@ -25,12 +26,13 @@ import { VisitEditModalComponent } from './components/visit-edit-modal/visit-edi
 export class VisitsComponent implements OnInit {
   readonly visitsService = inject(VisitsService);
   readonly auth = inject(AuthLocalService);
+  private readonly syncService = inject(AdminSyncService);
 
   selectedVisit = signal<Visit | null>(null);
   showEditModal = signal(false);
   showDetailModal = signal(false);
   isUpdatingVisit = signal(false);
-  isSyncing = signal(false);
+  isSyncing = this.syncService.isSyncing;
   currentPage = signal(1);
   pageSize = signal(10);
 
@@ -145,15 +147,12 @@ export class VisitsComponent implements OnInit {
   }
 
   onSync() {
-    this.isSyncing.set(true);
-    this.visitsService.syncVisits().subscribe({
+    this.syncService.syncModule('visits').subscribe({
       next: (res) => {
-        this.isSyncing.set(false);
         if (res.success) {
           this.visitsService.loadVisits({ page: 1, page_size: this.pageSize() });
         }
-      },
-      error: () => this.isSyncing.set(false)
+      }
     });
   }
 }

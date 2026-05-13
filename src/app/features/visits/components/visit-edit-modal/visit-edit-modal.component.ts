@@ -86,4 +86,13 @@ export class VisitEditModalComponent implements OnInit {
     }
     this.save.emit(this.editForm.value);
   }
+
+  getErrorMessage(controlName: string): string {
+    const control = this.editForm.get(controlName);
+    if (control && control.touched && control.invalid) {
+      if (control.errors?.['required']) return 'هذا الحقل مطلوب';
+      if (control.errors?.['email']) return 'البريد الإلكتروني غير صالح';
+    }
+    return '';
+  }
 }

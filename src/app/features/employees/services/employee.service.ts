@@ -18,6 +18,9 @@ export interface Employee {
   department: string;
   created_at: string;
   last_login_at: string | null;
+  total_assigned_tickets?: number;
+  total_assigned_visits?: number;
+  is_online?: boolean;
 }
 
 export interface EmployeeFilters {
@@ -25,8 +28,8 @@ export interface EmployeeFilters {
   page_size?: number;
   search?: string;
   department?: string;
+  employee_role?: string;
 }
-
 export interface EmployeeDetails {
   id: number;
   name: string;
@@ -37,6 +40,22 @@ export interface EmployeeDetails {
   total_assigned_visits: number;
   avatar_url: string | null;
   last_login_at: string | null;
+}
+
+export interface SupportTicket {
+  id: number;
+  odoo_id: number;
+  title: string;
+  status: string;
+  priority: string;
+  created_at: string;
+}
+
+export interface Visit {
+  id: number;
+  name: string;
+  status: string;
+  visit_date: string;
 }
 
 @Injectable({
@@ -58,6 +77,7 @@ export class EmployeeService {
       pageSize: filters.page_size,
       search: filters.search,
       department: filters.department,
+      employee_role: filters.employee_role,
     });
 
     this.http.get<ApiResponse<PagedResult<Employee>>>(
@@ -75,5 +95,19 @@ export class EmployeeService {
 
   getEmployeeDetails(id: number): Observable<ApiResponse<EmployeeDetails>> {
     return this.http.get<ApiResponse<EmployeeDetails>>(`${this.apiUrl}/api/users/employees/${id}/details`);
+  }
+
+  getEmployeeTickets(id: number, page = 1, pageSize = 10): Observable<ApiResponse<PagedResult<SupportTicket>>> {
+    const params = buildHttpParams({ page, pageSize });
+    return this.http.get<ApiResponse<PagedResult<SupportTicket>>>(
+      `${this.apiUrl}/api/users/${id}/tickets`, { params }
+    );
+  }
+
+  getEmployeeVisits(id: number, page = 1, pageSize = 10): Observable<ApiResponse<PagedResult<Visit>>> {
+    const params = buildHttpParams({ page, pageSize });
+    return this.http.get<ApiResponse<PagedResult<Visit>>>(
+      `${this.apiUrl}/api/users/${id}/visits`, { params }
+    );
   }
 }

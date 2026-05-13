@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { WebSocketService } from '../../../core/services/websocket.service';
+import { buildHttpParams } from '../../../core/utils/http-params.util';
 
 export interface Conversation {
   conversation_id: string;
@@ -130,9 +131,21 @@ export class ChatService {
     });
   }
 
-  getConversations(): Observable<any> {
-    return this.http.get<any>(`${this.base}/api/ai-assistant/conversations`).pipe(
+  readonly total = signal(0);
+
+  getConversations(filters: {
+    page?: number;
+    page_size?: number;
+    machine_type?: string;
+    from?: string;
+    to?: string;
+    status?: string;
+    search?: string;
+  } = {}): Observable<any> {
+    const params = buildHttpParams(filters);
+    return this.http.get<any>(`${this.base}/api/ai-assistant/conversations`, { params }).pipe(
       tap((res: any) => {
+        this.total.set(res.data?.total || 0);
         const lastMsgs: Record<string, ApiMessage> = {};
         (res.data?.items || []).forEach((c: any) => {
           const lm = c.last_message || c.lastMessage || c.last_message_content;
@@ -217,5 +230,16 @@ export class ChatService {
 
   sendTyping(conversationId: string, senderName: string): void {
     this.ws.typing(conversationId, senderName);
+  }
+
+  acceptConversation(conversationId: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.base}/api/ai-assistant/customer-care/accept`,
+      { conversation_id: conversationId }
+    );
+  }
+
+  deleteConversation(conversationId: string): Observable<any> {
+    return this.http.delete<any>(`${this.base}/api/ai-assistant/conversation/${conversationId}`);
   }
 }

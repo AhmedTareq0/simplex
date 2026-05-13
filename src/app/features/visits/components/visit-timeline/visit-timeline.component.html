@@ -1,0 +1,35 @@
+<div class="timeline">
+  @for (item of items(); track item.id) {
+  <div class="timeline__item">
+    <div class="timeline__icon" [ngClass]="'timeline__icon--' + item.type">
+      <app-icon [name]="getIcon(item.type)" size="sm" />
+    </div>
+    <div class="timeline__content">
+      <div class="timeline__header">
+        <span class="timeline__title">{{ item.title }}</span>
+        <span class="timeline__date">{{ formatDate(item.date) }}</span>
+      </div>
+      @if (item.description) {
+      <p class="timeline__description">{{ item.description }}</p>
+      }
+      @if (item.user) {
+      <div class="timeline__user">
+        <app-icon name="user" size="sm" />
+        <span>{{ item.user }}</span>
+      </div>
+      }
+      @if (item.statusFrom && item.statusTo) {
+      <div class="timeline__status-change">
+        <span class="status-badge status-badge--from">{{ getStatusLabel(item.statusFrom) }}</span>
+        <app-icon name="sync" size="sm" class="status-arrow" />
+        <span class="status-badge status-badge--to">{{ getStatusLabel(item.statusTo) }}</span>
+      </div>
+      }
+    </div>
+  </div>
+  } @empty {
+  <div class="timeline__empty">
+    <p>لا يوجد سجل نشاطات لهذه الزيارة حتى الآن.</p>
+  </div>
+  }
+</div>

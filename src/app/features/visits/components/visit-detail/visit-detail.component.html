@@ -1,4 +1,4 @@
-<app-shared-modal [visible]="visible()" [title]="'تفاصيل الزيارة'" (visibleChange)="close.emit()">
+<app-shared-modal [visible]="visible()" [title]="'تفاصيل الزيارة'" [maxWidth]="'50rem'" (visibleChange)="close.emit()">
   @if (visit()) {
   <div class="visit-detail">
     <div class="visit-detail__section">
@@ -80,13 +80,74 @@
     </div>
     }
 
+    <!-- (Timeline) -->
+    <div class="visit-detail__section">
+      <h3 class="visit-detail__section-title">سجل النشاطات</h3>
+      <app-visit-timeline [items]="activities()" />
+    </div>
+
     <div class="visit-detail__actions">
-      <app-button label="تعديل" variant="secondary" icon="pencil" (pressed)="onEdit()" />
-      @if (visit()?.status === 'scheduled' || visit()?.status === 'in_progress') {
-      <app-button label="تمت الزيارة بنجاح" variant="primary" [loading]="isSaving()" (pressed)="onComplete()" />
+      <app-button label="تعديل البيانات" variant="secondary" icon="pencil" (pressed)="onEdit()" />
+
+      @if (showCompleteBtn) {
+      <app-button label="إكمال الزيارة" variant="success" icon="check" [loading]="isSaving()"
+        (pressed)="onComplete()" />
       }
-      <app-button label="إغلاق" variant="secondary" (pressed)="close.emit()" />
+
+      @if (showRescheduleBtn) {
+      <app-button label="إعادة جدولة" variant="secondary" icon="calendarPlus"
+        (pressed)="showRescheduleModal.set(true)" />
+      }
+
+      @if (showReassignBtn) {
+      <app-button label="إعادة تعيين مهندس" variant="secondary" icon="plusCircle"
+        (pressed)="showReassignModal.set(true)" />
+      }
+
+      @if (showCancelBtn) {
+      <app-button label="إلغاء الزيارة" variant="danger" icon="xCircle" (pressed)="showCancelConfirm.set(true)" />
+      }
     </div>
   </div>
   }
 </app-shared-modal>
+
+<!-- Modal إعادة الجدولة -->
+<app-shared-modal [visible]="showRescheduleModal()" [title]="'إعادة جدولة الزيارة'" [maxWidth]="'32rem'"
+  (visibleChange)="showRescheduleModal.set(false)">
+  <div class="action-form">
+    <app-shared-input label="التاريخ والوقت الجديد" type="datetime-local" [(ngModel)]="newPlannedDate"
+      [required]="true" />
+    <app-shared-input label="ملاحظات إعادة الجدولة" [(ngModel)]="rescheduleNote"
+      placeholder="أدخل سبب إعادة الجدولة أو ملاحظات إضافية" />
+    <div class="action-form__footer">
+      <app-button label="تأكيد الموعد" variant="primary" [loading]="isSaving()" (pressed)="onReschedule()"
+        [disabled]="!newPlannedDate()" />
+      <app-button label="تراجع" variant="secondary" (pressed)="showRescheduleModal.set(false)" />
+    </div>
+  </div>
+</app-shared-modal>
+
+<!-- Modal إعادة التعيين -->
+<app-shared-modal [visible]="showReassignModal()" [title]="'إعادة تعيين المهندس'" [maxWidth]="'32rem'"
+  (visibleChange)="showReassignModal.set(false)">
+  <div class="action-form">
+    <app-shared-select label="اختر المهندس الجديد" [options]="engineerOptions" [(ngModel)]="selectedEngineerId"
+      [required]="true" placeholder="ابحث عن مهندس..." [filter]="true" />
+    <div class="action-form__footer">
+      <app-button label="تحديث المهندس" variant="primary" [loading]="isSaving()" (pressed)="onReassign()"
+        [disabled]="!selectedEngineerId()" />
+      <app-button label="تراجع" variant="secondary" (pressed)="showReassignModal.set(false)" />
+    </div>
+  </div>
+</app-shared-modal>
+
+<!-- تأكيد الإلغاء -->
+<app-shared-confirmation [visible]="showCancelConfirm()" [title]="'إلغاء الزيارة'"
+  [message]="'هل أنت متأكد من رغبتك في إلغاء هذه الزيارة؟ لا يمكن التراجع عن هذا الإجراء.'" confirmLabel="تأكيد الإلغاء"
+  type="danger" [isLoading]="isSaving()" (visibleChange)="showCancelConfirm.set($event)" (confirmed)="onCancelVisit()">
+  <div class="extra-content">
+    <app-shared-input label="سبب الإلغاء" [(ngModel)]="cancelReason" placeholder="يرجى إدخال سبب الإلغاء..."
+      [required]="true" />
+  </div>
+</app-shared-confirmation>

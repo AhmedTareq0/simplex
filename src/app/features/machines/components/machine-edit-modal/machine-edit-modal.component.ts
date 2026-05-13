@@ -1,10 +1,10 @@
 import { Component, input, output, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { 
-  SharedModalComponent, 
-  SharedInputComponent, 
-  SharedSelectComponent, 
+import {
+  SharedModalComponent,
+  SharedInputComponent,
+  SharedSelectComponent,
   IconComponent,
   ButtonComponent
 } from '../../../../shared/components';
@@ -14,9 +14,9 @@ import { Machine, MachineService, MachineCategory } from '../../services/machine
   selector: 'app-machine-edit-modal',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
-    ReactiveFormsModule, 
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
     SharedModalComponent,
     SharedInputComponent,
     SharedSelectComponent,
@@ -33,16 +33,30 @@ export class MachineEditModalComponent implements OnInit {
   machine = input.required<Machine>();
   isSubmitting = input<boolean>(false);
   visible = input<boolean>(false);
-  
+
   save = output<FormData>();
   cancel = output<void>();
 
   editForm: FormGroup = this.fb.group({
     name: ['', Validators.required],
     categoryId: [null, Validators.required],
+    type: ['Goods', Validators.required],
     description: [''],
-    price: [null, Validators.required]
+    description_sale: [''],
+    price: [null, [Validators.required, Validators.min(0)]],
+    active: [true],
+    model_number: [''],
+    serial_number: [''],
+    warranty_period: [null],
+    origin_country: [''],
+    technical_specs: ['']
   });
+
+  typeOptions = [
+    { label: 'سلعة (Goods)', value: 'Goods' },
+    { label: 'خدمة (Service)', value: 'Service' },
+    { label: 'استهلاكي (Consumable)', value: 'Consumable' }
+  ];
 
   categories = signal<MachineCategory[]>([]);
   selectedImage: File | null = null;
@@ -54,23 +68,34 @@ export class MachineEditModalComponent implements OnInit {
     const m = this.machine();
     if (m && m.id !== 0) {
       this.editForm.patchValue({
-        name: m.display_name,
+        name: m.display_name || m.name,
         description: m.description,
+        description_sale: m.description_sale,
         price: m.list_price,
-        categoryId: m.category_id ?? null
+        categoryId: m.category_id ?? null,
+        type: m.type || 'product',
+        active: m.active ?? true,
+        model_number: m.model_number || '',
+        serial_number: m.serial_number || '',
+        warranty_period: m.warranty_period || null,
+        origin_country: m.origin_country || '',
+        technical_specs: m.technical_specs || ''
       });
       if (m.image_url) {
         this.imagePreview.set(m.image_url);
       }
     } else {
-      this.editForm.reset();
+      this.editForm.reset({
+        active: true,
+        type: 'Goods'
+      });
       this.imagePreview.set(null);
     }
   }
 
   private loadCategories() {
     this.machineService.getCategories().subscribe(cats => {
-      this.categories.set(cats);
+      this.categories.set(cats || []);
       this.patchSelectedCategory();
     });
   }
@@ -125,20 +150,41 @@ export class MachineEditModalComponent implements OnInit {
     const formData = new FormData();
     const vals = this.editForm.value;
 
-    // Keys matching API_FRONTEND_DOCS.md exactly
-    formData.append('Name', vals.name);
-    formData.append('CategoryId', vals.categoryId.toString());
-    formData.append('Description', vals.description || '');
-    formData.append('Price', vals.price.toString());
+    formData.append('name', vals.name);
+    formData.append('category_id', vals.categoryId.toString());
+    formData.append('description', vals.description || '');
+    formData.append('description_sale', vals.description_sale || '');
+    formData.append('list_price', vals.price.toString());
+    formData.append('type', vals.type);
+    formData.append('active', vals.active.toString());
+    formData.append('model_number', vals.model_number || '');
+    formData.append('serial_number', vals.serial_number || '');
+    if (vals.warranty_period) formData.append('warranty_period', vals.warranty_period.toString());
+    formData.append('origin_country', vals.origin_country || '');
+    formData.append('technical_specs', vals.technical_specs || '');
 
     if (this.selectedImage) {
-      formData.append('Image', this.selectedImage);
+      formData.append('image', this.selectedImage);
     }
 
     if (this.selectedDocument) {
-      formData.append('Document', this.selectedDocument);
+      formData.append('document', this.selectedDocument);
     }
 
     this.save.emit(formData);
+  }
+
+  getErrorMessage(controlName: string): string {
+    const control = this.editForm.get(controlName);
+    if (!control || !control.touched) return '';
+
+    if (control.hasError('required')) {
+      return 'هذا الحقل مطلوب';
+    }
+    if (control.hasError('min')) {
+      return 'القيمة يجب أن تكون أكبر من 0';
+    }
+
+    return '';
   }
 }

@@ -1,150 +1,145 @@
-<app-shared-modal
-  [visible]="visible()"
-  title="تفاصيل العميل"
-  (closed)="close.emit()"
->
-  @if (client()) {
-    <div class="client-detail">
-      <div class="client-detail__header">
-        <div class="client-detail__image">
-          <img [src]="client()?.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'" alt="Client Image" />
-        </div>
-        <div class="client-detail__info">
-          <h2 class="client-detail__name">{{ client()?.name }}</h2>
-        </div>
-      </div>
+@if (client()) {
+<div class="client-detail-page">
+  <!-- Top Navigation Bar -->
+  <div class="detail-nav">
+    <h1 class="nav-title">تفاصيل العميل</h1>
+    <app-button label="رجوع" variant="secondary" (pressed)="onBack()" class="back-btn" />
+  </div>
 
-      <!-- Basic Info -->
-      <div class="client-detail__grid">
-        <div class="detail-item">
-          <label>Odoo User ID</label>
-          <div class="detail-item__value">{{ client()?.odoo_user_id }}</div>
-        </div>
-
-        <div class="detail-item">
-          <label>Partner ID</label>
-          <div class="detail-item__value">{{ client()?.partner_id }}</div>
-        </div>
-
-        <div class="detail-item">
-          <label>البريد الإلكتروني</label>
-          <div class="detail-item__value">{{ client()?.email }}</div>
-        </div>
-
-        <div class="detail-item">
-          <label>رقم الهاتف</label>
-          <div class="detail-item__value" dir="ltr">{{ client()?.phone || '—' }}</div>
-        </div>
-      </div>
-
-      <!-- Statistics -->
-      @if (clientDetails()) {
-        <div class="client-detail__stats">
-          <h3>إحصائيات العميل</h3>
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-number">{{ clientDetails()?.total_machines }}</div>
-              <div class="stat-label">إجمالي الآلات</div>
+  <div class="client-detail">
+    <!-- Header Section with Profile Card -->
+    <div class="client-detail__hero">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="profile-card">
+          <div class="profile-card__image">
+            <img [src]="client()?.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'"
+              alt="Client Image" />
+          </div>
+          <div class="profile-card__info">
+            <h2 class="profile-card__name">{{ client()?.name }}</h2>
+            <div class="profile-card__contact">
+              <div class="contact-item">
+                <span>{{ client()?.email }}</span>
+                <app-icon name="mail" size="sm" />
+              </div>
+              <div class="contact-item">
+                <span dir="ltr">{{ client()?.phone || '—' }}</span>
+                <app-icon name="phone" size="sm" />
+              </div>
             </div>
-            <div class="stat-card">
-              <div class="stat-number">{{ clientDetails()?.total_tickets }}</div>
-              <div class="stat-label">إجمالي التذاكر</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-number">{{ clientDetails()?.total_visits }}</div>
-              <div class="stat-label">إجمالي الزيارات</div>
+            <div class="profile-card__tags">
+              <span class="tag">عميل {{ client()?.role || 'مميز' }}</span>
             </div>
           </div>
         </div>
-      }
+      </div>
+    </div>
 
-      <!-- Machines -->
+    <!-- Stats Section -->
+    <div class="client-detail__stats">
+      <div class="stat-card">
+        <div class="stat-card__icon icon--primary">
+          <app-icon name="table" />
+        </div>
+        <div class="stat-card__body">
+          <div class="stat-card__number">{{ client()?.total_machines || 0 }}</div>
+          <div class="stat-card__label">إجمالي الماكينات</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon icon--warning">
+          <app-icon name="calendarClock" />
+        </div>
+        <div class="stat-card__body">
+          <div class="stat-card__number">{{ client()?.total_tickets || 0 }}</div>
+          <div class="stat-card__label">تذاكر الدعم</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon icon--success">
+          <app-icon name="mapMarker" />
+        </div>
+        <div class="stat-card__body">
+          <div class="stat-card__number">{{ client()?.total_visits || 0 }}</div>
+          <div class="stat-card__label">الزيارات الميدانية</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="client-detail__content-grid">
+      <!-- Machines Section -->
       <div class="client-detail__section">
-        <h3>آلات العميل</h3>
+        <h3 class="section-title">
+          <app-icon name="table" />
+          الماكينات المشتراة
+        </h3>
         @if (isLoadingMachines()) {
-          <div class="loading">جاري التحميل...</div>
-        } @else if (clientMachines().length > 0) {
-          <div class="machines-grid">
-            @for (machine of clientMachines(); track machine.id) {
-              <div class="machine-card">
-                <img [src]="machine.image_url || 'https://via.placeholder.com/100'" alt="Machine" />
-                <div class="machine-info">
-                  <div class="machine-name">{{ machine.name }}</div>
-                  <div class="machine-ref">{{ machine.order_reference }}</div>
-                  <div class="machine-category">{{ machine.category }}</div>
-                  <div class="machine-price">{{ machine.price }} {{ machine.currency }}</div>
+          <app-skeleton-loader type="text" [count]="3" />
+        } @else if (clientMachines().length) {
+          <div class="mini-machines-grid">
+            @for (m of clientMachines(); track m.id) {
+              <div class="mini-machine-item">
+                <img [src]="m.image_url || 'assets/images/machine-placeholder.png'" [alt]="m.name">
+                <div class="mini-machine-item__info">
+                  <span class="name">{{ m.name }}</span>
+                  <span class="ref">{{ m.order_reference }}</span>
                 </div>
               </div>
             }
           </div>
         } @else {
-          <div class="no-data">لا توجد آلات لهذا العميل</div>
+          <div class="empty-state">لا توجد ماكينات مسجلة</div>
         }
       </div>
 
-      <!-- Tickets -->
+      <!-- Recent Tickets Section -->
       <div class="client-detail__section">
-        <h3>تذاكر الدعم الفني</h3>
+        <h3 class="section-title">
+          <app-icon name="ticket" />
+          أحدث التذاكر
+        </h3>
         @if (isLoadingTickets()) {
-          <div class="loading">جاري التحميل...</div>
-        } @else if (clientTickets().length > 0) {
-          <div class="tickets-list">
-            @for (ticket of clientTickets(); track ticket.id) {
-              <div class="ticket-item">
-                <div class="ticket-info">
-                  <div class="ticket-title">{{ ticket.title }}</div>
-                  <div class="ticket-meta">
-                    <span class="ticket-id">#{{ ticket.odoo_id }}</span>
-                    <span class="ticket-status" [class]="'status--' + ticket.status">{{ ticket.status }}</span>
-                    <span class="ticket-priority" [class]="'priority--' + ticket.priority">{{ ticket.priority }}</span>
-                  </div>
-                </div>
-              </div>
-            }
-          </div>
+          <app-skeleton-loader type="table" [count]="5" />
         } @else {
-          <div class="no-data">لا توجد تذاكر لهذا العميل</div>
+          <app-shared-table [data]="clientTickets()" [columns]="ticketColumns" [showActions]="false"
+            (onRowClick)="onTicketClick($event)" />
         }
       </div>
 
-      <!-- Visits -->
+      <!-- Recent Visits Section -->
       <div class="client-detail__section">
-        <h3>زيارات الصيانة</h3>
+        <h3 class="section-title">
+          <app-icon name="calendarClock" />
+          سجل الزيارات
+        </h3>
         @if (isLoadingVisits()) {
-          <div class="loading">جاري التحميل...</div>
-        } @else if (clientVisits().length > 0) {
-          <div class="visits-list">
-            @for (visit of clientVisits(); track visit.id) {
-              <div class="visit-item">
-                <div class="visit-info">
-                  <div class="visit-name">{{ visit.name }}</div>
-                  <div class="visit-meta">
-                    <span class="visit-date">{{ visit.visit_date | date:'dd/MM/yyyy' }}</span>
-                    <span class="visit-status" [class]="'status--' + visit.status">{{ visit.status }}</span>
-                  </div>
-                </div>
-              </div>
-            }
-          </div>
+          <app-skeleton-loader type="table" [count]="5" />
         } @else {
-          <div class="no-data">لا توجد زيارات لهذا العميل</div>
-        }
-      </div>
-
-      <div class="client-detail__actions">
-        <app-button
-          label="إغلاق"
-          variant="secondary"
-          (pressed)="close.emit()"
-        />
-        @if (auth.isSuperAdmin()) {
-          <app-button
-            label="تعديل البيانات"
-            icon="pencil"
-            (pressed)="edit.emit(client()!)"
-          />
+          <app-shared-table [data]="clientVisits()" [columns]="visitColumns" [showActions]="false"
+            (onRowClick)="onVisitClick($event)" />
         }
       </div>
     </div>
-  }
-</app-shared-modal>
+  </div>
+</div>
+}
+
+<!-- Modals -->
+@if (showTicketDetail() && selectedTicket()) {
+  <app-ticket-detail
+    [visible]="showTicketDetail()"
+    [ticket]="selectedTicket()"
+    (visibleChange)="showTicketDetail.set($event)"
+    (updated)="handleTicketUpdate()"
+  />
+}
+
+@if (showVisitDetail() && selectedVisit()) {
+  <app-visit-detail
+    [visible]="showVisitDetail()"
+    [visit]="selectedVisit()"
+    (close)="showVisitDetail.set(false)"
+    (updated)="handleVisitUpdate()"
+  />
+}

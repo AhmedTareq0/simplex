@@ -1,33 +1,33 @@
 <app-shared-modal
   [(visible)]="visible"
-  [title]="'تفاصيل التذكرة #' + (user?.id || '')"
+  [title]="'تفاصيل التذكرة #' + (ticket?.id || '')"
   [maxWidth]="'600px'"
   [width]="'95vw'"
   [showCloseButton]="true"
   (closed)="close()"
 >
-  @if (user) {
+  @if (ticket) {
     <div class="cd-split__info">
 
       <!-- Title & Description -->
       <div class="cd-split__section">
-        <p class="cd-split__ticket-title">{{ user.title }}</p>
-        @if (user.description) {
-          <p class="cd-split__description">{{ user.description }}</p>
+        <p class="cd-split__ticket-title">{{ ticket.title }}</p>
+        @if (ticket.description) {
+          <p class="cd-split__description">{{ ticket.description }}</p>
         }
       </div>
 
       <!-- Badges -->
       <div class="cd-split__badges">
         <span class="cd-split__badge"
-          [style.background]="getStatusColor(user.status) + '20'"
-          [style.color]="getStatusColor(user.status)">
-          {{ getStatusLabel(user.status) }}
+          [style.background]="getStatusColor(ticket.status) + '20'"
+          [style.color]="getStatusColor(ticket.status)">
+          {{ getStatusLabel(ticket.status) }}
         </span>
         <span class="cd-split__badge"
-          [style.background]="getPriorityColor(user.priority) + '20'"
-          [style.color]="getPriorityColor(user.priority)">
-          {{ getPriorityLabel(user.priority) }}
+          [style.background]="getPriorityColor(ticket.priority) + '20'"
+          [style.color]="getPriorityColor(ticket.priority)">
+          {{ getPriorityLabel(ticket.priority) }}
         </span>
       </div>
 
@@ -35,68 +35,35 @@
       <div class="cd-split__fields">
         <div class="cd-split__field-row">
           <span class="cd-split__field-label">العميل</span>
-          <span class="cd-split__field-value">{{ user.customer }}</span>
+          <span class="cd-split__field-value">{{ ticket.customer }}</span>
         </div>
         <div class="cd-split__field-row">
           <span class="cd-split__field-label">المكنة</span>
-          <span class="cd-split__field-value">{{ user.machine_id }}</span>
+          <span class="cd-split__field-value">{{ ticket.machine_id }}</span>
         </div>
         <div class="cd-split__field-row">
           <span class="cd-split__field-label">المهندس</span>
-          <span class="cd-split__field-value">{{ user.engineer_name || '—' }}</span>
+          <span class="cd-split__field-value">{{ ticket.engineer_name || '—' }}</span>
         </div>
         <div class="cd-split__field-row">
           <span class="cd-split__field-label">خدمة العملاء</span>
-          <span class="cd-split__field-value">{{ user.customer_care_name || '—' }}</span>
+          <span class="cd-split__field-value">{{ ticket.customer_care_name || '—' }}</span>
         </div>
         <div class="cd-split__field-row">
           <span class="cd-split__field-label">تاريخ الزيارة</span>
-          <span class="cd-split__field-value">{{ formatDate(user.visit_date) }}</span>
+          <span class="cd-split__field-value">{{ formatDate(ticket.visit_date) }}</span>
         </div>
       </div>
 
-      <!-- Edit Form -->
-      @if (isEditing()) {
-        <div class="cd-split__form">
-          <div class="cd-split__field">
-            <label class="cd-split__label">الحالة</label>
-            <select class="cd-split__select" [ngModel]="editStatus()" (ngModelChange)="editStatus.set($event)">
-              @for (opt of statusOptions; track opt.value) {
-                <option [value]="opt.value">{{ opt.label }}</option>
-              }
-            </select>
-          </div>
-          <div class="cd-split__field">
-            <label class="cd-split__label">الأولوية</label>
-            <select class="cd-split__select" [ngModel]="editPriority()" (ngModelChange)="editPriority.set($event)">
-              @for (opt of priorityOptions; track opt.value) {
-                <option [value]="opt.value">{{ opt.label }}</option>
-              }
-            </select>
-          </div>
-          <div class="cd-split__field">
-            <label class="cd-split__label">تاريخ الزيارة</label>
-            <input class="cd-split__input" type="date" [ngModel]="editVisitDate()" (ngModelChange)="editVisitDate.set($event)" />
-          </div>
-        </div>
-      }
-
       <!-- Actions -->
       <div class="cd-split__actions">
-        @if (!isEditing()) {
-          <button class="cd-split__btn cd-split__btn--edit" (click)="startEdit()">تعديل</button>
-          @if (user.conversation_id) {
-            <button class="cd-split__btn cd-split__btn--ghost" (click)="goToChat()">فتح المحادثة</button>
-          }
-          <button class="cd-split__btn cd-split__btn--danger" (click)="onDelete()" [disabled]="isDeleting()">
-            {{ isDeleting() ? 'جاري الحذف...' : 'حذف' }}
-          </button>
-        } @else {
-          <button class="cd-split__btn cd-split__btn--edit" (click)="save()" [disabled]="isSaving()">
-            {{ isSaving() ? 'جاري الحفظ...' : 'حفظ' }}
-          </button>
-          <button class="cd-split__btn cd-split__btn--ghost" (click)="cancelEdit()">إلغاء</button>
+        <button class="cd-split__btn cd-split__btn--edit" (click)="startEdit()">تعديل</button>
+        @if (ticket.conversation_id) {
+          <button class="cd-split__btn cd-split__btn--ghost" (click)="goToChat()">فتح المحادثة</button>
         }
+        <button class="cd-split__btn cd-split__btn--danger" (click)="onDelete()" [disabled]="isDeleting()">
+          {{ isDeleting() ? 'جاري الحذف...' : 'حذف' }}
+        </button>
       </div>
 
     </div>

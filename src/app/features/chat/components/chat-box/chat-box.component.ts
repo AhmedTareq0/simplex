@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, Output, EventEmitter } from '@angular/core';
 import { ChatHeaderComponent } from '../chat-header/chat-header.component';
 import { ChatMessagesComponent } from '../chat-messages/chat-messages.component';
 
@@ -18,4 +18,6 @@ export class ChatBoxComponent {
   readonly isTyping = input(false);
   readonly userName = input('');
   readonly users = input<any[]>([]);
+
+  @Output() deleted = new EventEmitter<string>();
 }
