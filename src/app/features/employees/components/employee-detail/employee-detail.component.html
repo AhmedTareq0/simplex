@@ -40,6 +40,7 @@
     <!-- Stats Section -->
     @if (employeeDetails()) {
     <div class="employee-detail__stats">
+      @if (employeeDetails()?.employee_role !== 'engineer') {
       <div class="stat-card">
         <div class="stat-card__icon icon--primary">
           <app-icon name="ticket" />
@@ -49,6 +50,8 @@
           <div class="stat-card__label">تذاكر الدعم</div>
         </div>
       </div>
+      }
+      @if (employeeDetails()?.employee_role !== 'customer_care') {
       <div class="stat-card">
         <div class="stat-card__icon icon--warning">
           <app-icon name="calendarClock" />
@@ -58,11 +61,13 @@
           <div class="stat-card__label">إجمالي الزيارات</div>
         </div>
       </div>
+      }
     </div>
     }
 
     <div class="employee-detail__content-grid">
       <!-- Assigned Tickets Section -->
+      @if (employeeDetails()?.employee_role !== 'engineer') {
       <div class="employee-detail__section">
         <h3 class="section-title">
           <app-icon name="ticket" />
@@ -75,8 +80,10 @@
           [showDelete]="false" [showActions]="false" (onRowClick)="onTicketClick($event)" />
         }
       </div>
+      }
 
       <!-- Assigned Visits Section -->
+      @if (employeeDetails()?.employee_role !== 'customer_care') {
       <div class="employee-detail__section">
         <h3 class="section-title">
           <app-icon name="calendarClock" />
@@ -89,14 +96,19 @@
           [showDelete]="false" [showActions]="false" (onRowClick)="onVisitClick($event)" />
         }
       </div>
+      }
     </div>
   </div>
 </div>
 
 <!-- Ticket Detail Modal -->
+@if (employeeDetails()?.employee_role !== 'engineer') {
 <app-ticket-detail [(visible)]="showTicketDetail" [ticket]="selectedTicket()" (updated)="handleTicketUpdate()" />
+}
 
 <!-- Visit Detail Modal -->
+@if (employeeDetails()?.employee_role !== 'customer_care') {
 <app-visit-detail [visible]="showVisitDetail()" [visit]="selectedVisit()" (close)="showVisitDetail.set(false)"
   (updated)="handleVisitUpdate()" />
+}
 }

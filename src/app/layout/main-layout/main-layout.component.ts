@@ -20,7 +20,7 @@ const NAV_ITEMS: NavItem[] = [
   { link: 'visits', title: 'الزيارات', icon: 'mapMarker', permissions: ['visits.view_own', 'visits.view_all'] },
   { link: 'employees', title: 'الموظفين', icon: 'users', permissions: ['users.manage'] },
   { link: 'clients', title: 'العملاء', icon: 'user', permissions: ['users.manage'] },
-  { link: 'chat', title: 'الدردشة', icon: 'chat', permissions: ['dashboard.view'] },
+  { link: 'chat', title: 'الدردشة', icon: 'chat', permissions: ['chat.cc', 'chat.engineer'] },
   { link: 'notifications', title: 'الإشعارات', icon: 'bell', permissions: ['notifications.view'] },
   { link: 'settings', title: 'الإعدادات', icon: 'cog', permissions: ['settings.view'] },
 ];
