@@ -1,25 +1,22 @@
 <header class="chat-header">
   <div class="chat-header__info">
     <div class="chat-header__avatar-wrap">
-      <img
-        class="chat-header__image"
-        [src]="person()?.picture || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'"
-        [alt]="person()?.name"
-      />
+      <img class="chat-header__image"
+        [src]="person()?.picture || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'" [alt]="person()?.name" />
       @if (isOnline()) {
-        <span class="chat-header__online-dot"></span>
+      <span class="chat-header__online-dot"></span>
       }
     </div>
     <div class="chat-header__text">
       <h3 class="chat-header__name">{{ person()?.name || 'غير معروف' }}</h3>
       <p class="chat-header__status" [class.chat-header__status--typing]="isTyping()">
         @if (isTyping()) {
-          <span class="chat-header__typing-dots">
-            <span></span><span></span><span></span>
-          </span>
-          <span>يكتب...</span>
+        <span class="chat-header__typing-dots">
+          <span></span><span></span><span></span>
+        </span>
+        <span>يكتب...</span>
         } @else {
-          {{ isOnline() ? 'متصل الآن' : 'غير متصل' }}
+        {{ isOnline() ? 'متصل الآن' : 'غير متصل' }}
         }
       </p>
     </div>
@@ -27,66 +24,53 @@
 
   <div class="chat-header__actions">
     @if (canRequestVisit()) {
-      <button
-        class="chat-header__btn chat-header__btn--primary"
-        (click)="requestVisit()"
-        [disabled]="isRequestingVisit()"
-      >
-        <app-icon name="calendarPlus" size="sm" />
-        <span>{{ isRequestingVisit() ? 'جاري الإرسال...' : 'طلب زيارة مهندس' }}</span>
-      </button>
+    <button class="chat-header__btn chat-header__btn--primary" (click)="requestVisit()"
+      [disabled]="isRequestingVisit()">
+      <app-icon name="calendarPlus" size="sm" />
+      <span>{{ isRequestingVisit() ? 'جاري الإرسال...' : 'طلب زيارة مهندس' }}</span>
+    </button>
     }
 
     @if (isWithEngineer()) {
-      <div class="chat-header__engineer-status">
-        <app-icon name="user" size="sm" />
-        <div class="chat-header__engineer-info-text">
-          <span class="chat-header__label">مع المهندس</span>
-          @if (person()?.engineerName) {
-            <span class="chat-header__value">{{ person()?.engineerName }}</span>
-          }
-        </div>
+    <div class="chat-header__engineer-status">
+      <app-icon name="user" size="sm" />
+      <div class="chat-header__engineer-info-text">
+        <span class="chat-header__label">مع المهندس</span>
+        @if (person()?.engineerName) {
+        <span class="chat-header__value">{{ person()?.engineerName }}</span>
+        }
       </div>
+    </div>
     }
 
     <div class="chat-header__menu-wrap">
-      <button class="chat-header__action-btn" aria-label="المزيد" (click)="toggleMenu()">
+      <!-- <button class="chat-header__action-btn" aria-label="المزيد" (click)="toggleMenu()">
         <app-icon name="moreVertical" size="sm" />
-      </button>
+      </button> -->
 
       @if (showMenu()) {
-        <div class="chat-header__dropdown">
-          <div class="chat-header__dropdown-backdrop" (click)="showMenu.set(false)"></div>
-          <div class="chat-header__dropdown-content">
-            @if (isSuperAdmin()) {
-              <button
-                class="chat-header__dropdown-item chat-header__dropdown-item--danger"
-                (click)="onDeleteClick()"
-                [disabled]="isDeleting()"
-              >
-                <app-icon name="trash" size="sm" />
-                <span>حذف المحادثة نهائياً</span>
-              </button>
-            } @else {
-              <div class="chat-header__dropdown-item chat-header__dropdown-item--info">
-                <app-icon name="info" size="sm" />
-                <span>لا توجد خيارات إضافية</span>
-              </div>
-            }
+      <div class="chat-header__dropdown">
+        <div class="chat-header__dropdown-backdrop" (click)="showMenu.set(false)"></div>
+        <div class="chat-header__dropdown-content">
+          @if (canDeleteChat()) {
+          <button class="chat-header__dropdown-item chat-header__dropdown-item--danger" (click)="onDeleteClick()"
+            [disabled]="isDeleting()">
+            <app-icon name="trash" size="sm" />
+            <span>حذف المحادثة نهائياً</span>
+          </button>
+          } @else {
+          <div class="chat-header__dropdown-item chat-header__dropdown-item--info">
+            <app-icon name="info" size="sm" />
+            <span>لا توجد خيارات إضافية</span>
           </div>
+          }
         </div>
+      </div>
       }
     </div>
   </div>
 
-  <app-shared-confirmation
-    [visible]="showDeleteConfirm()"
-    (visibleChange)="showDeleteConfirm.set($event)"
-    title="حذف المحادثة"
-    message="هل أنت متأكد من حذف هذه المحادثة نهائياً؟ لا يمكن التراجع عن هذا الإجراء."
-    confirmLabel="حذف نهائي"
-    type="danger"
-    [isLoading]="isDeleting()"
-    (confirmed)="confirmDelete()"
-  />
+  <app-shared-confirmation [visible]="showDeleteConfirm()" (visibleChange)="showDeleteConfirm.set($event)"
+    title="حذف المحادثة" message="هل أنت متأكد من حذف هذه المحادثة نهائياً؟ لا يمكن التراجع عن هذا الإجراء."
+    confirmLabel="حذف نهائي" type="danger" [isLoading]="isDeleting()" (confirmed)="confirmDelete()" />
 </header>

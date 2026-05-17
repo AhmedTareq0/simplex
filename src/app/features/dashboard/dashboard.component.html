@@ -5,7 +5,14 @@
       <h1 class="dashboard__title">لوحة التحكم</h1>
       <p class="dashboard__subtitle">ملخص النظام والأداء العام من Odoo</p>
     </div>
-    <div class="dashboard__header-actions">
+    <div class="dashboard__header-actions" style="align-items: center;">
+      <app-shared-datepicker
+        [ngModel]="rangeDates()"
+        (ngModelChange)="rangeDates.set($any($event));"
+        selectionMode="range"
+        placeholder="تصفية بالتاريخ..."
+        style="width: 250px;"
+      />
       <app-button 
         variant="secondary" 
         (click)="onSyncAll()" 
@@ -97,30 +104,12 @@
         <h3>أداء الفريق</h3>
         <span class="dashboard__chart-badge">الشهر الحالي</span>
       </div>
-      <div class="agents-grid">
-        @for (agent of topAgents(); track agent.name) {
-        <div class="agent-card">
-          <img [src]="agent.avatar" [alt]="agent.name" class="agent-card__avatar" />
-          <div class="agent-card__info">
-            <span class="agent-card__name">{{ agent.name }}</span>
-            <span class="agent-card__role">{{ agent.role }}</span>
-          </div>
-          <div class="agent-card__stats">
-            <div class="agent-stat">
-              <span class="agent-stat__value">{{ agent.resolved }}</span>
-              <span class="agent-stat__label">محلولة</span>
-            </div>
-            <div class="agent-stat">
-              <span class="agent-stat__value">{{ agent.satisfaction }}%</span>
-              <span class="agent-stat__label">رضا</span>
-            </div>
-          </div>
-          <div class="agent-card__bar">
-            <div class="agent-card__progress" [style.width.%]="agent.satisfaction"></div>
-          </div>
-        </div>
-        }
-      </div>
+      <app-shared-table 
+        [data]="topAgents()" 
+        [columns]="agentColumns" 
+        [showActions]="false" 
+        [rows]="5" 
+      />
     </div>
   </div>
 

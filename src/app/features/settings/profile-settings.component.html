@@ -256,23 +256,39 @@
             <form class="settings__form" (ngSubmit)="changePassword()">
               <div class="settings__field settings__field--full">
                 <label class="settings__label">كلمة المرور الحالية</label>
-                <input class="settings__input" type="password" [(ngModel)]="security.currentPassword" name="currentPassword" placeholder="••••••••" />
+                <div class="settings__password-wrap">
+                  <input class="settings__input settings__input--password" [type]="showCurrentPassword() ? 'text' : 'password'" [(ngModel)]="security.currentPassword" name="currentPassword" placeholder="••••••••" [disabled]="isChangingPassword()" />
+                  <button type="button" class="settings__password-toggle" (click)="showCurrentPassword.set(!showCurrentPassword())" tabindex="-1">
+                    <app-icon [name]="showCurrentPassword() ? 'eye-off' : 'eye'" size="sm" />
+                  </button>
+                </div>
               </div>
               <div class="settings__form-row">
                 <div class="settings__field">
                   <label class="settings__label">كلمة المرور الجديدة</label>
-                  <input class="settings__input" type="password" [(ngModel)]="security.newPassword" name="newPassword" placeholder="••••••••" />
+                  <div class="settings__password-wrap">
+                    <input class="settings__input settings__input--password" [type]="showNewPassword() ? 'text' : 'password'" [(ngModel)]="security.newPassword" name="newPassword" placeholder="••••••••" [disabled]="isChangingPassword()" />
+                    <button type="button" class="settings__password-toggle" (click)="showNewPassword.set(!showNewPassword())" tabindex="-1">
+                      <app-icon [name]="showNewPassword() ? 'eye-off' : 'eye'" size="sm" />
+                    </button>
+                  </div>
                 </div>
                 <div class="settings__field">
                   <label class="settings__label">تأكيد كلمة المرور</label>
-                  <input
-                    class="settings__input"
-                    [class.settings__input--success]="passwordsMatch"
-                    type="password"
-                    [(ngModel)]="security.confirmPassword"
-                    name="confirmPassword"
-                    placeholder="••••••••"
-                  />
+                  <div class="settings__password-wrap">
+                    <input
+                      class="settings__input settings__input--password"
+                      [class.settings__input--success]="passwordsMatch"
+                      [type]="showConfirmPassword() ? 'text' : 'password'"
+                      [(ngModel)]="security.confirmPassword"
+                      name="confirmPassword"
+                      placeholder="••••••••"
+                      [disabled]="isChangingPassword()"
+                    />
+                    <button type="button" class="settings__password-toggle" (click)="showConfirmPassword.set(!showConfirmPassword())" tabindex="-1">
+                      <app-icon [name]="showConfirmPassword() ? 'eye-off' : 'eye'" size="sm" />
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -280,17 +296,27 @@
                 <p class="settings__error">كلمتا المرور غير متطابقتين</p>
               }
 
-              @if (saveSuccess()) {
-                <div class="settings__toast">
-                  <app-icon name="check-circle" size="sm" />
-                  <span>تم تحديث كلمة المرور بنجاح</span>
+              @if (passwordError()) {
+                <div class="settings__toast settings__toast--error">
+                  <app-icon name="alert-triangle" size="sm" />
+                  <span>{{ passwordError() }}</span>
                 </div>
               }
 
+              <p class="settings__hint">
+                <app-icon name="info" size="sm" />
+                سيتم تسجيل خروجك من جميع الأجهزة بعد تغيير كلمة المرور
+              </p>
+
               <div class="settings__form-actions">
-                <button type="submit" class="settings__btn settings__btn--primary" [disabled]="!passwordsMatch || !security.currentPassword">
-                  <app-icon name="shield" size="sm" />
-                  تحديث كلمة المرور
+                <button type="submit" class="settings__btn settings__btn--primary" [disabled]="!passwordsMatch || !security.currentPassword || isChangingPassword()">
+                  @if (isChangingPassword()) {
+                    <i class="pi pi-spin pi-spinner" style="font-size: 1rem;"></i>
+                    جاري التحديث...
+                  } @else {
+                    <app-icon name="shield" size="sm" />
+                    تحديث كلمة المرور
+                  }
                 </button>
               </div>
             </form>

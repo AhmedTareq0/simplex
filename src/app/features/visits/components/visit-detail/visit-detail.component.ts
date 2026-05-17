@@ -5,6 +5,8 @@ import { SharedModalComponent, ButtonComponent, SharedConfirmationComponent, Sha
 import { Visit, VisitsService, TimelineItem } from '../../services/visits.service';
 import { VisitTimelineComponent } from '../visit-timeline/visit-timeline.component';
 import { EmployeeService, Employee } from '@/features/employees/services/employee.service';
+import { MachineService } from '@/features/machines/services/machine.service';
+import { AuthLocalService } from '@/auth/services/auth-local.service';
 
 @Component({
   selector: 'app-visit-detail',
@@ -25,6 +27,8 @@ import { EmployeeService, Employee } from '@/features/employees/services/employe
 export class VisitDetailComponent {
   private readonly visitsService = inject(VisitsService);
   private readonly employeeService = inject(EmployeeService);
+  private readonly machineService = inject(MachineService);
+  readonly auth = inject(AuthLocalService);
 
   visit = input.required<Visit | null>();
   visible = input<boolean>(false);
@@ -52,7 +56,14 @@ export class VisitDetailComponent {
   ngOnChanges() {
     if (this.visible() && this.visit()) {
       this.loadActivities();
-      this.loadEngineers();
+      if (this.auth.hasPermission('visits.update')) {
+        if (this.auth.hasPermission('users.manage')) {
+          this.loadEngineers();
+        }
+        if (this.auth.hasPermission('machines.view') || this.auth.hasPermission('machines.manage')) {
+          this.machineService.loadMachines({ pageSize: 100 });
+        }
+      }
     }
   }
 
@@ -63,7 +74,7 @@ export class VisitDetailComponent {
   get engineerOptions() {
     return this.employeeService.employees()
       .filter((e: Employee) => e.department === 'Maintenance' || e.employee_role === 'engineer')
-      .map((e: Employee) => ({ label: e.name, value: e.odoo_user_id }));
+      .map((e: Employee) => ({ label: e.name, value: e.id }));
   }
 
   loadActivities() {
@@ -133,7 +144,13 @@ export class VisitDetailComponent {
   }
 
   get machineName(): string {
-    return this.visit()?.machine_name || '—';
+    const visit = this.visit();
+    if (visit?.machine_name) return visit.machine_name;
+    if (visit?.machine_id) {
+      const machine = this.machineService.machines().find(m => m.id === visit.machine_id);
+      return machine?.name || '—';
+    }
+    return '—';
   }
 
   get visitDate(): string | null {
@@ -196,8 +213,12 @@ export class VisitDetailComponent {
     const visit = this.visit();
     if (!visit || !this.selectedEngineerId()) return;
 
+    // Convert local id to odoo_user_id for the API
+    const selectedEmp = this.employeeService.employees().find(e => e.id === this.selectedEngineerId());
+    const odooId = selectedEmp ? selectedEmp.odoo_user_id : this.selectedEngineerId()!;
+
     this.isSaving.set(true);
-    this.visitsService.reassignVisit(visit.id, this.selectedEngineerId()!).subscribe({
+    this.visitsService.reassignVisit(visit.id, odooId).subscribe({
       next: (res) => {
         this.isSaving.set(false);
         this.showReassignModal.set(false);

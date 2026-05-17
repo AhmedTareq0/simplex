@@ -4,6 +4,7 @@ import { Observable, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ApiResponse, PagedResult } from '../../../core/interfaces/api-response.interface';
 import { buildHttpParams } from '../../../core/utils/http-params.util';
+import { AuthLocalService } from '@/auth/services/auth-local.service';
 
 export interface Ticket {
   id: number;
@@ -31,24 +32,18 @@ export interface TicketFilters {
 }
 
 export interface UpdateTicketPayload {
-  title?: string;
-  description?: string;
   status?: string;
   priority?: string;
   visit_date?: string | null;
   engineer_id?: number | null;
-  conversation_id?: string | null;
 }
 
 export interface CreateTicketPayload {
+  customer_id: number;
   title: string;
-  description: string;
   priority: 'low' | 'medium' | 'high';
-  machine_id?: string;
-  status?: string;
-  visit_date?: string | null;
+  machine_id?: number | string;
   engineer_id?: number | null;
-  conversation_id?: string | null;
 }
 
 export interface SyncResult {
@@ -59,6 +54,7 @@ export interface SyncResult {
 @Injectable({ providedIn: 'root' })
 export class TicketsService {
   private readonly http = inject(HttpClient);
+  private readonly auth = inject(AuthLocalService);
   private readonly base = environment.apiUrl;
 
   readonly tickets = signal<Ticket[]>([]);
@@ -79,7 +75,7 @@ export class TicketsService {
       to: filters.to,
     });
 
-    this.http.get<ApiResponse<PagedResult<Ticket>>>(`${this.base}/api/tickets/all`, { params })
+    this.http.get<ApiResponse<PagedResult<Ticket>>>(this.getTicketsEndpoint(), { params })
       .subscribe({
         next: (res) => {
           this.tickets.set(res.data?.items || []);
@@ -137,5 +133,15 @@ export class TicketsService {
         },
         error: () => this.isLoading.set(false),
       });
+  }
+
+  private getTicketsEndpoint(): string {
+    if (this.auth.hasPermission('tickets.view_all')) {
+      return `${this.base}/api/tickets/all`;
+    }
+    if (this.auth.hasPermission('tickets.view_cc')) {
+      return `${this.base}/api/tickets/customer-care`;
+    }
+    return `${this.base}/api/tickets/engineer`;
   }
 }

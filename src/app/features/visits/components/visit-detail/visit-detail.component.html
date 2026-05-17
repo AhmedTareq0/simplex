@@ -87,25 +87,29 @@
     </div>
 
     <div class="visit-detail__actions">
-      <app-button label="تعديل البيانات" variant="secondary" icon="pencil" (pressed)="onEdit()" />
+      @if (auth.hasPermission('visits.update')) {
+        <app-button label="تعديل البيانات" variant="secondary" icon="pencil" (pressed)="onEdit()" />
+      }
 
       @if (showCompleteBtn) {
       <app-button label="إكمال الزيارة" variant="success" icon="check" [loading]="isSaving()"
         (pressed)="onComplete()" />
       }
 
-      @if (showRescheduleBtn) {
-      <app-button label="إعادة جدولة" variant="secondary" icon="calendarPlus"
-        (pressed)="showRescheduleModal.set(true)" />
-      }
+      @if (auth.hasPermission('visits.update')) {
+        @if (showRescheduleBtn) {
+        <app-button label="إعادة جدولة" variant="secondary" icon="calendarPlus"
+          (pressed)="showRescheduleModal.set(true)" />
+        }
 
-      @if (showReassignBtn) {
-      <app-button label="إعادة تعيين مهندس" variant="secondary" icon="plusCircle"
-        (pressed)="showReassignModal.set(true)" />
-      }
+        @if (showReassignBtn) {
+        <app-button label="إعادة تعيين مهندس" variant="secondary" icon="plusCircle"
+          (pressed)="showReassignModal.set(true)" />
+        }
 
-      @if (showCancelBtn) {
-      <app-button label="إلغاء الزيارة" variant="danger" icon="xCircle" (pressed)="showCancelConfirm.set(true)" />
+        @if (showCancelBtn) {
+        <app-button label="إلغاء الزيارة" variant="danger" icon="xCircle" (pressed)="showCancelConfirm.set(true)" />
+        }
       }
     </div>
   </div>

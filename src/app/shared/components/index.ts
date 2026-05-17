@@ -7,3 +7,4 @@ export * from './shared-select/shared-select.component';
 export * from './shared-table/shared-table.component';
 export * from './shared-input/shared-input.component';
 export * from './shared-confirmation/shared-confirmation.component';
+export * from './shared-datepicker/shared-datepicker.component';

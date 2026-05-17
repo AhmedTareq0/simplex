@@ -2,9 +2,10 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import { tap, catchError, finalize } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { WebSocketService } from '../../core/services/websocket.service';
+import { AppRole, Permission, ROLE_PERMISSIONS } from '../roles';
 
 export interface AuthCredentials {
   email?: string;
@@ -48,6 +49,11 @@ export interface RefreshResponse {
   };
 }
 
+export interface ChangePasswordRequest {
+  old_password: string;
+  new_password: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthLocalService {
   private readonly http = inject(HttpClient);
@@ -62,10 +68,26 @@ export class AuthLocalService {
   readonly userType = computed(() => this.currentUser()?.user_type);
   readonly employeeRole = computed(() => this.currentUser()?.employee_role);
 
-  readonly isSuperAdmin = computed(() => this.userType() === 'superadmin');
-  readonly isCustomerSupport = computed(() => this.userType() === 'custom_support');
+  readonly isSuperAdmin = computed(() => this.employeeRole() === 'superadmin' || this.userType() === 'superadmin');
+  readonly isCustomerSupport = computed(() => this.employeeRole() === 'customer_support');
+  readonly isEngineer = computed(() => this.employeeRole() === 'engineer');
 
-  // Current user — loaded from API, falls back to localStorage cache
+  readonly role = computed<AppRole | null>(() => {
+    if (this.isSuperAdmin()) return 'superadmin';
+    if (this.isCustomerSupport()) return 'customer_support';
+    if (this.isEngineer()) return 'engineer';
+    return null;
+  });
+
+  readonly permissions = computed<Permission[]>(() => {
+    const currentRole = this.role();
+    return currentRole ? ROLE_PERMISSIONS[currentRole] : [];
+  });
+
+  hasPermission(permission: Permission): boolean {
+    return this.permissions().includes(permission);
+  }
+
   readonly currentUser = signal<CurrentUser | null>(this.loadCachedUser());
 
   private loadCachedUser(): CurrentUser | null {
@@ -112,7 +134,7 @@ export class AuthLocalService {
   }
 
   refresh(refreshToken: string): Observable<RefreshResponse> {
-    return this.http.post<RefreshResponse>(`${environment.apiUrl}/api/auth/refresh`, { refreshToken }).pipe(
+    return this.http.post<RefreshResponse>(`${environment.apiUrl}/api/auth/refresh`, { refresh_token: refreshToken }).pipe(
       tap((response) => {
         const token = response?.data?.access_token;
         const newRefreshToken = response?.data?.refresh_token;
@@ -127,6 +149,16 @@ export class AuthLocalService {
       catchError((error) => {
         this.logout();
         return throwError(() => error);
+      })
+    );
+  }
+
+  /** Change password — revokes all sessions on success, user must re-login */
+  changePassword(payload: ChangePasswordRequest): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/api/auth/change-password`, payload).pipe(
+      tap(() => {
+        // All sessions are revoked by the server, clear local state
+        this.clearSession();
       })
     );
   }

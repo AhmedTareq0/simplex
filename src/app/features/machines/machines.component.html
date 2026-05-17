@@ -5,11 +5,13 @@
       <p class="machines__subtitle">إدارة وتعديل بيانات الماكينات</p>
     </div>
     <div class="machines__actions">
-      <app-button
-        label="إضافة ماكينة"
-        icon="plus"
-        (pressed)="onAdd()"
-      />
+      @if (auth.hasPermission('machines.manage')) {
+        <app-button
+          label="إضافة ماكينة"
+          icon="plus"
+          (pressed)="onAdd()"
+        />
+      }
     </div>
   </div>
 
@@ -23,14 +25,14 @@
       [columns]="columns"
       title="قائمة الماكينات"
       [showView]="true"
-      [showEdit]="true"
-      [showDelete]="true"
+      [showEdit]="auth.hasPermission('machines.manage')"
+      [showDelete]="auth.hasPermission('machines.manage')"
       [showActions]="true"
       [lazy]="true"
       [totalRecords]="total"
       [rows]="pageSize()"
       [currentPage]="currentPage()"
-      [showSync]="true"
+      [showSync]="auth.hasPermission('sync.manage')"
       [isSyncing]="isSyncing()"
       (onSync)="onSync()"
       (onPageChange)="onPageChange($event)"

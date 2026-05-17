@@ -26,6 +26,14 @@
       (valueChange)="selectedTimeRange.set($any($event)); onFilterChange()"
     />
     
+    <app-shared-datepicker
+      label="تحديد فترة (من - إلى)"
+      [ngModel]="rangeDates()"
+      (ngModelChange)="rangeDates.set($any($event)); onFilterChange()"
+      selectionMode="range"
+      placeholder="اختر فترة محددة..."
+    />
+
     <app-shared-select 
       label="القسم / الفئة" 
       [options]="departmentOptions()" 

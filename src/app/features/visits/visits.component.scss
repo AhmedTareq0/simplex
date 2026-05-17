@@ -33,4 +33,44 @@
     border-radius: 1.5rem;
     overflow: hidden;
   }
+
+  &__next-visit {
+    margin-bottom: var(--space-6);
+
+    &-title {
+      font-size: var(--text-lg);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+      margin: 0 0 var(--space-4) 0;
+    }
+
+    &-card {
+      background: var(--color-card-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 1rem;
+      padding: var(--space-4);
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-4) var(--space-8);
+      box-shadow: var(--shadow-sm);
+
+      .info-group {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+
+        .info-label {
+          font-size: var(--text-xs);
+          color: var(--color-text-tertiary);
+          text-transform: uppercase;
+        }
+
+        .info-value {
+          font-size: var(--text-sm);
+          font-weight: var(--font-weight-medium);
+          color: var(--color-text-primary);
+        }
+      }
+    }
+  }
 }

@@ -6,37 +6,41 @@
   <form [formGroup]="editForm" (ngSubmit)="onSubmit()" class="visit-form">
     <div class="visit-form__grid">
       <app-shared-input
-        label="اسم العميل"
-        formControlName="customer_name"
-        placeholder="أدخل اسم العميل"
+        label="عنوان الزيارة"
+        formControlName="title"
+        placeholder="أدخل عنوان الزيارة"
         [required]="true"
-        [error]="getErrorMessage('customer_name')"
-      />
-      <app-shared-input
-        label="اسم المهندس"
-        formControlName="engineer_name"
-        placeholder="أدخل اسم المهندس"
-        [required]="true"
-        [error]="getErrorMessage('engineer_name')"
-      />
-      <app-shared-input
-        label="اسم الماكينة"
-        formControlName="machine_name"
-        placeholder="أدخل اسم الماكينة"
-      />
-      <app-shared-input
-        label="تاريخ الزيارة"
-        type="date"
-        formControlName="planned_start"
-        [required]="true"
-        [error]="getErrorMessage('planned_start')"
+        [error]="getErrorMessage('title')"
+        [disabled]="visit().id !== 0"
       />
       <app-shared-select
-        label="الحالة"
-        formControlName="status"
-        [options]="statusOptions"
+        label="العميل"
+        formControlName="customer_id"
+        [options]="customerOptions()"
+        placeholder="اختر العميل"
         [required]="true"
-        [error]="getErrorMessage('status')"
+        [filter]="true"
+        [error]="getErrorMessage('customer_id')"
+        [disabled]="visit().id !== 0"
+      />
+      <app-shared-select
+        label="الماكينة"
+        formControlName="machine_id"
+        [options]="machineOptions()"
+        placeholder="اختر الماكينة"
+        [required]="true"
+        [filter]="true"
+        [error]="getErrorMessage('machine_id')"
+        [disabled]="visit().id !== 0"
+      />
+      <app-shared-select
+        label="مرتبط بتذكرة"
+        formControlName="ticket_id"
+        [options]="ticketOptions()"
+        placeholder="اختر تذكرة (اختياري)"
+        [filter]="true"
+        [showClear]="true"
+        [disabled]="visit().id !== 0"
       />
       <app-shared-select
         label="الأولوية"
@@ -44,17 +48,42 @@
         [options]="priorityOptions"
         [required]="true"
         [error]="getErrorMessage('priority')"
+        [disabled]="visit().id !== 0"
+      />
+      <app-shared-select
+        label="المهندس"
+        formControlName="engineer_id"
+        [options]="engineerOptions()"
+        placeholder="اختر المهندس (اختياري)"
+        [filter]="true"
+        [showClear]="true"
+      />
+      <app-shared-input
+        label="تاريخ الزيارة"
+        type="date"
+        formControlName="visit_date"
+        [required]="true"
+        [error]="getErrorMessage('visit_date')"
+      />
+      <app-shared-select
+        label="الحالة"
+        formControlName="status"
+        [options]="statusOptions()"
+        [required]="true"
+        [error]="getErrorMessage('status')"
       />
     </div>
 
-    <div class="visit-form__full">
-      <label class="visit-form__label">ملاحظات</label>
-      <textarea
-        class="visit-form__textarea"
-        formControlName="notes"
-        placeholder="أدخل أي ملاحظات إضافية هنا..."
-      ></textarea>
-    </div>
+    @if (visit().id !== 0) {
+      <div class="visit-form__full">
+        <label class="visit-form__label">ملاحظات</label>
+        <textarea
+          class="visit-form__textarea"
+          formControlName="notes"
+          placeholder="أدخل أي ملاحظات إضافية هنا..."
+        ></textarea>
+      </div>
+    }
 
     <div class="visit-form__actions">
       <app-button

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { SharedModalComponent } from '../../../../shared/components/shared-modal/shared-modal.component';
 import { TicketsService, Ticket } from '../../services/tickets.service';
 import { Router } from '@angular/router';
+import { AuthLocalService } from '@/auth/services/auth-local.service';
 
 @Component({
   selector: 'app-ticket-detail',
@@ -14,6 +15,7 @@ import { Router } from '@angular/router';
 export class TicketDetailComponent {
   private readonly ticketsService = inject(TicketsService);
   private readonly router = inject(Router);
+  readonly auth = inject(AuthLocalService);
 
   @Input() visible = false;
   @Input() ticket: any = null;

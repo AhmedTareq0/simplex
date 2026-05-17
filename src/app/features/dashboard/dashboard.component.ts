@@ -1,7 +1,8 @@
 import { Component, ChangeDetectionStrategy, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgApexchartsModule } from 'ng-apexcharts';
-import { IconComponent, SharedTableComponent, TableColumn, ButtonComponent } from '../../shared/components';
+import { IconComponent, SharedTableComponent, TableColumn, ButtonComponent, SharedDatepickerComponent } from '../../shared/components';
+import { FormsModule } from '@angular/forms';
 
 import { DashboardService } from './services/dashboard.service';
 import { AdminSyncService } from '../../core/services/admin-sync.service';
@@ -12,7 +13,7 @@ import { ticketStatusConfig, monthlyTicketsConfig, visitsTrendConfig } from './c
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, NgApexchartsModule, IconComponent, SharedTableComponent, ButtonComponent],
+  imports: [CommonModule, FormsModule, NgApexchartsModule, IconComponent, SharedTableComponent, ButtonComponent, SharedDatepickerComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,6 +26,7 @@ export class DashboardComponent implements OnInit {
   readonly dailyVisits = signal<any[]>([]);
   readonly topAgents = signal<any[]>([]);
   readonly isLoading = signal(true);
+  readonly rangeDates = signal<Date[] | null>(null);
 
   private dataSubscription?: Subscription;
 
@@ -46,6 +48,13 @@ export class DashboardComponent implements OnInit {
         }
       }
     }
+  ];
+
+  readonly agentColumns: TableColumn[] = [
+    { field: 'name', header: 'الموظف', type: 'text' },
+    { field: 'role', header: 'الدور / القسم', type: 'badge' },
+    { field: 'resolved', header: 'تذاكر محلولة', type: 'number' },
+    { field: 'satisfaction', header: 'نسبة الرضا', type: 'text', formatter: (val: any) => `${val}%` }
   ];
 
   readonly tableLabels = {

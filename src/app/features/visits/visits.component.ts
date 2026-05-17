@@ -39,6 +39,24 @@ export class VisitsComponent implements OnInit {
   get isLoading(): boolean { return this.visitsService.isLoading(); }
   get total(): number { return this.visitsService.total(); }
   get visits(): Visit[] { return this.visitsService.visits(); }
+  get nextVisit() { return this.visitsService.nextVisit; }
+
+  formatVisitDate(dateStr?: string | null): string {
+    if (!dateStr) return '—';
+    return new Date(dateStr).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  getStatusLabel(status: string): string {
+    const labels: Record<string, string> = {
+      new: 'جديدة',
+      in_progress: 'قيد التنفيذ',
+      done: 'مكتمل',
+      cancelled: 'ملغى',
+      scheduled: 'مجدول',
+      completed: 'مكتمل'
+    };
+    return labels[status] || status;
+  }
 
   columns: TableColumn[] = [
     { field: 'name', header: 'اسم الزيارة', type: 'text', filterable: true },

@@ -5,6 +5,7 @@ import { tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { WebSocketService } from '../../../core/services/websocket.service';
 import { buildHttpParams } from '../../../core/utils/http-params.util';
+import { AuthLocalService } from '@/auth/services/auth-local.service';
 
 export interface Conversation {
   conversation_id: string;
@@ -37,6 +38,7 @@ export interface ApiMessage {
 export class ChatService {
   private readonly http = inject(HttpClient);
   private readonly ws = inject(WebSocketService);
+  private readonly auth = inject(AuthLocalService);
   private readonly base = environment.apiUrl;
 
   readonly activeConversationId = signal<string | null>(null);
@@ -195,7 +197,12 @@ export class ChatService {
     form.append('ConversationId', conversationId);
     form.append('Message', message.trim() || ' ');
     if (attachment) form.append('Attachment', attachment);
-    return this.http.post<any>(`${this.base}/api/ai-assistant/customer-care/message`, form);
+
+    const endpoint = this.auth.hasPermission('chat.engineer') && !this.auth.hasPermission('chat.cc')
+      ? `${this.base}/api/ai-assistant/engineer/message`
+      : `${this.base}/api/ai-assistant/customer-care/message`;
+
+    return this.http.post<any>(endpoint, form);
   }
 
   requestVisit(conversationId: string): Observable<any> {
@@ -203,23 +210,23 @@ export class ChatService {
       `${this.base}/api/ai-assistant/customer-care/request-engineer-visit`,
       { conversation_id: conversationId }
     ).pipe(
-      tap((res) => {
-        if (res.success && res.data && res.data.engineer_name) {
-          const sysMsg: ApiMessage = {
-            id: 'sys-' + Date.now(),
-            role: 'system',
-            content: `تم انضمام المهندس ${res.data.engineer_name} للمحادثة`,
-            attachment_url: null,
-            attachment_type: null,
-            timestamp: new Date().toISOString(),
-          };
-
-          if (conversationId === this.activeConversationId()) {
-            this.messages.update(prev => [...prev, sysMsg]);
-          }
-
-        }
-      })
+      // tap((res) => {
+      //   if (res.success && res.data && res.data.engineer_name) {
+      //     const sysMsg: ApiMessage = {
+      //       id: 'sys-' + Date.now(),
+      //       role: 'system',
+      //       content: `تم انضمام المهندس ${res.data.engineer_name} للمحادثة`,
+      //       attachment_url: null,
+      //       attachment_type: null,
+      //       timestamp: new Date().toISOString(),
+      //     };
+      // 
+      //     if (conversationId === this.activeConversationId()) {
+      //       this.messages.update(prev => [...prev, sysMsg]);
+      //     }
+      // 
+      //   }
+      // })
     );
   }
 

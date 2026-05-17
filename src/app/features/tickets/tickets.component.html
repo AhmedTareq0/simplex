@@ -5,11 +5,13 @@
       <p class="tickets__subtitle">إدارة تذاكر دعم العملاء</p>
     </div>
     <div class="tickets__actions">
-      <app-button
-        label="إنشاء تذكرة"
-        icon="plus"
-        (pressed)="showCreate.set(true)"
-      />
+      @if (auth.hasPermission('tickets.create')) {
+        <app-button
+          label="إنشاء تذكرة"
+          icon="plus"
+          (pressed)="showCreate.set(true)"
+        />
+      }
     </div>
   </div>
 
@@ -30,7 +32,7 @@
       [totalRecords]="total"
       [rows]="pageSize()"
       [currentPage]="currentPage()"
-      [showSync]="isSuperAdmin"
+      [showSync]="auth.hasPermission('sync.manage')"
       [isSyncing]="isSyncing()"
       (onSync)="onSync()"
       (onPageChange)="onPageChange($event)"

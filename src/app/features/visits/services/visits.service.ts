@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ApiResponse, PagedResult } from '../../../core/interfaces/api-response.interface';
 import { buildHttpParams } from '../../../core/utils/http-params.util';
+import { AuthLocalService } from '@/auth/services/auth-local.service';
 
 export interface VisitEngineer {
   id: number;
@@ -28,7 +29,11 @@ export interface Visit {
   deadline?: string | null;
   customer_name?: string;
   engineer_name?: string;
+  customer_id?: number;
+  engineer_id?: number;
+  machine_id?: number;
   machine_name?: string;
+  ticket_id?: number;
   visit_date?: string;
   priority?: string;
   notes?: string;
@@ -46,16 +51,28 @@ export interface VisitFilters {
   page_size?: number;
 }
 
+export interface VisitsResult extends PagedResult<Visit> {
+  next_visit?: Visit;
+}
+
 @Injectable({ providedIn: 'root' })
 export class VisitsService {
   private readonly http = inject(HttpClient);
+  private readonly auth = inject(AuthLocalService);
   private readonly base = environment.apiUrl;
 
   readonly visits = signal<Visit[]>([]);
+  readonly nextVisit = signal<Visit | null>(null);
   readonly isLoading = signal(false);
   readonly total = signal(0);
 
-  loadVisits(filters: VisitFilters = {}, all: boolean = true): void {
+  private getVisitsEndpoint(): string {
+    return this.auth.hasPermission('visits.view_all')
+      ? `${this.base}/api/visits/all`
+      : `${this.base}/api/visits`;
+  }
+
+  loadVisits(filters: VisitFilters = {}): void {
     this.isLoading.set(true);
 
     const params = buildHttpParams({
@@ -66,12 +83,13 @@ export class VisitsService {
       to: filters.to,
     });
 
-    const endpoint = all ? `${this.base}/api/visits/all` : `${this.base}/api/visits`;
+    const endpoint = this.getVisitsEndpoint();
 
-    this.http.get<ApiResponse<PagedResult<Visit>>>(endpoint, { params })
+    this.http.get<ApiResponse<VisitsResult>>(endpoint, { params })
       .subscribe({
         next: (res) => {
           this.visits.set(res.data?.items || []);
+          this.nextVisit.set(res.data?.next_visit || null);
           this.total.set(res.data?.total || 0);
           this.isLoading.set(false);
         },

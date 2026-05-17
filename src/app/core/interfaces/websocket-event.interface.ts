@@ -45,3 +45,13 @@ export interface ConversationEndedPayload {
 export interface ConversationReopenedPayload {
   conversation_id: string;
 }
+
+export interface NotificationPayload {
+  id: number | string;
+  type: string;
+  title: string;
+  body: string;
+  is_read: boolean;
+  created_at: string;
+  data: string;
+}

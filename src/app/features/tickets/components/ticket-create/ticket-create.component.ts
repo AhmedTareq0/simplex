@@ -9,6 +9,8 @@ import { TicketsService, CreateTicketPayload, UpdateTicketPayload } from '../../
 import { MachineService } from '../../../machines/services/machine.service';
 import { EmployeeService } from '../../../employees/services/employee.service';
 import { ChatService, Conversation } from '../../../chat/services/chat.service';
+import { ClientService } from '../../../clients/services/client.service';
+import { AuthLocalService } from '@/auth/services/auth-local.service';
 
 @Component({
   selector: 'app-ticket-create',
@@ -29,6 +31,8 @@ export class TicketCreateComponent {
   private readonly machineService = inject(MachineService);
   private readonly employeeService = inject(EmployeeService);
   private readonly chatService = inject(ChatService);
+  private readonly clientService = inject(ClientService);
+  private readonly auth = inject(AuthLocalService);
 
   @Input() visible = false;
   @Input() isEditMode = false;
@@ -41,33 +45,35 @@ export class TicketCreateComponent {
   readonly errorMessage = signal('');
   readonly conversations = signal<Conversation[]>([]);
 
-  // Use computed signals to map data from the existing services
-  readonly machineOptions = computed(() => 
-    this.machineService.machines().map(m => ({ label: m.name, value: m.name }))
+  readonly machineOptions = computed(() =>
+    this.machineService.machines().map(m => ({ label: m.name, value: m.id }))
   );
 
-  readonly engineerOptions = computed(() => 
+  readonly clientOptions = computed(() =>
+    this.clientService.clients().map(c => ({ label: c.name, value: c.odoo_user_id }))
+  );
+
+  readonly engineerOptions = computed(() =>
     this.employeeService.employees()
       .filter(e => e.department === 'Maintenance' || e.employee_role === 'Maintenance')
       .map(e => ({ label: e.name, value: e.odoo_user_id }))
   );
 
-  readonly conversationOptions = computed(() => 
-    this.conversations().map(c => ({ 
-      label: `${c.customer_name} - ${c.conversation_id.substring(0, 8)}`, 
-      value: c.conversation_id 
+  readonly conversationOptions = computed(() =>
+    this.conversations().map(c => ({
+      label: `${c.customer_name} - ${c.conversation_id.substring(0, 8)}`,
+      value: c.conversation_id
     }))
   );
 
   formData = {
+    customer_id: null as number | null,
     title: '',
-    description: '',
     priority: 'medium' as string,
     status: 'open' as string,
     visit_date: '' as string,
-    machine_id: '' as string,
+    machine_id: null as number | null,
     engineer_id: null as number | null,
-    conversation_id: '' as string,
   };
 
   priorityOptions = [
@@ -84,38 +90,45 @@ export class TicketCreateComponent {
   ];
 
   ngOnInit() {
-    // Load data using existing services
-    this.machineService.loadMachines({ pageSize: 100 });
-    this.employeeService.loadEmployees({ department: 'Maintenance', page_size: 100 });
-    this.chatService.getConversations({ page_size: 100 }).subscribe(res => {
-      this.conversations.set(res.data?.items || []);
-    });
   }
 
   ngOnChanges() {
     if (this.visible) {
+      if (this.auth.hasPermission('tickets.create') || this.auth.hasPermission('tickets.update')) {
+        if (this.auth.hasPermission('users.manage')) {
+          this.clientService.loadClients({ page_size: 100 });
+          this.employeeService.loadEmployees({ department: 'Maintenance', page_size: 100 });
+        }
+        if (this.auth.hasPermission('machines.view') || this.auth.hasPermission('machines.manage')) {
+          this.machineService.loadMachines({ pageSize: 100 });
+        }
+        if (this.auth.hasPermission('chat.cc') || this.auth.hasPermission('chat.engineer')) {
+          this.chatService.getConversations({ page_size: 100 }).subscribe(res => {
+            this.conversations.set(res.data?.items || []);
+          });
+        }
+      }
+
       this.errorMessage.set('');
       if (this.isEditMode && this.editData) {
         this.formData = {
+          customer_id: this.editData.customer_id || null,
           title: this.editData.title || '',
-          description: this.editData.description || '',
           priority: this.editData.priority || 'medium',
           status: this.editData.status || 'open',
           visit_date: this.editData.visit_date ? this.editData.visit_date.split('T')[0] : '',
-          machine_id: this.editData.machine_id || '',
+          machine_id: this.editData.machine_id || null,
           engineer_id: this.editData.engineer_id || null,
-          conversation_id: this.editData.conversation_id || '',
         };
       } else {
         this.formData = {
+          customer_id: null,
           title: '',
-          description: '',
           priority: 'medium',
           status: 'open',
           visit_date: '',
-          machine_id: '',
+          machine_id: null,
           engineer_id: null,
-          conversation_id: '',
         };
       }
     }
@@ -127,8 +140,8 @@ export class TicketCreateComponent {
   }
 
   onSave() {
-    if (!this.formData.title) {
-      this.errorMessage.set('يرجى ملء العنوان');
+    if (!this.formData.title || (!this.isEditMode && (!this.formData.customer_id || !this.formData.machine_id))) {
+      this.errorMessage.set('يرجى ملء الحقول الإلزامية (العميل، العنوان، والماكينة)');
       return;
     }
 
@@ -137,13 +150,10 @@ export class TicketCreateComponent {
 
     if (this.isEditMode && this.editData?.id) {
       const payload: UpdateTicketPayload = {
-        title: this.formData.title,
-        description: this.formData.description,
         status: this.formData.status,
         priority: this.formData.priority,
         visit_date: this.formData.visit_date || null,
         engineer_id: this.formData.engineer_id,
-        conversation_id: this.formData.conversation_id || null,
       };
 
       this.ticketsService.updateTicket(Number(this.editData.id), payload).subscribe({
@@ -159,14 +169,11 @@ export class TicketCreateComponent {
       });
     } else {
       const payload: CreateTicketPayload = {
+        customer_id: this.formData.customer_id!,
         title: this.formData.title,
-        description: this.formData.description,
         priority: this.formData.priority as CreateTicketPayload['priority'],
         machine_id: this.formData.machine_id || undefined,
-        status: this.formData.status,
-        visit_date: this.formData.visit_date || null,
         engineer_id: this.formData.engineer_id,
-        conversation_id: this.formData.conversation_id || null,
       };
 
       this.ticketsService.createTicket(payload).subscribe({

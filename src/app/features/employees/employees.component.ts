@@ -67,14 +67,14 @@ export class EmployeesComponent implements OnInit {
       } as any)[value] || value
     },
     {
-      field: 'total_assigned_tickets',
+      field: 'total_active_assigned_tickets',
       header: 'تذاكر نشطة',
       type: 'badge',
       color: '#2563eb',
       formatter: (value: number) => (value || 0).toString()
     },
     {
-      field: 'total_assigned_visits',
+      field: 'total_active_assigned_visits',
       header: 'زيارات نشطة',
       type: 'badge',
       color: '#7c3aed',

@@ -16,7 +16,7 @@ import { AdminSyncService } from '../../core/services/admin-sync.service';
 })
 export class TicketsComponent implements OnInit {
   readonly ticketsService = inject(TicketsService);
-  private readonly auth = inject(AuthLocalService);
+  readonly auth = inject(AuthLocalService);
   private readonly syncService = inject(AdminSyncService);
 
   selectedTicket = signal<any>(null);
@@ -30,7 +30,6 @@ export class TicketsComponent implements OnInit {
 
   get isLoading(): boolean { return this.ticketsService.isLoading(); }
   get total(): number { return this.ticketsService.total(); }
-  get isSuperAdmin(): boolean { return this.auth.isSuperAdmin(); }
 
   columns: TableColumn[] = [
     {
@@ -78,22 +77,14 @@ export class TicketsComponent implements OnInit {
 
   private loadData() {
     const filters = { page: this.currentPage(), page_size: this.pageSize() };
-    if (this.isSuperAdmin) {
-      this.ticketsService.loadTickets(filters);
-    } else {
-      this.ticketsService.loadMyTickets(filters);
-    }
+    this.ticketsService.loadTickets(filters);
   }
 
   onPageChange(event: { page: number; rows: number }) {
     this.currentPage.set(event.page);
     this.pageSize.set(event.rows);
     const filters = { page: event.page, page_size: event.rows };
-    if (this.isSuperAdmin) {
-      this.ticketsService.loadTickets(filters);
-    } else {
-      this.ticketsService.loadMyTickets(filters);
-    }
+    this.ticketsService.loadTickets(filters);
   }
 
   onSync() {
