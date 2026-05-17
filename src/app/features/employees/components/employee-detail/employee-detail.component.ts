@@ -95,23 +95,29 @@ export class EmployeeDetailComponent implements OnInit {
   }
 
   private loadAssignedData(id: number) {
-    this.isLoadingTickets.set(true);
-    this.employeeService.getEmployeeTickets(id).subscribe({
-      next: (res) => {
-        this.assignedTickets.set(res.data?.items || []);
-        this.isLoadingTickets.set(false);
-      },
-      error: () => this.isLoadingTickets.set(false)
-    });
+    const role = this.employeeDetails()?.employee_role;
 
-    this.isLoadingVisits.set(true);
-    this.employeeService.getEmployeeVisits(id).subscribe({
-      next: (res) => {
-        this.assignedVisits.set(res.data?.items || []);
-        this.isLoadingVisits.set(false);
-      },
-      error: () => this.isLoadingVisits.set(false)
-    });
+    if (role !== 'engineer') {
+      this.isLoadingTickets.set(true);
+      this.employeeService.getEmployeeTickets(id).subscribe({
+        next: (res) => {
+          this.assignedTickets.set(res.data?.items || []);
+          this.isLoadingTickets.set(false);
+        },
+        error: () => this.isLoadingTickets.set(false)
+      });
+    }
+
+    if (role !== 'customer_care') {
+      this.isLoadingVisits.set(true);
+      this.employeeService.getEmployeeVisits(id).subscribe({
+        next: (res) => {
+          this.assignedVisits.set(res.data?.items || []);
+          this.isLoadingVisits.set(false);
+        },
+        error: () => this.isLoadingVisits.set(false)
+      });
+    }
   }
 
   onBack() {
