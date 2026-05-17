@@ -57,13 +57,17 @@
 
       <!-- Actions -->
       <div class="cd-split__actions">
-        <button class="cd-split__btn cd-split__btn--edit" (click)="startEdit()">تعديل</button>
+        @if (auth.hasPermission('tickets.update')) {
+          <button class="cd-split__btn cd-split__btn--edit" (click)="startEdit()">تعديل</button>
+        }
         @if (ticket.conversation_id) {
           <button class="cd-split__btn cd-split__btn--ghost" (click)="goToChat()">فتح المحادثة</button>
         }
-        <button class="cd-split__btn cd-split__btn--danger" (click)="onDelete()" [disabled]="isDeleting()">
-          {{ isDeleting() ? 'جاري الحذف...' : 'حذف' }}
-        </button>
+        @if (auth.hasPermission('tickets.delete')) {
+          <button class="cd-split__btn cd-split__btn--danger" (click)="onDelete()" [disabled]="isDeleting()">
+            {{ isDeleting() ? 'جاري الحذف...' : 'حذف' }}
+          </button>
+        }
       </div>
 
     </div>

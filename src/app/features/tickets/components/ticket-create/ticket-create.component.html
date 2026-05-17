@@ -5,45 +5,43 @@
   (closed)="close()"
 >
   <div class="ticket-create__form">
-    <app-shared-input
-      label="العنوان"
-      type="text"
-      [(ngModel)]="formData.title"
-      placeholder="أدخل عنوان التذكرة"
-      class="ticket-create__field"
-    ></app-shared-input>
+    @if (!isEditMode) {
+      <app-shared-select
+        label="العميل *"
+        [options]="clientOptions()"
+        [(ngModel)]="formData.customer_id"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="اختر العميل"
+        [showClear]="true"
+        [filter]="true"
+        class="ticket-create__field"
+      ></app-shared-select>
+    }
 
-    <app-shared-input
-      label="الوصف"
-      type="text"
-      [(ngModel)]="formData.description"
-      placeholder="أدخل وصف المشكلة"
-      class="ticket-create__field"
-    ></app-shared-input>
+    @if (!isEditMode) {
+      <app-shared-input
+        label="العنوان *"
+        type="text"
+        [(ngModel)]="formData.title"
+        placeholder="أدخل عنوان التذكرة"
+        class="ticket-create__field"
+      ></app-shared-input>
+    }
 
-    <app-shared-select
-      label="المكينة"
-      [options]="machineOptions()"
-      [(ngModel)]="formData.machine_id"
-      optionLabel="label"
-      optionValue="value"
-      placeholder="اختر المكينة"
-      [showClear]="true"
-      [filter]="true"
-      class="ticket-create__field"
-    ></app-shared-select>
-
-    <app-shared-select
-      label="ربط بمحادثة"
-      [options]="conversationOptions()"
-      [(ngModel)]="formData.conversation_id"
-      optionLabel="label"
-      optionValue="value"
-      placeholder="اختر المحادثة (اختياري)"
-      [showClear]="true"
-      [filter]="true"
-      class="ticket-create__field"
-    ></app-shared-select>
+    @if (!isEditMode) {
+      <app-shared-select
+        label="الماكينة *"
+        [options]="machineOptions()"
+        [(ngModel)]="formData.machine_id"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="اختر الماكينة"
+        [showClear]="true"
+        [filter]="true"
+        class="ticket-create__field"
+      ></app-shared-select>
+    }
 
     <app-shared-select
       label="المهندس المسؤول"
@@ -57,12 +55,14 @@
       class="ticket-create__field"
     ></app-shared-select>
 
-    <app-shared-input
-      label="تاريخ الزيارة المتوقع"
-      type="date"
-      [(ngModel)]="formData.visit_date"
-      class="ticket-create__field"
-    ></app-shared-input>
+    @if (isEditMode) {
+      <app-shared-input
+        label="تاريخ الزيارة المتوقع"
+        type="date"
+        [(ngModel)]="formData.visit_date"
+        class="ticket-create__field"
+      ></app-shared-input>
+    }
 
     <div class="ticket-create__row">
       <app-shared-select
@@ -76,16 +76,18 @@
         class="ticket-create__field"
       ></app-shared-select>
 
-      <app-shared-select
-        label="الحالة"
-        [options]="statusOptions"
-        [(ngModel)]="formData.status"
-        optionLabel="label"
-        optionValue="value"
-        placeholder="اختر الحالة"
-        [showClear]="false"
-        class="ticket-create__field"
-      ></app-shared-select>
+      @if (isEditMode) {
+        <app-shared-select
+          label="الحالة"
+          [options]="statusOptions"
+          [(ngModel)]="formData.status"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="اختر الحالة"
+          [showClear]="false"
+          class="ticket-create__field"
+        ></app-shared-select>
+      }
     </div>
 
     @if (errorMessage()) {

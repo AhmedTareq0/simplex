@@ -1,0 +1,28 @@
+<div class="app-shared-datepicker">
+  @if (label) {
+    <label class="app-shared-datepicker__label">
+      {{ label }}
+    </label>
+  }
+
+  <p-datepicker
+    [(ngModel)]="value"
+    (ngModelChange)="onModelChange($event)"
+    [selectionMode]="selectionMode"
+    [readonlyInput]="readonlyInput"
+    [showButtonBar]="showButtonBar"
+    [placeholder]="placeholder"
+    [disabled]="disabled"
+    [minDate]="minDate"
+    [maxDate]="maxDate"
+    appendTo="body"
+    styleClass="app-shared-datepicker__control"
+    panelStyleClass="app-shared-datepicker__panel"
+  ></p-datepicker>
+
+  @if (error) {
+    <p class="app-shared-datepicker__message app-shared-datepicker__message--error">{{ error }}</p>
+  } @else if (hint) {
+    <p class="app-shared-datepicker__message">{{ hint }}</p>
+  }
+</div>

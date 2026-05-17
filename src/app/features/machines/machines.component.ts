@@ -7,6 +7,7 @@ import { MachineEditModalComponent } from './components/machine-edit-modal/machi
 import { MachineDetailComponent } from './components/machine-detail/machine-detail.component';
 import { AdminSyncService } from '../../core/services/admin-sync.service';
 import { ApiResponse } from '../../core/interfaces/api-response.interface';
+import { AuthLocalService } from '../../auth/services/auth-local.service';
 
 @Component({
   selector: 'app-machines',
@@ -18,6 +19,7 @@ import { ApiResponse } from '../../core/interfaces/api-response.interface';
 })
 export class MachinesComponent implements OnInit {
   readonly machineService = inject(MachineService);
+  readonly auth = inject(AuthLocalService);
   private readonly syncService = inject(AdminSyncService);
 
   selectedMachine = signal<Machine | null>(null);

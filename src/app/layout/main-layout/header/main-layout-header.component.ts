@@ -23,7 +23,7 @@ export class MainLayoutHeaderComponent implements OnInit {
 
   readonly mappedNotifications = computed<NotificationItem[]>(() => {
     return this.notifService.notifications().slice(0, 5).map(n => ({
-      id: n.id,
+      id: String(n.id),
       title: n.title,
       description: n.body,
       avatarText: this.getInitial(n.type),
@@ -66,14 +66,10 @@ export class MainLayoutHeaderComponent implements OnInit {
 
   private getInitial(type: string): string {
     const map: Record<string, string> = {
-      new_escalation: 'C',
-      ticket_update: 'T',
-      visit_scheduled: 'V',
-      visit_completed: 'D',
+      conversation_assigned: 'C',
       engineer_assigned: 'E',
       message_received: 'M',
-      system_alert: 'S',
-      visit_cancelled: 'X',
+      ticket_assigned: 'T',
     };
     return map[type] || 'N';
   }

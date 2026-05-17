@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard, guestGuard } from './core/guards/auth.guard';
+import { permissionGuard } from './core/guards/permission.guard';
 
 export const routes: Routes = [
   {
@@ -16,17 +17,23 @@ export const routes: Routes = [
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
       {
         path: 'dashboard',
+        canActivate: [permissionGuard],
+        data: { permission: 'dashboard.view' },
         loadComponent: () =>
           import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
       },
 
       {
         path: 'reports',
+        canActivate: [permissionGuard],
+        data: { permission: 'reports.view' },
         loadComponent: () =>
           import('./features/dashboard/reports/reports.component').then((m) => m.ReportsComponent),
       },
       {
         path: 'machines',
+        canActivate: [permissionGuard],
+        data: { permission: 'machines.view' },
         loadComponent: () =>
           import('./features/machines/machines.component').then((m) => m.MachinesComponent),
       },
@@ -49,6 +56,8 @@ export const routes: Routes = [
       },
       {
         path: 'employees',
+        canActivate: [permissionGuard],
+        data: { permission: 'users.manage' },
         children: [
           {
             path: '',
@@ -66,6 +75,8 @@ export const routes: Routes = [
       },
       {
         path: 'clients',
+        canActivate: [permissionGuard],
+        data: { permission: 'users.manage' },
         children: [
           {
             path: '',
@@ -83,11 +94,15 @@ export const routes: Routes = [
       },
       {
         path: 'settings',
+        canActivate: [permissionGuard],
+        data: { permission: 'settings.view' },
         loadComponent: () =>
           import('./features/settings/profile-settings.component').then((m) => m.ProfileSettingsComponent),
       },
       {
         path: 'notifications',
+        canActivate: [permissionGuard],
+        data: { permission: 'notifications.view' },
         loadComponent: () =>
           import('./features/notifications/notifications.component').then((m) => m.NotificationsComponent),
       },

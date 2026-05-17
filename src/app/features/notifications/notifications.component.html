@@ -3,7 +3,7 @@
   <div class="notifications__header">
     <div class="notifications__info">
       <h1 class="notifications__title">إدارة الإشعارات</h1>
-      <p class="notifications__subtitle">سجل الإشعارات وحالة التسليم وتاريخ الإشعارات</p>
+      <p class="notifications__subtitle">سجل الإشعارات الواردة</p>
     </div>
     <div class="notifications__actions">
       <app-button label="تصفية" variant="secondary" icon="filter" (pressed)="toggleFilters()" />
@@ -19,7 +19,7 @@
         <app-icon name="bell" size="md" />
       </div>
       <div class="stat-card__content">
-        <span class="stat-card__value">{{ stats.total }}</span>
+        <span class="stat-card__value">{{ total }}</span>
         <span class="stat-card__label">إجمالي الإشعارات</span>
       </div>
     </div>
@@ -33,58 +33,39 @@
         <span class="stat-card__label">غير مقروء</span>
       </div>
     </div>
-
-    <div class="stat-card stat-card--delivered">
-      <div class="stat-card__icon">
-        <app-icon name="check" size="md" />
-      </div>
-      <div class="stat-card__content">
-        <span class="stat-card__value">{{ stats.delivered }}</span>
-        <span class="stat-card__label">تم التسليم</span>
-      </div>
-    </div>
-
-    <div class="stat-card stat-card--failed">
-      <div class="stat-card__icon">
-        <app-icon name="xCircle" size="md" />
-      </div>
-      <div class="stat-card__content">
-        <span class="stat-card__value">{{ stats.failed }}</span>
-        <span class="stat-card__label">فشل التسليم</span>
-      </div>
-    </div>
   </div>
 
   <!-- Filters -->
   @if (showFilters()) {
   <div class="notifications__filters">
     <div class="filter-group">
-      <label class="filter-label">النوع</label>
-      <select class="filter-select" [ngModel]="filterType()" (ngModelChange)="filterType.set($event); onFilterChange()">
-        @for (opt of typeOptions; track opt.value) {
-        <option [value]="opt.value">{{ opt.label }}</option>
-        }
-      </select>
+      <app-shared-input
+        label="بحث"
+        placeholder="ابحث في الإشعارات..."
+        icon="search"
+        [ngModel]="filterSearch()"
+        (ngModelChange)="filterSearch.set($event); onFilterChange()">
+      </app-shared-input>
     </div>
 
     <div class="filter-group">
-      <label class="filter-label">الحالة</label>
-      <select class="filter-select" [ngModel]="filterStatus()"
-        (ngModelChange)="filterStatus.set($event); onFilterChange()">
-        @for (opt of statusOptions; track opt.value) {
-        <option [value]="opt.value">{{ opt.label }}</option>
-        }
-      </select>
+      <app-shared-select
+        label="النوع"
+        [options]="typeOptions"
+        [ngModel]="filterType()"
+        (ngModelChange)="filterType.set($event); onFilterChange()"
+        placeholder="الكل">
+      </app-shared-select>
     </div>
 
     <div class="filter-group">
-      <label class="filter-label">القناة</label>
-      <select class="filter-select" [ngModel]="filterChannel()"
-        (ngModelChange)="filterChannel.set($event); onFilterChange()">
-        @for (opt of channelOptions; track opt.value) {
-        <option [value]="opt.value">{{ opt.label }}</option>
-        }
-      </select>
+      <app-shared-select
+        label="الحالة"
+        [options]="readOptions"
+        [ngModel]="filterIsRead()"
+        (ngModelChange)="filterIsRead.set($event); onFilterChange()"
+        placeholder="الكل">
+      </app-shared-select>
     </div>
 
     <div class="filter-group filter-group--actions">
@@ -102,7 +83,26 @@
   <app-shared-table [data]="notifications" [columns]="columns" title="سجل الإشعارات" [showView]="false"
     [showEdit]="false" [showDelete]="false" [showActions]="false" [lazy]="true" [totalRecords]="total"
     [rows]="pageSize()" [currentPage]="currentPage()" (onPageChange)="onPageChange($event)"
-    (onRowClick)="onRowClick($event)" />
+    (onRowClick)="onRowClick($event)">
+    <ng-template #filterTpl let-col>
+      @if (col.field === 'type') {
+      <app-shared-select
+        [options]="typeOptions"
+        [ngModel]="filterType()"
+        (ngModelChange)="filterType.set($event); onFilterChange()"
+        placeholder="اختر النوع">
+      </app-shared-select>
+      }
+      @if (col.field === 'is_read') {
+      <app-shared-select
+        [options]="readOptions"
+        [ngModel]="filterIsRead()"
+        (ngModelChange)="filterIsRead.set($event); onFilterChange()"
+        placeholder="اختر الحالة">
+      </app-shared-select>
+      }
+    </ng-template>
+  </app-shared-table>
   }
 </div>
 
@@ -121,9 +121,9 @@
         <span class="notif-detail__time">{{ formatRelativeTime(selectedNotification()!.created_at) }}</span>
       </div>
       <span class="notif-detail__status-badge"
-        [style.background-color]="getStatusColor(selectedNotification()!.status) + '18'"
-        [style.color]="getStatusColor(selectedNotification()!.status)">
-        {{ getStatusLabel(selectedNotification()!.status) }}
+        [style.background-color]="getStatusColor(selectedNotification()!.is_read) + '18'"
+        [style.color]="getStatusColor(selectedNotification()!.is_read)">
+        {{ selectedNotification()!.is_read ? 'مقروء' : 'غير مقروء' }}
       </span>
     </div>
 
@@ -135,21 +135,6 @@
     <!-- Info Grid -->
     <div class="notif-detail__grid">
       <div class="notif-detail__item">
-        <span class="notif-detail__label">المستلم</span>
-        <span class="notif-detail__value">{{ selectedNotification()!.recipient_name }}</span>
-      </div>
-      <div class="notif-detail__item">
-        <span class="notif-detail__label">الدور</span>
-        <span class="notif-detail__value">{{ selectedNotification()!.recipient_role }}</span>
-      </div>
-      <div class="notif-detail__item">
-        <span class="notif-detail__label">القناة</span>
-        <span class="notif-detail__value">
-          <app-icon [name]="getChannelIcon(selectedNotification()!.channel)" size="sm" />
-          {{ getChannelLabel(selectedNotification()!.channel) }}
-        </span>
-      </div>
-      <div class="notif-detail__item">
         <span class="notif-detail__label">النوع</span>
         <span class="notif-detail__value">{{ getTypeLabel(selectedNotification()!.type) }}</span>
       </div>
@@ -157,22 +142,6 @@
         <span class="notif-detail__label">تاريخ الإرسال</span>
         <span class="notif-detail__value">{{ formatDate(selectedNotification()!.created_at) }}</span>
       </div>
-      <div class="notif-detail__item">
-        <span class="notif-detail__label">تاريخ التسليم</span>
-        <span class="notif-detail__value">{{ formatDate(selectedNotification()!.delivered_at) }}</span>
-      </div>
-      <div class="notif-detail__item">
-        <span class="notif-detail__label">تاريخ القراءة</span>
-        <span class="notif-detail__value">{{ formatDate(selectedNotification()!.read_at) }}</span>
-      </div>
-      @if (selectedNotification()!.reference_id) {
-      <div class="notif-detail__item">
-        <span class="notif-detail__label">المرجع</span>
-        <span class="notif-detail__value notif-detail__value--ref">
-          {{ selectedNotification()!.reference_type }} #{{ selectedNotification()!.reference_id }}
-        </span>
-      </div>
-      }
     </div>
 
     <!-- Actions -->

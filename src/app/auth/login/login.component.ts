@@ -68,7 +68,11 @@ export class LoginComponent {
     this.authService.login(credentials as any).subscribe({
       next: () => {
         this.isLoading.set(false);
-        this.router.navigate(['/dashboard']);
+        if (this.authService.hasPermission('dashboard.view')) {
+          this.router.navigate(['/dashboard']);
+        } else {
+          this.router.navigate(['/tickets']);
+        }
       },
       error: (err) => {
         this.isLoading.set(false);

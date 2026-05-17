@@ -32,6 +32,11 @@ export class ProfileSettingsComponent implements OnInit {
   activeTab = signal<'profile' | 'notifications' | 'security'>('profile');
   saveSuccess = signal(false);
   isLoading = signal(false);
+  isChangingPassword = signal(false);
+  passwordError = signal<string | null>(null);
+  showCurrentPassword = signal(false);
+  showNewPassword = signal(false);
+  showConfirmPassword = signal(false);
   avatarPreview = signal<string | null>(null);
 
   // Read from the auth service signal — stays in sync automatically
@@ -102,9 +107,24 @@ export class ProfileSettingsComponent implements OnInit {
 
   changePassword() {
     if (!this.passwordsMatch || !this.security.currentPassword) return;
-    this.security = { currentPassword: '', newPassword: '', confirmPassword: '' };
-    this.saveSuccess.set(true);
-    setTimeout(() => this.saveSuccess.set(false), 3000);
+
+    this.isChangingPassword.set(true);
+    this.passwordError.set(null);
+
+    this.authService.changePassword({
+      old_password: this.security.currentPassword,
+      new_password: this.security.newPassword,
+    }).subscribe({
+      next: () => {
+        // Session cleared & redirected to login by AuthLocalService
+        // No need to do anything here — clearSession() handles navigation
+      },
+      error: (err) => {
+        this.isChangingPassword.set(false);
+        const message = err?.error?.message || 'حدث خطأ أثناء تغيير كلمة المرور';
+        this.passwordError.set(message);
+      },
+    });
   }
 
   get passwordsMatch(): boolean {

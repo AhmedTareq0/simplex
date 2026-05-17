@@ -10,6 +10,7 @@ import {
   UnreadCountPayload,
   ConversationEndedPayload,
   ConversationReopenedPayload,
+  NotificationPayload,
 } from '../interfaces/websocket-event.interface';
 
 
@@ -43,6 +44,7 @@ export class WebSocketService {
   private _unreadCount$ = new Subject<UnreadCountPayload>();
   private _conversationEnded$ = new Subject<ConversationEndedPayload>();
   private _conversationReopened$ = new Subject<ConversationReopenedPayload>();
+  private _notification$ = new Subject<NotificationPayload>();
   private _pong$ = new Subject<void>();
   private _connected$ = new Subject<void>();
   private _disconnected$ = new Subject<CloseEvent>();
@@ -63,6 +65,7 @@ export class WebSocketService {
   readonly unreadCount$ = this._unreadCount$.asObservable();
   readonly conversationEnded$ = this._conversationEnded$.asObservable();
   readonly conversationReopened$ = this._conversationReopened$.asObservable();
+  readonly notification$ = this._notification$.asObservable();
   readonly pong$ = this._pong$.asObservable();
 
   connect(token: string): void {
@@ -223,6 +226,9 @@ export class WebSocketService {
         break;
       case 'ConversationReopened':
         this._conversationReopened$.next(msg.data);
+        break;
+      case 'Notification':
+        this._notification$.next(msg.data);
         break;
       case 'pong':
         this._pong$.next();

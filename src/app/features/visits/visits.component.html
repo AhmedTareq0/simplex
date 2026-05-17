@@ -5,7 +5,7 @@
       <p class="visits__subtitle">متابعة وإدارة مواعيد زيارات الصيانة والدعم الفني</p>
     </div>
     <div class="visits__actions">
-      @if (auth.isSuperAdmin()) {
+      @if (auth.hasPermission('visits.create')) {
         <app-button
           label="إضافة زيارة"
           icon="plus"
@@ -20,19 +20,59 @@
       <app-skeleton-loader type="table" [count]="8" />
     </div>
   } @else {
+    @if (nextVisit()) {
+      <div class="visits__next-visit">
+        <h2 class="visits__next-visit-title">الزيارة القادمة</h2>
+        <div class="visits__next-visit-card">
+          <div class="info-group">
+            <span class="info-label">اسم الزيارة:</span>
+            <span class="info-value">{{ nextVisit()!.name }}</span>
+          </div>
+          <div class="info-group">
+            <span class="info-label">الموعد المتوقع:</span>
+            <span class="info-value">{{ formatVisitDate(nextVisit()!.visit_date || nextVisit()!.planned_start) }}</span>
+          </div>
+          <div class="info-group">
+            <span class="info-label">العميل:</span>
+            <span class="info-value">{{ nextVisit()!.customer?.name || nextVisit()!.customer_name || '—' }}</span>
+          </div>
+          <div class="info-group">
+            <span class="info-label">المهندس:</span>
+            <span class="info-value">{{ nextVisit()!.engineer?.name || nextVisit()!.engineer_name || '—' }}</span>
+          </div>
+          @if (nextVisit()!.machine_name) {
+            <div class="info-group">
+              <span class="info-label">الماكينة:</span>
+              <span class="info-value">{{ nextVisit()!.machine_name }}</span>
+            </div>
+          }
+          @if (nextVisit()!.ticket_id) {
+            <div class="info-group">
+              <span class="info-label">رقم التذكرة:</span>
+              <span class="info-value">#{{ nextVisit()!.ticket_id }}</span>
+            </div>
+          }
+          <div class="info-group">
+            <span class="info-label">الحالة:</span>
+            <span class="info-value">{{ getStatusLabel(nextVisit()!.status) }}</span>
+          </div>
+        </div>
+      </div>
+    }
+
     <app-shared-table
       [data]="visits"
       [columns]="columns"
       title="قائمة الزيارات"
       [showView]="true"
-      [showEdit]="true"
+      [showEdit]="auth.hasPermission('visits.update')"
       [showDelete]="false"
       [showActions]="true"
       [lazy]="true"
       [totalRecords]="total"
       [rows]="pageSize()"
       [currentPage]="currentPage()"
-      [showSync]="auth.isSuperAdmin()"
+      [showSync]="auth.hasPermission('sync.manage')"
       [isSyncing]="isSyncing()"
       (onSync)="onSync()"
       (onPageChange)="onPageChange($event)"

@@ -2,13 +2,13 @@ import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@ang
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgApexchartsModule } from 'ng-apexcharts';
-import { IconComponent, ButtonComponent, SharedTableComponent, TableColumn, SkeletonLoaderComponent, SharedSelectComponent } from '../../../shared/components';
+import { IconComponent, ButtonComponent, SharedTableComponent, TableColumn, SkeletonLoaderComponent, SharedSelectComponent, SharedDatepickerComponent } from '../../../shared/components';
 import { DashboardService, DashboardStats } from '../services/dashboard.service';
 
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgApexchartsModule, IconComponent, ButtonComponent, SharedTableComponent, SkeletonLoaderComponent, SharedSelectComponent],
+  imports: [CommonModule, FormsModule, NgApexchartsModule, IconComponent, ButtonComponent, SharedTableComponent, SkeletonLoaderComponent, SharedSelectComponent, SharedDatepickerComponent],
   templateUrl: './reports.component.html',
   styleUrl: './reports.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,6 +36,7 @@ export class ReportsComponent implements OnInit {
   readonly selectedTimeRange = signal('30d');
   readonly selectedDepartment = signal('all');
   readonly selectedAgent = signal<string | null>(null);
+  readonly rangeDates = signal<Date[] | null>(null);
 
   readonly workloadChartOptions = signal<any>({
     chart: { type: 'donut', height: 350 },

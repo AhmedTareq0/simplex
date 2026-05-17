@@ -1,7 +1,7 @@
 import { Component, input, signal, computed, inject, Output, EventEmitter } from '@angular/core';
 import { IconComponent, SharedConfirmationComponent } from '../../../../shared/components';
 import { ChatService } from '../../services/chat.service';
-import { AuthLocalService } from '../../../../auth/services/auth-local.service';
+import { AuthLocalService } from '@/auth/services/auth-local.service';
 
 @Component({
   selector: 'app-chat-header',
@@ -28,8 +28,8 @@ export class ChatHeaderComponent {
   readonly isDeleting = signal(false);
   readonly showDeleteConfirm = signal(false);
 
-  readonly isSuperAdmin = computed(() => this.auth.isSuperAdmin());
-  readonly canRequestVisit = computed(() => this.status() === 'with_customer_care');
+  readonly canDeleteChat = computed(() => this.auth.hasPermission('chat.delete'));
+  readonly canRequestVisit = computed(() => this.status() === 'with_customer_care' && this.auth.hasPermission('chat.cc'));
   readonly isWithEngineer = computed(() => this.status() === 'with_engineer');
   readonly hasMenuItems = computed(() => this.canRequestVisit() || this.isWithEngineer());
 

@@ -10,15 +10,14 @@ import {
   IconComponent,
   SharedModalComponent,
   AppIconName,
+  SharedInputComponent,
+  SharedSelectComponent,
 } from '../../shared/components';
 import {
   NotificationsService,
-  AppNotification,
-  NotificationType,
-  NotificationStatus,
-  NotificationChannel,
   NotificationFilters,
 } from './services/notifications.service';
+import { NotificationPayload } from '../../core/interfaces/websocket-event.interface';
 
 @Component({
   selector: 'app-notifications',
@@ -31,6 +30,8 @@ import {
     ButtonComponent,
     IconComponent,
     SharedModalComponent,
+    SharedInputComponent,
+    SharedSelectComponent,
   ],
   templateUrl: './notifications.component.html',
   styleUrl: './notifications.component.scss',
@@ -40,21 +41,21 @@ export class NotificationsComponent implements OnInit {
   readonly notifService = inject(NotificationsService);
   private readonly route = inject(ActivatedRoute);
 
-  selectedNotification = signal<AppNotification | null>(null);
+  selectedNotification = signal<NotificationPayload | null>(null);
   showDetailModal = signal(false);
   currentPage = signal(1);
   pageSize = signal(10);
   isMarkingAll = signal(false);
 
   // Filters
-  filterType = signal<NotificationType | ''>('');
-  filterStatus = signal<NotificationStatus | ''>('');
-  filterChannel = signal<NotificationChannel | ''>('');
+  filterType = signal<string>('');
+  filterIsRead = signal<boolean | ''>('');
+  filterSearch = signal<string>('');
   showFilters = signal(false);
 
   get isLoading(): boolean { return this.notifService.isLoading(); }
   get total(): number { return this.notifService.total(); }
-  get notifications(): AppNotification[] { return this.notifService.notifications(); }
+  get notifications(): NotificationPayload[] { return this.notifService.notifications(); }
   get stats() { return this.notifService.stats(); }
 
   columns: TableColumn[] = [
@@ -63,29 +64,19 @@ export class NotificationsComponent implements OnInit {
       header: 'النوع',
       type: 'badge',
       formatter: (value: string) => this.getTypeLabel(value),
+      filterable: true,
     },
     {
       field: 'title',
       header: 'العنوان',
       type: 'text',
-      filterable: true,
     },
     {
-      field: 'recipient_name',
-      header: 'المستلم',
-      type: 'text',
-    },
-    {
-      field: 'channel',
-      header: 'القناة',
-      type: 'badge',
-      formatter: (value: string) => this.getChannelLabel(value),
-    },
-    {
-      field: 'status',
+      field: 'is_read',
       header: 'الحالة',
       type: 'badge',
-      formatter: (value: string) => this.getStatusLabel(value),
+      formatter: (value: boolean) => value ? 'مقروء' : 'غير مقروء',
+      filterable: true,
     },
     {
       field: 'created_at',
@@ -97,30 +88,16 @@ export class NotificationsComponent implements OnInit {
 
   readonly typeOptions = [
     { label: 'الكل', value: '' },
-    { label: 'محادثة مصعّدة', value: 'new_escalation' },
-    { label: 'تحديث تذكرة', value: 'ticket_update' },
-    { label: 'زيارة مجدولة', value: 'visit_scheduled' },
-    { label: 'زيارة مكتملة', value: 'visit_completed' },
-    { label: 'تعيين مهندس', value: 'engineer_assigned' },
+    { label: 'محادثة مصعّدة', value: 'conversation_assigned' },
     { label: 'رسالة جديدة', value: 'message_received' },
-    { label: 'تنبيه النظام', value: 'system_alert' },
-    { label: 'إلغاء زيارة', value: 'visit_cancelled' },
+    { label: 'تعيين مهندس', value: 'engineer_assigned' },
+    { label: 'إسناد تذكرة', value: 'ticket_assigned' },
   ];
 
-  readonly statusOptions = [
+  readonly readOptions = [
     { label: 'الكل', value: '' },
-    { label: 'مرسل', value: 'sent' },
-    { label: 'تم التسليم', value: 'delivered' },
-    { label: 'مقروء', value: 'read' },
-    { label: 'فشل', value: 'failed' },
-  ];
-
-  readonly channelOptions = [
-    { label: 'الكل', value: '' },
-    { label: 'Push', value: 'push' },
-    { label: 'WebSocket', value: 'websocket' },
-    { label: 'بريد إلكتروني', value: 'email' },
-    { label: 'SMS', value: 'sms' },
+    { label: 'مقروء', value: true },
+    { label: 'غير مقروء', value: false },
   ];
 
   ngOnInit() {
@@ -131,13 +108,12 @@ export class NotificationsComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       const id = params['id'];
       if (id) {
-        // Wait for data to load then find and open
         setTimeout(() => {
-          const notif = this.notifications.find(n => n.id === id);
+          const notif = this.notifications.find((n: NotificationPayload) => n.id.toString() === id.toString());
           if (notif) {
             this.onRowClick(notif);
           }
-        }, 800); // Wait for mock delay
+        }, 800);
       }
     });
   }
@@ -147,13 +123,16 @@ export class NotificationsComponent implements OnInit {
   }
 
   private buildFilters(): NotificationFilters {
-    return {
+    const filters: NotificationFilters = {
       page: this.currentPage(),
       page_size: this.pageSize(),
       type: this.filterType(),
-      status: this.filterStatus(),
-      channel: this.filterChannel(),
+      is_read: this.filterIsRead(),
     };
+    if (this.filterSearch()) {
+      filters.search = this.filterSearch();
+    }
+    return filters;
   }
 
   onPageChange(event: { page: number; rows: number }) {
@@ -162,17 +141,15 @@ export class NotificationsComponent implements OnInit {
     this.loadData();
   }
 
-  onRowClick(notification: AppNotification) {
+  onRowClick(notification: NotificationPayload) {
     this.selectedNotification.set(notification);
     this.showDetailModal.set(true);
 
     // Auto-mark as read when opened
-    if (notification.status !== 'read' && notification.status !== 'failed') {
+    if (!notification.is_read) {
       this.notifService.markAsRead(notification.id).subscribe({
         next: (res) => {
-          if (res.success && res.data) {
-            this.selectedNotification.set(res.data);
-          }
+          // No need to update local, service takes care of it
         }
       });
     }
@@ -185,8 +162,8 @@ export class NotificationsComponent implements OnInit {
 
   resetFilters() {
     this.filterType.set('');
-    this.filterStatus.set('');
-    this.filterChannel.set('');
+    this.filterIsRead.set('');
+    this.filterSearch.set('');
     this.currentPage.set(1);
     this.loadData();
   }
@@ -200,13 +177,12 @@ export class NotificationsComponent implements OnInit {
     this.notifService.markAllAsRead().subscribe({
       next: () => {
         this.isMarkingAll.set(false);
-        this.loadData();
       },
       error: () => this.isMarkingAll.set(false),
     });
   }
 
-  deleteNotification(id: string) {
+  deleteNotification(id: string | number) {
     this.notifService.deleteNotification(id).subscribe({
       next: () => {
         this.showDetailModal.set(false);
@@ -219,84 +195,36 @@ export class NotificationsComponent implements OnInit {
 
   getTypeLabel(type: string): string {
     const map: Record<string, string> = {
-      new_escalation: 'تصعيد',
-      ticket_update: 'تذكرة',
-      visit_scheduled: 'جدولة',
-      visit_completed: 'اكتمال',
-      engineer_assigned: 'تعيين',
-      message_received: 'رسالة',
-      system_alert: 'تنبيه',
-      visit_cancelled: 'إلغاء',
+      conversation_assigned: 'محادثة جديدة',
+      engineer_assigned: 'تعيين مهندس',
+      message_received: 'رسالة جديدة',
+      ticket_assigned: 'تذكرة جديدة',
     };
     return map[type] || type;
   }
 
   getTypeIcon(type: string): AppIconName {
     const map: Record<string, AppIconName> = {
-      new_escalation: 'messageSquare',
-      ticket_update: 'calendarClock',
-      visit_scheduled: 'mapMarker',
-      visit_completed: 'check',
+      conversation_assigned: 'messageSquare',
       engineer_assigned: 'users',
       message_received: 'chat',
-      system_alert: 'bell',
-      visit_cancelled: 'xCircle',
+      ticket_assigned: 'ticket',
     };
     return map[type] || 'bell';
   }
 
   getTypeColor(type: string): string {
     const map: Record<string, string> = {
-      new_escalation: '#8b5cf6',
-      ticket_update: '#3b82f6',
-      visit_scheduled: '#059669',
-      visit_completed: '#10b981',
+      conversation_assigned: '#8b5cf6',
       engineer_assigned: '#6366f1',
       message_received: '#0ea5e9',
-      system_alert: '#f59e0b',
-      visit_cancelled: '#ef4444',
+      ticket_assigned: '#10b981',
     };
     return map[type] || '#6b7280';
   }
 
-  getStatusLabel(status: string): string {
-    const map: Record<string, string> = {
-      sent: 'مرسل',
-      delivered: 'تم التسليم',
-      read: 'مقروء',
-      failed: 'فشل',
-    };
-    return map[status] || status;
-  }
-
-  getStatusColor(status: string): string {
-    const map: Record<string, string> = {
-      sent: '#f59e0b',
-      delivered: '#3b82f6',
-      read: '#10b981',
-      failed: '#ef4444',
-    };
-    return map[status] || '#6b7280';
-  }
-
-  getChannelLabel(channel: string): string {
-    const map: Record<string, string> = {
-      push: 'Push',
-      websocket: 'WebSocket',
-      email: 'بريد إلكتروني',
-      sms: 'SMS',
-    };
-    return map[channel] || channel;
-  }
-
-  getChannelIcon(channel: string): AppIconName {
-    const map: Record<string, AppIconName> = {
-      push: 'bell',
-      websocket: 'zap',
-      email: 'mail',
-      sms: 'phone',
-    };
-    return map[channel] || 'bell';
+  getStatusColor(is_read: boolean): string {
+    return is_read ? '#10b981' : '#f59e0b';
   }
 
   formatDate(date: string | null): string {
