@@ -1,0 +1,93 @@
+<div class="flex flex-col gap-4 p-4">
+  <!-- Header & Filters -->
+  <div
+    class="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+    <div class="flex items-center gap-2">
+      <div class="bg-primary-50 p-2 rounded-lg text-primary-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold text-slate-800">تقويم الأحداث</h2>
+        <p class="text-sm text-slate-500">إدارة الزيارات والتذاكر</p>
+      </div>
+    </div>
+
+    <!-- Advanced Filters -->
+    <div class="flex flex-wrap items-end gap-3 w-full md:w-auto">
+      <div class="flex flex-col gap-1 w-full md:w-48">
+        <label class="text-xs font-bold text-slate-500 mr-1">نوع الحدث</label>
+        <app-shared-select [options]="eventTypes" [ngModel]="selectedEventType()"
+          (ngModelChange)="onEventTypeChange($event)" placeholder="نوع الحدث"></app-shared-select>
+      </div>
+
+      @if (selectedEventType() !== 'visit') {
+      <div class="flex flex-col gap-1 w-full md:w-48">
+        <label class="text-xs font-bold text-slate-500 mr-1">خدمة العملاء (التذاكر)</label>
+        <app-shared-select [options]="csAgentsOptions()" [ngModel]="selectedCustomerSupport()"
+          (ngModelChange)="onCustomerSupportChange($event)" placeholder="اختر موظف" [filter]="true"></app-shared-select>
+      </div>
+      }
+
+      @if (selectedEventType() !== 'ticket') {
+      <div class="flex flex-col gap-1 w-full md:w-48">
+        <label class="text-xs font-bold text-slate-500 mr-1">المهندسين (الزيارات)</label>
+        <app-shared-select [options]="engineersOptions()" [ngModel]="selectedEngineer()"
+          (ngModelChange)="onEngineerChange($event)" placeholder="اختر مهندس" [filter]="true"></app-shared-select>
+      </div>
+      }
+
+      <div class="flex flex-col gap-1 w-full md:w-48">
+        <label class="text-xs font-bold text-slate-500 mr-1">العملاء</label>
+        <app-shared-select [options]="clientsOptions()" [ngModel]="selectedClient()"
+          (ngModelChange)="selectedClient.set($event)" placeholder="اختر عميل" [filter]="true"></app-shared-select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calendar Container -->
+  <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 calendar-container">
+    <full-calendar [options]="calendarOptions()"></full-calendar>
+  </div>
+</div>
+
+<!-- Event Details Dialog using Shared Modal -->
+<app-shared-modal [visible]="isDialogOpen()" (visibleChange)="isDialogOpen.set($event)"
+  [title]="selectedEventData()?.title || 'تفاصيل الحدث'" width="25vw" maxWidth="350px">
+  @if(selectedEventData(); as event) {
+  <div class="flex flex-col gap-4">
+    <div class="flex justify-between items-center border-b pb-2 border-slate-100">
+      <span class="text-slate-500 font-medium">النوع:</span>
+      <span class="px-3 py-1 rounded-full text-sm font-bold"
+        [ngClass]="event.type === 'visit' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'">
+        {{ event.type === 'visit' ? 'زيارة' : 'تذكرة' }}
+      </span>
+    </div>
+
+    <div class="flex justify-between items-center border-b pb-2 border-slate-100">
+      <span class="text-slate-500 font-medium">العميل:</span>
+      <span class="text-slate-800">{{ event.client }}</span>
+    </div>
+
+    <div class="flex justify-between items-center pb-2 border-slate-100">
+      <span class="text-slate-500 font-medium">الحالة:</span>
+      <span class="text-slate-800 font-semibold">{{ event.status | titlecase }}</span>
+    </div>
+
+    <div class="flex justify-end gap-2 mt-4">
+      <button
+        class="px-4 py-2 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors font-medium cursor-pointer"
+        (click)="isDialogOpen.set(false)">
+        إغلاق
+      </button>
+      <button
+        class="px-4 py-2 text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors font-medium cursor-pointer"
+        (click)="goToDetails()">
+        عرض التفاصيل
+      </button>
+    </div>
+  </div>
+  }
+</app-shared-modal>

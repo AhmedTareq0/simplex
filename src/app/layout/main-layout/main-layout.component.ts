@@ -21,6 +21,7 @@ const NAV_ITEMS: NavItem[] = [
   { link: 'employees', title: 'الموظفين', icon: 'users', permissions: ['users.manage'] },
   { link: 'clients', title: 'العملاء', icon: 'user', permissions: ['users.manage'] },
   { link: 'chat', title: 'الدردشة', icon: 'chat', permissions: ['chat.cc', 'chat.engineer'] },
+  { link: 'calendar', title: 'التقويم', icon: 'calendarClock', permissions: ['calendar.view'] },
   { link: 'notifications', title: 'الإشعارات', icon: 'bell', permissions: ['notifications.view'] },
   { link: 'settings', title: 'الإعدادات', icon: 'cog', permissions: ['settings.view'] },
 ];

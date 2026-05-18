@@ -1,5 +1,6 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, effect, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { SharedTableComponent, TableColumn, ButtonComponent, SkeletonLoaderComponent } from '@/shared/components';
 import { ApiResponse } from '@/core/interfaces/api-response.interface';
 import { AuthLocalService } from '@/auth/services/auth-local.service';
@@ -27,6 +28,8 @@ export class VisitsComponent implements OnInit {
   readonly visitsService = inject(VisitsService);
   readonly auth = inject(AuthLocalService);
   private readonly syncService = inject(AdminSyncService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   selectedVisit = signal<Visit | null>(null);
   showEditModal = signal(false);
@@ -35,6 +38,22 @@ export class VisitsComponent implements OnInit {
   isSyncing = this.syncService.isSyncing;
   currentPage = signal(1);
   pageSize = signal(10);
+
+  readonly visitIdParam = signal<string | null>(null);
+
+  constructor() {
+    effect(() => {
+      const visitId = this.visitIdParam();
+      const list = this.visitsService.visits();
+      if (visitId && list.length > 0) {
+        const found = list.find(v => v.id === +visitId || v.ticket_id === +visitId);
+        if (found) {
+          this.onRowClick(found);
+          this.cdr.markForCheck();
+        }
+      }
+    });
+  }
 
   get isLoading(): boolean { return this.visitsService.isLoading(); }
   get total(): number { return this.visitsService.total(); }
@@ -108,7 +127,15 @@ export class VisitsComponent implements OnInit {
   ];
 
   ngOnInit() {
-    this.visitsService.loadVisits({ page: 1, page_size: this.pageSize() });
+    this.route.queryParams.subscribe(params => {
+      const visitId = params['id'];
+      if (visitId) {
+        this.visitIdParam.set(visitId);
+        this.visitsService.loadVisits({ page: 1, page_size: 100 });
+      } else {
+        this.visitsService.loadVisits({ page: 1, page_size: this.pageSize() });
+      }
+    });
   }
 
   onAdd() {
