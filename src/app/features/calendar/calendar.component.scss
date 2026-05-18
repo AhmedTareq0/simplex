@@ -1,0 +1,111 @@
+.calendar-container {
+  ::ng-deep {
+    /* FullCalendar variables override for Tailwind-like colors */
+    --fc-border-color: #f1f5f9;
+    /* slate-100 */
+    --fc-button-text-color: #475569;
+    /* slate-600 */
+    --fc-button-bg-color: #f8fafc;
+    /* slate-50 */
+    --fc-button-border-color: #e2e8f0;
+    /* slate-200 */
+    --fc-button-hover-bg-color: #f1f5f9;
+    /* slate-100 */
+    --fc-button-hover-border-color: #cbd5e1;
+    /* slate-300 */
+    --fc-button-active-bg-color: #e2e8f0;
+    /* slate-200 */
+    --fc-button-active-border-color: #cbd5e1;
+    /* slate-300 */
+
+    --fc-event-bg-color: var(--p-primary-500);
+    --fc-event-border-color: var(--p-primary-600);
+
+    --fc-page-bg-color: #ffffff;
+    --fc-neutral-bg-color: #f8fafc;
+    /* slate-50 */
+    --fc-neutral-text-color: #64748b;
+    /* slate-500 */
+    --fc-today-bg-color: #eff6ff;
+    /* blue-50 */
+
+    .fc-theme-standard .fc-scrollgrid {
+      border: 1px solid var(--fc-border-color);
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+
+    .fc-button-primary {
+      text-transform: capitalize;
+      font-weight: 500;
+      transition: all 0.2s;
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+
+      &:focus {
+        box-shadow: none !important;
+      }
+    }
+
+    .fc-header-toolbar {
+      margin-bottom: 1.5em !important;
+
+      @media (max-width: 768px) {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+
+    .fc-event {
+      border-radius: 4px;
+      padding: 2px 4px;
+      font-size: 0.85em;
+      cursor: pointer;
+      transition: transform 0.1s ease-in-out;
+
+      &:hover {
+        transform: scale(1.02);
+      }
+    }
+
+    .fc-daygrid-event-dot {
+      border-width: 4px;
+    }
+
+    .fc-col-header-cell-cushion {
+      padding: 0.75rem 0;
+      color: #334155;
+      /* slate-700 */
+      font-weight: 600;
+    }
+
+    .fc-daygrid-day-number {
+      color: #64748b;
+      /* slate-500 */
+      font-weight: 500;
+      padding: 0.5rem;
+    }
+  }
+}
+
+::ng-deep .event-dialog {
+  .p-dialog-header {
+    border-bottom: 1px solid #f1f5f9;
+    padding: 1.25rem 1.5rem;
+
+    .p-dialog-title {
+      font-weight: 700;
+      color: #1e293b;
+      font-size: 1.125rem;
+    }
+  }
+
+  .p-dialog-content {
+    padding: 1rem 1.5rem;
+  }
+
+  .p-dialog-footer {
+    border-top: 1px solid #f1f5f9;
+    padding: 1rem 1.5rem;
+  }
+}

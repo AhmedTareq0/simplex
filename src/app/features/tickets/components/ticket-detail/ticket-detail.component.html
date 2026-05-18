@@ -1,75 +1,64 @@
-<app-shared-modal
-  [(visible)]="visible"
-  [title]="'تفاصيل التذكرة #' + (ticket?.id || '')"
-  [maxWidth]="'600px'"
-  [width]="'95vw'"
-  [showCloseButton]="true"
-  (closed)="close()"
->
+<app-shared-modal [(visible)]="visible" [title]="'تفاصيل التذكرة #' + (ticket?.id || '')" [maxWidth]="'600px'"
+  [width]="'95vw'" [showCloseButton]="true" (closed)="close()">
   @if (ticket) {
-    <div class="cd-split__info">
+  <div class="cd-split__info">
 
-      <!-- Title & Description -->
-      <div class="cd-split__section">
-        <p class="cd-split__ticket-title">{{ ticket.title }}</p>
-        @if (ticket.description) {
-          <p class="cd-split__description">{{ ticket.description }}</p>
-        }
+    <!-- Title & Description -->
+    <div class="cd-split__section">
+      <p class="cd-split__ticket-title">{{ ticket.title }}</p>
+      @if (ticket.description) {
+      <p class="cd-split__description">{{ ticket.description }}</p>
+      }
+    </div>
+
+    <!-- Badges -->
+    <div class="cd-split__badges">
+      <span class="cd-split__badge" [style.background]="getStatusColor(ticket.status) + '20'"
+        [style.color]="getStatusColor(ticket.status)">
+        {{ getStatusLabel(ticket.status) }}
+      </span>
+      <span class="cd-split__badge" [style.background]="getPriorityColor(ticket.priority) + '20'"
+        [style.color]="getPriorityColor(ticket.priority)">
+        {{ getPriorityLabel(ticket.priority) }}
+      </span>
+    </div>
+
+    <!-- Info rows -->
+    <div class="cd-split__fields">
+      <div class="cd-split__field-row">
+        <span class="cd-split__field-label">العميل</span>
+        <span class="cd-split__field-value">{{ ticket.customer }}</span>
       </div>
-
-      <!-- Badges -->
-      <div class="cd-split__badges">
-        <span class="cd-split__badge"
-          [style.background]="getStatusColor(ticket.status) + '20'"
-          [style.color]="getStatusColor(ticket.status)">
-          {{ getStatusLabel(ticket.status) }}
-        </span>
-        <span class="cd-split__badge"
-          [style.background]="getPriorityColor(ticket.priority) + '20'"
-          [style.color]="getPriorityColor(ticket.priority)">
-          {{ getPriorityLabel(ticket.priority) }}
-        </span>
+      <div class="cd-split__field-row">
+        <span class="cd-split__field-label">المكنة</span>
+        <span class="cd-split__field-value">{{ ticket.machine_id }}</span>
       </div>
-
-      <!-- Info rows -->
-      <div class="cd-split__fields">
-        <div class="cd-split__field-row">
-          <span class="cd-split__field-label">العميل</span>
-          <span class="cd-split__field-value">{{ ticket.customer }}</span>
-        </div>
-        <div class="cd-split__field-row">
-          <span class="cd-split__field-label">المكنة</span>
-          <span class="cd-split__field-value">{{ ticket.machine_id }}</span>
-        </div>
-        <div class="cd-split__field-row">
-          <span class="cd-split__field-label">المهندس</span>
-          <span class="cd-split__field-value">{{ ticket.engineer_name || '—' }}</span>
-        </div>
-        <div class="cd-split__field-row">
-          <span class="cd-split__field-label">خدمة العملاء</span>
-          <span class="cd-split__field-value">{{ ticket.customer_care_name || '—' }}</span>
-        </div>
-        <div class="cd-split__field-row">
-          <span class="cd-split__field-label">تاريخ الزيارة</span>
-          <span class="cd-split__field-value">{{ formatDate(ticket.visit_date) }}</span>
-        </div>
+      <div class="cd-split__field-row">
+        <span class="cd-split__field-label">المهندس</span>
+        <span class="cd-split__field-value">{{ ticket.engineer_name || '—' }}</span>
       </div>
-
-      <!-- Actions -->
-      <div class="cd-split__actions">
-        @if (auth.hasPermission('tickets.update')) {
-          <button class="cd-split__btn cd-split__btn--edit" (click)="startEdit()">تعديل</button>
-        }
-        @if (ticket.conversation_id) {
-          <button class="cd-split__btn cd-split__btn--ghost" (click)="goToChat()">فتح المحادثة</button>
-        }
-        @if (auth.hasPermission('tickets.delete')) {
-          <button class="cd-split__btn cd-split__btn--danger" (click)="onDelete()" [disabled]="isDeleting()">
-            {{ isDeleting() ? 'جاري الحذف...' : 'حذف' }}
-          </button>
-        }
+      <div class="cd-split__field-row">
+        <span class="cd-split__field-label">خدمة العملاء</span>
+        <span class="cd-split__field-value">{{ ticket.customer_care_name || '—' }}</span>
       </div>
 
     </div>
+
+    <!-- Actions -->
+    <div class="cd-split__actions">
+      @if (auth.hasPermission('tickets.update')) {
+      <button class="cd-split__btn cd-split__btn--edit" (click)="startEdit()">تعديل</button>
+      }
+      @if (ticket.conversation_id) {
+      <button class="cd-split__btn cd-split__btn--ghost" (click)="goToChat()">فتح المحادثة</button>
+      }
+      @if (auth.hasPermission('tickets.delete')) {
+      <button class="cd-split__btn cd-split__btn--danger" (click)="onDelete()" [disabled]="isDeleting()">
+        {{ isDeleting() ? 'جاري الحذف...' : 'حذف' }}
+      </button>
+      }
+    </div>
+
+  </div>
   }
 </app-shared-modal>

@@ -106,6 +106,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/notifications/notifications.component').then((m) => m.NotificationsComponent),
       },
+      {
+        path: 'calendar',
+        canActivate: [permissionGuard],
+        data: { permission: 'calendar.view' },
+        loadComponent: () =>
+          import('./features/calendar/calendar.component').then((m) => m.CalendarComponent),
+      },
     ],
   },
 ];

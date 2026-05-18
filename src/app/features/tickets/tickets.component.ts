@@ -1,4 +1,5 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { SharedTableComponent, TableColumn, ButtonComponent } from '../../shared/components';
 import { TicketDetailComponent } from './components/ticket-detail/ticket-detail.component';
 import { TicketCreateComponent } from './components/ticket-create/ticket-create.component';
@@ -18,6 +19,7 @@ export class TicketsComponent implements OnInit {
   readonly ticketsService = inject(TicketsService);
   readonly auth = inject(AuthLocalService);
   private readonly syncService = inject(AdminSyncService);
+  private readonly route = inject(ActivatedRoute);
 
   selectedTicket = signal<any>(null);
   showDetail = signal(false);
@@ -61,10 +63,7 @@ export class TicketsComponent implements OnInit {
     },
     { field: 'engineer_name', header: 'المهندس', type: 'text', filterable: true, filterType: 'text' },
     { field: 'customer_care_name', header: 'خدمة العملاء', type: 'text', filterable: true, filterType: 'text' },
-    {
-      field: 'visit_date', header: 'تاريخ الزيارة', type: 'text',
-      formatter: (value) => value ? new Date(value).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }) : '—',
-    },
+
     {
       field: 'created_at', header: 'تاريخ الإنشاء', type: 'text',
       formatter: (value) => value ? new Date(value).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }) : '—',
@@ -73,6 +72,18 @@ export class TicketsComponent implements OnInit {
 
   ngOnInit() {
     this.loadData();
+    this.route.queryParams.subscribe(params => {
+      const ticketId = params['id'];
+      if (ticketId) {
+        this.ticketsService.getTicket(+ticketId).subscribe({
+          next: (res) => {
+            if (res && res.data) {
+              this.onRowClick(this.mapTicket(res.data));
+            }
+          }
+        });
+      }
+    });
   }
 
   private loadData() {

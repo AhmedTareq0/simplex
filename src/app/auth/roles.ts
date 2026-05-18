@@ -21,7 +21,8 @@ export type Permission =
   | 'chat.delete'
   | 'sync.manage'
   | 'notifications.view'
-  | 'settings.view';
+  | 'settings.view'
+  | 'calendar.view';
 
 export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
   superadmin: [
@@ -43,17 +44,15 @@ export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
     'sync.manage',
     'notifications.view',
     'settings.view',
+    'calendar.view',
   ],
   customer_support: [
     'tickets.view_cc',
-    'tickets.update',
-    'tickets.delete',
     'chat.cc',
     'notifications.view',
     'settings.view',
   ],
   engineer: [
-    'tickets.view_engineer',
     'visits.view_own',
     'chat.engineer',
     'notifications.view',
