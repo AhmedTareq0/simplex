@@ -7,6 +7,7 @@ import { VisitTimelineComponent } from '../visit-timeline/visit-timeline.compone
 import { EmployeeService, Employee } from '@/features/employees/services/employee.service';
 import { MachineService } from '@/features/machines/services/machine.service';
 import { AuthLocalService } from '@/auth/services/auth-local.service';
+import { RatingModule } from 'primeng/rating';
 
 @Component({
   selector: 'app-visit-detail',
@@ -19,7 +20,8 @@ import { AuthLocalService } from '@/auth/services/auth-local.service';
     VisitTimelineComponent,
     SharedConfirmationComponent,
     SharedInputComponent,
-    SharedSelectComponent
+    SharedSelectComponent,
+    RatingModule
   ],
   templateUrl: './visit-detail.component.html',
   styleUrl: './visit-detail.component.scss'
@@ -163,7 +165,7 @@ export class VisitDetailComponent {
     if (!visit || this.isSaving()) return;
 
     this.isSaving.set(true);
-    this.visitsService.updateVisit(visit.id, { status: 'done' }).subscribe({
+    this.visitsService.updateVisitStatus(visit.id, 'done').subscribe({
       next: (res) => {
         this.isSaving.set(false);
         this.updated.emit(res.data);
@@ -182,7 +184,7 @@ export class VisitDetailComponent {
     if (!visit || !this.cancelReason()) return;
 
     this.isSaving.set(true);
-    this.visitsService.cancelVisit(visit.id, this.cancelReason()).subscribe({
+    this.visitsService.cancelVisitEngineer(visit.id, this.cancelReason()).subscribe({
       next: (res) => {
         this.isSaving.set(false);
         this.showCancelConfirm.set(false);

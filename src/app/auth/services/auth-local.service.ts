@@ -69,7 +69,7 @@ export class AuthLocalService {
   readonly employeeRole = computed(() => this.currentUser()?.employee_role);
 
   readonly isSuperAdmin = computed(() => this.employeeRole() === 'superadmin' || this.userType() === 'superadmin');
-  readonly isCustomerSupport = computed(() => this.employeeRole() === 'customer_support');
+  readonly isCustomerSupport = computed(() => this.employeeRole() === 'customer_support' || this.employeeRole() === 'customer_care');
   readonly isEngineer = computed(() => this.employeeRole() === 'engineer');
 
   readonly role = computed<AppRole | null>(() => {

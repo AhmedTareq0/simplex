@@ -14,12 +14,11 @@ export class AdminSyncService {
 
   syncAll(): Observable<any> {
     this.isSyncing.set(true);
-    // Triggering multiple sync endpoints in parallel
     return forkJoin({
       machines: this.http.post<ApiResponse<any>>(`${this.apiUrl}/api/machines/sync`, {}),
+      userMachines: this.http.post<ApiResponse<any>>(`${this.apiUrl}/api/machines/sync-user-machines`, {}),
       tickets: this.http.post<ApiResponse<any>>(`${this.apiUrl}/api/tickets/sync`, {}),
       visits: this.http.post<ApiResponse<any>>(`${this.apiUrl}/api/visits/sync`, {}),
-      users: this.http.post<ApiResponse<any>>(`${this.apiUrl}/api/users/sync`, {})
     }).pipe(
       tap({
         next: () => {
@@ -34,9 +33,10 @@ export class AdminSyncService {
     );
   }
 
-  syncModule(module: 'machines' | 'tickets' | 'visits' | 'users'): Observable<ApiResponse<any>> {
+  syncModule(module: 'machines' | 'tickets' | 'visits' | 'invoices' | 'machines/sync-user-machines'): Observable<ApiResponse<any>> {
     this.isSyncing.set(true);
-    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/api/${module}/sync`, {}).pipe(
+    const path = module === 'machines/sync-user-machines' ? 'machines/sync-user-machines' : `${module}/sync`;
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/api/${path}`, {}).pipe(
       tap(() => this.isSyncing.set(false))
     );
   }

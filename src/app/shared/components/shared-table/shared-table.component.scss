@@ -366,6 +366,10 @@
   text-align: start;
 }
 
+.st-th--number {
+  text-align: center !important;
+}
+
 .st-th--actions {
   text-align: center;
   width: 4rem;
@@ -373,8 +377,8 @@
 
 .st-td--number {
   min-width: 8rem;
-  width: 1%;
   white-space: nowrap;
+  text-align: center !important;
 }
 
 /* ── Badges & Status ── */
@@ -429,7 +433,7 @@
 .st-td__number {
   display: block;
   width: 100%;
-  text-align: end;
+  text-align: center !important;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }

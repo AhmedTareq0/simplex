@@ -9,11 +9,12 @@ import { MenuItem } from 'primeng/api';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { IconComponent } from '../icon/icon.component';
+import { RatingModule } from 'primeng/rating';
 
 export interface TableColumn {
   field: string;
   header: string;
-  type?: 'text' | 'number' | 'date' | 'status' | 'badge' | 'image' | 'link';
+  type?: 'text' | 'number' | 'date' | 'status' | 'badge' | 'image' | 'link' | 'button' | 'rating';
   filterable?: boolean;
   filterType?: 'text' | 'dropdown' | 'date' | 'boolean';
   filterOptions?: any[];
@@ -37,7 +38,8 @@ export interface TableColumn {
     TooltipModule,
     SelectModule,
     FormsModule,
-    IconComponent
+    IconComponent,
+    RatingModule
   ],
   templateUrl: './shared-table.component.html',
   styleUrls: ['./shared-table.component.scss']

@@ -24,10 +24,10 @@
 
   <div class="chat-header__actions">
     @if (canRequestVisit()) {
-    <button class="chat-header__btn chat-header__btn--primary" (click)="requestVisit()"
+    <button class="chat-header__btn chat-header__btn--primary" (click)="openVisitForm()"
       [disabled]="isRequestingVisit()">
       <app-icon name="calendarPlus" size="sm" />
-      <span>{{ isRequestingVisit() ? 'جاري الإرسال...' : 'طلب زيارة مهندس' }}</span>
+      <span>طلب زيارة مهندس</span>
     </button>
     }
 
@@ -73,4 +73,106 @@
   <app-shared-confirmation [visible]="showDeleteConfirm()" (visibleChange)="showDeleteConfirm.set($event)"
     title="حذف المحادثة" message="هل أنت متأكد من حذف هذه المحادثة نهائياً؟ لا يمكن التراجع عن هذا الإجراء."
     confirmLabel="حذف نهائي" type="danger" [isLoading]="isDeleting()" (confirmed)="confirmDelete()" />
+
+  <app-shared-modal [visible]="showVisitForm()" (visibleChange)="showVisitForm.set($event)" title="طلب زيارة مهندس"
+    maxWidth="38rem" contentClass="p-0">
+    <div class="visit-modal-body" style="padding-top: 8px; display: flex; flex-direction: column; gap: 16px;">
+
+      <div class="visit-field">
+        <label class="visit-label">
+          <span>نوع الطلب</span>
+          <span class="visit-required">*</span>
+        </label>
+        <div class="visit-chips">
+          @for (option of issueTypeOptions; track option.value) {
+          <button type="button" class="visit-chip" [class.visit-chip--active]="visitIssueType() === option.value"
+            (click)="setIssueType(option.value)">
+            {{ option.label }}
+          </button>
+          }
+        </div>
+      </div>
+
+      <div class="visit-field">
+        <label class="visit-label">
+          <span>{{ visitIssueType() === 'Maintenance' ? 'نوع الصيانة' : 'نوع الماكينة' }}</span>
+          <span class="visit-required">*</span>
+        </label>
+        <div class="visit-chips">
+          @if (visitIssueType() === 'Maintenance') {
+          @for (option of maintenanceSubTypes; track option.value) {
+          <button type="button" class="visit-chip" [class.visit-chip--active]="visitSubType() === option.value"
+            (click)="setSubType(option.value)">
+            {{ option.label }}
+          </button>
+          }
+          } @else if (visitIssueType() === 'Installation') {
+          @for (option of installationSubTypes; track option.value) {
+          <button type="button" class="visit-chip" [class.visit-chip--active]="visitSubType() === option.value"
+            (click)="setSubType(option.value)">
+            {{ option.label }}
+          </button>
+          }
+          }
+        </div>
+        @if (visitSubTypeError()) {
+        <span class="visit-error-text" style="margin-top: 4px;">
+          <app-icon name="alert-triangle" size="sm" />
+          {{ visitSubTypeError() }}
+        </span>
+        }
+      </div>
+
+      <div class="visit-field">
+        <label class="visit-label">
+          <span>الأولوية</span>
+          <span class="visit-required">*</span>
+        </label>
+        <div class="visit-chips">
+          @for (option of priorityOptions; track option.value) {
+          <button type="button" class="visit-chip" [class.visit-chip--active]="visitPriority() === option.value"
+            (click)="visitPriority.set(option.value)">
+            {{ option.label }}
+          </button>
+          }
+        </div>
+      </div>
+
+      <div class="visit-field" style="display: flex; flex-direction: column; gap: 8px;">
+        <label class="visit-label" for="visit-description">
+          <span>الوصف التفصيلي للأعطال والتشخيص</span>
+          <span class="visit-required">*</span>
+        </label>
+        <div class="visit-input-wrap">
+          <textarea id="visit-description" rows="4" class="visit-input visit-textarea"
+            [class.visit-input--error]="visitDescriptionError()"
+            placeholder="يرجى وصف الأعطال بدقة، متى بدأت والمشكلة بالتفصيل..." [ngModel]="visitDescription()"
+            (ngModelChange)="visitDescription.set($event)" (blur)="visitDescriptionTouched.set(true)"></textarea>
+          @if (visitDescriptionError()) {
+          <span class="visit-error-text">
+            <app-icon name="alert-triangle" size="sm" />
+            {{ visitDescriptionError() }}
+          </span>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="visit-modal-footer">
+      <button class="visit-btn visit-btn--secondary" (click)="showVisitForm.set(false)"
+        [disabled]="isRequestingVisit()">
+        إلغاء
+      </button>
+      <button class="visit-btn visit-btn--primary" (click)="submitVisitRequest()"
+        [disabled]="!isVisitFormValid() || isRequestingVisit()">
+        @if (isRequestingVisit()) {
+        <span class="visit-spinner"></span>
+        <span>جاري إرسال الطلب...</span>
+        } @else {
+        <app-icon name="calendarPlus" size="sm" />
+        <span>تأكيد وإرسال الطلب</span>
+        }
+      </button>
+    </div>
+  </app-shared-modal>
 </header>

@@ -74,7 +74,7 @@
     >
       <ng-template pTemplate="header" let-columns>
         <tr class="st-header-row">
-          <th *ngFor="let col of columns" class="st-th">{{ col.header }}</th>
+          <th *ngFor="let col of columns" class="st-th" [class.st-th--number]="col.type === 'number'">{{ col.header }}</th>
           <th *ngIf="showActions" class="st-th st-th--actions">الإجراءات</th>
         </tr>
 
@@ -154,6 +154,29 @@
                   <span class="st-status__text">{{ col.formatter ? col.formatter(rowData[col.field], rowData) : rowData[col.field] }}</span>
                 </div>
 
+                <div *ngSwitchCase="'button'" class="st-link-cell">
+                  @if (rowData[col.field]) {
+                    <button
+                      type="button"
+                      class="st-btn-link"
+                      style="border: 1px solid var(--color-primary-100); cursor: pointer;"
+                      (click)="$event.stopPropagation(); onAction.emit({ type: col.field, data: rowData })"
+                    >
+                      <app-icon [name]="col.icon || 'chat'" size="sm" />
+                      <span>{{ col.linkText || 'عرض' }}</span>
+                    </button>
+                  } @else {
+                    <span class="st-text-muted">—</span>
+                  }
+                </div>
+
+                <div *ngSwitchCase="'rating'" class="st-rating-cell" (click)="$event.stopPropagation()">
+                  <p-rating [ngModel]="rowData[col.field]" [readonly]="true"></p-rating>
+                  <div *ngIf="rowData[col.field + '_feedback']" class="st-rating-feedback" style="font-size: 12px; color: var(--text-secondary); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;" [pTooltip]="rowData[col.field + '_feedback']">
+                    {{ rowData[col.field + '_feedback'] }}
+                  </div>
+                </div>
+
                 <span
                   *ngSwitchDefault
                   [class.st-td__primary]="i === 0"
@@ -231,9 +254,10 @@
       </div>
       <div class="st-server-paginator__controls">
         <select class="st-server-paginator__select" [ngModel]="rows" (ngModelChange)="onRowsChange($event)">
-          <option [value]="10">10</option>
-          <option [value]="20">20</option>
-          <option [value]="50">50</option>
+          <option [ngValue]="5">5</option>
+          <option [ngValue]="10">10</option>
+          <option [ngValue]="20">20</option>
+          <option [ngValue]="50">50</option>
         </select>
 
         <button type="button" class="st-server-paginator__btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">

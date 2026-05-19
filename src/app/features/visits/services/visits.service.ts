@@ -40,6 +40,8 @@ export interface Visit {
   tags?: string[];
   created_at?: string;
   updated_at?: string;
+  engineer_rating?: number;
+  engineer_rating_feedback?: string;
   activities?: any[];
 }
 
@@ -116,20 +118,20 @@ export class VisitsService {
   }
 
   rescheduleVisit(id: number, newDate: string, note?: string): Observable<ApiResponse<Visit>> {
-    return this.updateVisit(id, { 
+    return this.updateVisit(id, {
       planned_start: newDate,
       notes: note || undefined
     } as any);
   }
 
   reassignVisit(id: number, engineerId: number): Observable<ApiResponse<Visit>> {
-    return this.updateVisit(id, { 
+    return this.updateVisit(id, {
       engineer_id: engineerId
     } as any);
   }
 
   cancelVisit(id: number, reason: string): Observable<ApiResponse<Visit>> {
-    return this.updateVisit(id, { 
+    return this.updateVisit(id, {
       status: 'cancelled',
       notes: `سبب الإلغاء: ${reason}`
     });
@@ -138,6 +140,20 @@ export class VisitsService {
   getVisitActivities(id: number): Observable<ApiResponse<any[]>> {
     return this.http.get<ApiResponse<any[]>>(`${this.base}/api/visits/${id}/activities`);
   }
+
+  getVisitDetail(id: number): Observable<ApiResponse<Visit>> {
+    return this.http.get<ApiResponse<Visit>>(`${this.base}/api/visits/detail?id=${id}`);
+  }
+
+  updateVisitStatus(id: number, status: string): Observable<ApiResponse<Visit>> {
+    return this.http.put<ApiResponse<Visit>>(`${this.base}/api/visits/status?id=${id}`, { status });
+  }
+
+  cancelVisitEngineer(id: number, reason: string): Observable<ApiResponse<Visit>> {
+    return this.http.put<ApiResponse<Visit>>(`${this.base}/api/visits/cancel?id=${id}`, { cancellation_reason: reason });
+  }
+
+
 }
 
 export interface TimelineItem {
