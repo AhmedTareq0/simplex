@@ -4,8 +4,8 @@ export const ticketStatusConfig = {
     height: 280,
     fontFamily: 'inherit',
   },
-  labels: ['مفتوحة', 'قيد المعالجة', 'مغلقة', 'معلقة'],
-  colors: ['#6ec1e4', '#f59e0b', '#16a34a', '#dc2626'],
+  labels: ['مفتوحة', 'قيد التنفيذ', 'مكتملة', 'مغلقة'],
+  colors: ['#3b82f6', '#f59e0b', '#10b981', '#6366f1'],
   plotOptions: {
     pie: {
       donut: {
@@ -66,7 +66,11 @@ export const monthlyTicketsConfig = {
   },
   tooltip: {
     y: {
-      formatter: (val: number) => `${val} محادثة`,
+      formatter: (val: number, opts?: any) => {
+        const seriesName = opts?.w?.config?.series?.[opts.seriesIndex]?.name;
+        const unit = seriesName === 'الزيارات' ? 'زيارة' : 'تذكرة';
+        return `${val} ${unit}`;
+      }
     },
   },
 };

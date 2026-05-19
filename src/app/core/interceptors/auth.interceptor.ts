@@ -9,9 +9,16 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const token = authService.token();
 
-  const authReq = token
-    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
-    : req;
+  const headers: Record<string, string> = {
+    'Accept-Language': 'ar',
+    'lang': 'ar'
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const authReq = req.clone({ setHeaders: headers });
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
@@ -22,7 +29,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
             switchMap((response) => {
               const newToken = response.data.access_token;
               const retryReq = req.clone({
-                setHeaders: { Authorization: `Bearer ${newToken}` }
+                setHeaders: {
+                  'Authorization': `Bearer ${newToken}`,
+                  'Accept-Language': 'ar',
+                  'lang': 'ar'
+                }
               });
               return next(retryReq);
             }),

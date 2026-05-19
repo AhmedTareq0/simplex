@@ -78,16 +78,14 @@ export class VisitsComponent implements OnInit {
   }
 
   columns: TableColumn[] = [
-    { field: 'name', header: 'اسم الزيارة', type: 'text', filterable: true },
     {
-      field: 'planned_start',
-      header: 'تاريخ الزيارة',
+      field: 'ticket_id',
+      header: 'رقم التذكرة',
       type: 'text',
-      formatter: (value: string, row: Visit) => {
-        const date = value || row?.visit_date;
-        return date ? new Date(date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
-      }
-    },
+      filterable: true,
+      formatter: (value: any) => value || '—'
+    }
+    , { field: 'name', header: 'اسم الماشين', type: 'text', filterable: true },
     {
       field: 'customer',
       header: 'العميل',
@@ -99,6 +97,15 @@ export class VisitsComponent implements OnInit {
       header: 'المهندس',
       type: 'text',
       formatter: (_value: any, row: Visit) => row?.engineer?.name || row?.engineer_name || '—'
+    },
+    {
+      field: 'planned_start',
+      header: 'تاريخ الزيارة',
+      type: 'text',
+      formatter: (value: string, row: Visit) => {
+        const date = value || row?.visit_date;
+        return date ? new Date(date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+      }
     },
     {
       field: 'status',
@@ -123,6 +130,12 @@ export class VisitsComponent implements OnInit {
         };
         return labels[value] || value;
       }
+    },
+    {
+      field: 'engineer_rating',
+      header: 'تقييم المهندس',
+      type: 'rating',
+      filterable: false
     }
   ];
 

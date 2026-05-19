@@ -48,6 +48,8 @@ export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
   ],
   customer_support: [
     'tickets.view_cc',
+    'tickets.create',
+    'tickets.update',
     'chat.cc',
     'notifications.view',
     'settings.view',

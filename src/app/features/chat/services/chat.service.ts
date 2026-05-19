@@ -205,29 +205,14 @@ export class ChatService {
     return this.http.post<any>(endpoint, form);
   }
 
-  requestVisit(conversationId: string): Observable<any> {
+  requestVisit(conversationId: string, metadata?: { issue_type: string; sub_type: string; priority: string; description: string }): Observable<any> {
     return this.http.post<any>(
       `${this.base}/api/ai-assistant/customer-care/request-engineer-visit`,
-      { conversation_id: conversationId }
-    ).pipe(
-      // tap((res) => {
-      //   if (res.success && res.data && res.data.engineer_name) {
-      //     const sysMsg: ApiMessage = {
-      //       id: 'sys-' + Date.now(),
-      //       role: 'system',
-      //       content: `تم انضمام المهندس ${res.data.engineer_name} للمحادثة`,
-      //       attachment_url: null,
-      //       attachment_type: null,
-      //       timestamp: new Date().toISOString(),
-      //     };
-      // 
-      //     if (conversationId === this.activeConversationId()) {
-      //       this.messages.update(prev => [...prev, sysMsg]);
-      //     }
-      // 
-      //   }
-      // })
-    );
+      { 
+        conversation_id: conversationId,
+        ...metadata
+      }
+    ).pipe();
   }
 
   markRead(conversationId: string): void {

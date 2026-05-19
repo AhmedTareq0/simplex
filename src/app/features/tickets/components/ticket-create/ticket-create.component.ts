@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, inject, signal, computed } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -53,6 +53,19 @@ export class TicketCreateComponent {
     this.clientService.clients().map(c => ({ label: c.name, value: c.odoo_user_id }))
   );
 
+  constructor() {
+    effect(() => {
+      const emps = this.employeeService.employees();
+      if (this.isEditMode && this.editData && emps.length > 0 && !this.formData.engineer_id) {
+        const emp = emps.find(e => e.name === this.editData.engineer_name);
+        if (emp) {
+          this.formData.engineer_id = emp.odoo_user_id;
+        }
+      }
+    });
+  }
+
+
   readonly engineerOptions = computed(() =>
     this.employeeService.employees()
       .filter(e => e.department === 'Maintenance' || e.employee_role === 'Maintenance')
@@ -70,8 +83,6 @@ export class TicketCreateComponent {
     customer_id: null as number | null,
     title: '',
     priority: 'medium' as string,
-    status: 'open' as string,
-    visit_date: '' as string,
     machine_id: null as number | null,
     engineer_id: null as number | null,
   };
@@ -95,13 +106,10 @@ export class TicketCreateComponent {
   ngOnChanges() {
     if (this.visible) {
       if (this.auth.hasPermission('tickets.create') || this.auth.hasPermission('tickets.update')) {
-        if (this.auth.hasPermission('users.manage')) {
-          this.clientService.loadClients({ page_size: 100 });
-          this.employeeService.loadEmployees({ department: 'Maintenance', page_size: 100 });
-        }
-        if (this.auth.hasPermission('machines.view') || this.auth.hasPermission('machines.manage')) {
-          this.machineService.loadMachines({ pageSize: 100 });
-        }
+        this.clientService.loadClients({ page_size: 100 });
+        this.employeeService.loadEmployees({ department: 'Maintenance', page_size: 100 });
+        this.machineService.loadMachines({ pageSize: 100 });
+
         if (this.auth.hasPermission('chat.cc') || this.auth.hasPermission('chat.engineer')) {
           this.chatService.getConversations({ page_size: 100 }).subscribe(res => {
             this.conversations.set(res.data?.items || []);
@@ -111,22 +119,19 @@ export class TicketCreateComponent {
 
       this.errorMessage.set('');
       if (this.isEditMode && this.editData) {
+        const emp = this.employeeService.employees().find(e => e.name === this.editData.engineer_name);
         this.formData = {
           customer_id: this.editData.customer_id || null,
           title: this.editData.title || '',
-          priority: this.editData.priority || 'medium',
-          status: this.editData.status || 'open',
-          visit_date: this.editData.visit_date ? this.editData.visit_date.split('T')[0] : '',
+          priority: this.editData.priority === 'normal' ? 'medium' : (this.editData.priority || 'medium'),
           machine_id: this.editData.machine_id || null,
-          engineer_id: this.editData.engineer_id || null,
+          engineer_id: emp ? emp.odoo_user_id : (this.editData.engineer_id || null),
         };
       } else {
         this.formData = {
           customer_id: null,
           title: '',
           priority: 'medium',
-          status: 'open',
-          visit_date: '',
           machine_id: null,
           engineer_id: null,
         };
@@ -150,9 +155,8 @@ export class TicketCreateComponent {
 
     if (this.isEditMode && this.editData?.id) {
       const payload: UpdateTicketPayload = {
-        status: this.formData.status,
+        title: this.formData.title,
         priority: this.formData.priority,
-        visit_date: this.formData.visit_date || null,
         engineer_id: this.formData.engineer_id,
       };
 

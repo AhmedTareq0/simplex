@@ -37,6 +37,20 @@
           <span class="visit-detail__label">الأولوية</span>
           <span class="visit-detail__value">{{ getPriorityLabel(visit()?.priority || '') }}</span>
         </div>
+        <div class="visit-detail__item">
+          <span class="visit-detail__label">تقييم المهندس</span>
+          <div class="visit-detail__value">
+            <ng-container *ngIf="visit()?.engineer_rating; else noRating">
+              <p-rating [ngModel]="visit()?.engineer_rating" [readonly]="true"></p-rating>
+              <div *ngIf="visit()?.engineer_rating_feedback" style="font-size: 0.85rem; color: #6b7280; margin-top: 4px;">
+                {{ visit()?.engineer_rating_feedback }}
+              </div>
+            </ng-container>
+            <ng-template #noRating>
+              <span class="text-gray-400" style="font-size: 0.85rem;">لم يتم التقييم بعد</span>
+            </ng-template>
+          </div>
+        </div>
       </div>
     </div>
 

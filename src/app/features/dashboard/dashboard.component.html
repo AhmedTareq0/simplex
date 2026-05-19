@@ -3,22 +3,12 @@
   <header class="dashboard__header">
     <div class="dashboard__header-info">
       <h1 class="dashboard__title">لوحة التحكم</h1>
-      <p class="dashboard__subtitle">ملخص النظام والأداء العام من Odoo</p>
+      <p class="dashboard__subtitle">ملخص النظام والأداء العام </p>
     </div>
     <div class="dashboard__header-actions" style="align-items: center;">
-      <app-shared-datepicker
-        [ngModel]="rangeDates()"
-        (ngModelChange)="rangeDates.set($any($event));"
-        selectionMode="range"
-        placeholder="تصفية بالتاريخ..."
-        style="width: 250px;"
-      />
-      <app-button 
-        variant="secondary" 
-        (click)="onSyncAll()" 
-        [loading]="isSyncing()"
-        icon="sync"
-      >
+      <app-shared-datepicker [ngModel]="rangeDates()" (ngModelChange)="rangeDates.set($any($event)); refreshData();"
+        selectionMode="range" placeholder="تصفية بالتاريخ..." style="width: 250px;" />
+      <app-button variant="secondary" (click)="onSyncAll()" [loading]="isSyncing()" icon="sync">
         مزامنة البيانات
       </app-button>
     </div>
@@ -47,27 +37,40 @@
     <div class="dashboard__chart-card">
       <div class="dashboard__chart-header">
         <h3>حالة التذاكر</h3>
-        <span class="dashboard__chart-badge">الشهر الحالي</span>
       </div>
       @if (ticketStatusOptions().series.length) {
-        <apx-chart [series]="ticketStatusOptions().series" [chart]="ticketStatusOptions().chart"
-          [labels]="ticketStatusOptions().labels" [colors]="ticketStatusOptions().colors"
-          [plotOptions]="ticketStatusOptions().plotOptions" [dataLabels]="ticketStatusOptions().dataLabels"
-          [legend]="ticketStatusOptions().legend" [tooltip]="ticketStatusOptions().tooltip" />
+      <apx-chart [series]="ticketStatusOptions().series" [chart]="ticketStatusOptions().chart"
+        [labels]="ticketStatusOptions().labels" [colors]="ticketStatusOptions().colors"
+        [plotOptions]="ticketStatusOptions().plotOptions" [dataLabels]="ticketStatusOptions().dataLabels"
+        [legend]="ticketStatusOptions().legend" [tooltip]="ticketStatusOptions().tooltip" />
       }
     </div>
 
     <div class="dashboard__chart-card dashboard__chart-card--wide">
       <div class="dashboard__chart-header">
-        <h3>التذاكر والمحادثات الشهرية</h3>
-        <span class="dashboard__chart-badge">2025</span>
+        <h3>التذاكر والزيارات</h3>
+
+        <div class="chart-periods">
+          <button class="chart-period-btn" [class.chart-period-btn--active]="activeChatPeriod() === 'daily'"
+            (click)="activeChatPeriod.set('daily')">
+            يومياً
+          </button>
+          <button class="chart-period-btn" [class.chart-period-btn--active]="activeChatPeriod() === 'weekly'"
+            (click)="activeChatPeriod.set('weekly')">
+            أسبوعياً
+          </button>
+          <button class="chart-period-btn" [class.chart-period-btn--active]="activeChatPeriod() === 'monthly'"
+            (click)="activeChatPeriod.set('monthly')">
+            شهرياً
+          </button>
+        </div>
       </div>
       @if (monthlyTicketsOptions().series.length) {
-        <apx-chart [series]="monthlyTicketsOptions().series" [chart]="monthlyTicketsOptions().chart"
-          [plotOptions]="monthlyTicketsOptions().plotOptions" [colors]="monthlyTicketsOptions().colors"
-          [dataLabels]="monthlyTicketsOptions().dataLabels" [stroke]="monthlyTicketsOptions().stroke"
-          [xaxis]="monthlyTicketsOptions().xaxis" [yaxis]="monthlyTicketsOptions().yaxis"
-          [legend]="monthlyTicketsOptions().legend" [tooltip]="monthlyTicketsOptions().tooltip" />
+      <apx-chart [series]="monthlyTicketsOptions().series" [chart]="monthlyTicketsOptions().chart"
+        [plotOptions]="monthlyTicketsOptions().plotOptions" [colors]="monthlyTicketsOptions().colors"
+        [dataLabels]="monthlyTicketsOptions().dataLabels" [stroke]="monthlyTicketsOptions().stroke"
+        [xaxis]="monthlyTicketsOptions().xaxis" [yaxis]="monthlyTicketsOptions().yaxis"
+        [legend]="monthlyTicketsOptions().legend" [tooltip]="monthlyTicketsOptions().tooltip" />
       }
     </div>
   </div>
@@ -76,15 +79,43 @@
   <div class="dashboard__row">
     <div class="dashboard__chart-card dashboard__chart-card--full">
       <div class="dashboard__chart-header">
-        <h3>تدفق الزيارات</h3>
-        <span class="dashboard__chart-badge">24 ساعة</span>
+        <div class="chart-header-left">
+          <h3>{{ activeTab() === 'visits' ? 'تدفق الزيارات' : 'تدفق التذاكر' }}</h3>
+
+          <!-- Tab Switcher (زيارات / تذاكر) -->
+          <div class="chart-tabs">
+            <button class="chart-tab" [class.chart-tab--active]="activeTab() === 'visits'"
+              (click)="activeTab.set('visits')">
+              الزيارات
+            </button>
+            <button class="chart-tab" [class.chart-tab--active]="activeTab() === 'tickets'"
+              (click)="activeTab.set('tickets')">
+              التذاكر
+            </button>
+          </div>
+        </div>
+
+        <div class="chart-periods">
+          <button class="chart-period-btn" [class.chart-period-btn--active]="activePeriod() === 'daily'"
+            (click)="activePeriod.set('daily')">
+            يومياً
+          </button>
+          <button class="chart-period-btn" [class.chart-period-btn--active]="activePeriod() === 'weekly'"
+            (click)="activePeriod.set('weekly')">
+            أسبوعياً
+          </button>
+          <button class="chart-period-btn" [class.chart-period-btn--active]="activePeriod() === 'monthly'"
+            (click)="activePeriod.set('monthly')">
+            شهرياً
+          </button>
+        </div>
       </div>
       @if (visitsTrendOptions().series.length) {
-        <apx-chart [series]="visitsTrendOptions().series" [chart]="visitsTrendOptions().chart"
-          [colors]="visitsTrendOptions().colors" [fill]="visitsTrendOptions().fill"
-          [dataLabels]="visitsTrendOptions().dataLabels" [stroke]="visitsTrendOptions().stroke"
-          [xaxis]="visitsTrendOptions().xaxis" [yaxis]="visitsTrendOptions().yaxis" [grid]="visitsTrendOptions().grid"
-          [tooltip]="visitsTrendOptions().tooltip" />
+      <apx-chart [series]="visitsTrendOptions().series" [chart]="visitsTrendOptions().chart"
+        [colors]="visitsTrendOptions().colors" [fill]="visitsTrendOptions().fill"
+        [dataLabels]="visitsTrendOptions().dataLabels" [stroke]="visitsTrendOptions().stroke"
+        [xaxis]="visitsTrendOptions().xaxis" [yaxis]="visitsTrendOptions().yaxis" [grid]="visitsTrendOptions().grid"
+        [tooltip]="visitsTrendOptions().tooltip" />
       }
     </div>
   </div>
@@ -92,25 +123,18 @@
   <!-- Row 3: Daily Visits Table (Full Width) -->
   <div class="dashboard__row">
     <div class="dashboard__chart-card dashboard__chart-card--full">
-      <app-shared-table [title]="'سجل الزيارات اليومية'" [data]="dailyVisits()" [columns]="visitColumns"
-        [labels]="tableLabels" [showActions]="false" [rows]="5" />
-    </div>
-  </div>
-
-  <!-- Top Agents -->
-  <div class="dashboard__row">
-    <div class="dashboard__chart-card dashboard__chart-card--full">
-      <div class="dashboard__chart-header">
-        <h3>أداء الفريق</h3>
-        <span class="dashboard__chart-badge">الشهر الحالي</span>
-      </div>
-      <app-shared-table 
-        [data]="topAgents()" 
-        [columns]="agentColumns" 
-        [showActions]="false" 
-        [rows]="5" 
+      <app-shared-table
+        [title]="'سجل الزيارات'"
+        [data]="dailyVisits()"
+        [columns]="visitColumns"
+        [labels]="tableLabels"
+        [showActions]="false"
+        [lazy]="true"
+        [totalRecords]="visitTotal()"
+        [rows]="visitPageSize()"
+        [currentPage]="visitPage()"
+        (onPageChange)="onVisitPageChange($event)"
       />
     </div>
   </div>
-
 </div>

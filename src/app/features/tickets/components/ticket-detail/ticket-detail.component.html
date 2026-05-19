@@ -4,57 +4,84 @@
   <div class="cd-split__info">
 
     <!-- Title & Description -->
-    <div class="cd-split__section">
-      <p class="cd-split__ticket-title">{{ ticket.title }}</p>
+    <div class=" cd-split__section mb-4">
+      <p class="cd-split__ticket-title text-xl font-bold text-gray-800 dark:text-white mb-2">{{ ticket.title }}</p>
       @if (ticket.description) {
-      <p class="cd-split__description">{{ ticket.description }}</p>
+      <p class="cd-split__description text-sm text-gray-600 dark:text-gray-300 mt-2">{{ ticket.description }}</p>
       }
     </div>
 
     <!-- Badges -->
-    <div class="cd-split__badges">
-      <span class="cd-split__badge" [style.background]="getStatusColor(ticket.status) + '20'"
-        [style.color]="getStatusColor(ticket.status)">
+    <div class="cd-split__badges mb-4 flex gap-2">
+      <span class="cd-split__badge px-2.5 py-1 text-xs font-medium rounded-full"
+        [style.background]="getStatusColor(ticket.status) + '20'" [style.color]="getStatusColor(ticket.status)">
         {{ getStatusLabel(ticket.status) }}
       </span>
-      <span class="cd-split__badge" [style.background]="getPriorityColor(ticket.priority) + '20'"
-        [style.color]="getPriorityColor(ticket.priority)">
+      <span class="cd-split__badge px-2.5 py-1 text-xs font-medium rounded-full"
+        [style.background]="getPriorityColor(ticket.priority) + '20'" [style.color]="getPriorityColor(ticket.priority)">
         {{ getPriorityLabel(ticket.priority) }}
       </span>
     </div>
 
     <!-- Info rows -->
-    <div class="cd-split__fields">
-      <div class="cd-split__field-row">
-        <span class="cd-split__field-label">العميل</span>
-        <span class="cd-split__field-value">{{ ticket.customer }}</span>
+    <div
+      class="cd-split__fields border-t border-b border-gray-150 dark:border-gray-700 py-3 mb-4 flex flex-col gap-2.5">
+      <div class="cd-split__field-row flex justify-between text-sm">
+        <span class="cd-split__field-label text-gray-500">العميل</span>
+        <span class="cd-split__field-value font-medium text-gray-800 dark:text-white">{{ ticket.customer }}</span>
       </div>
-      <div class="cd-split__field-row">
-        <span class="cd-split__field-label">المكنة</span>
-        <span class="cd-split__field-value">{{ ticket.machine_id }}</span>
+      <div class="cd-split__field-row flex justify-between text-sm">
+        <span class="cd-split__field-label text-gray-500">المكنة</span>
+        <span class="cd-split__field-value font-medium text-gray-800 dark:text-white">{{ ticket.machine_id }}</span>
       </div>
-      <div class="cd-split__field-row">
-        <span class="cd-split__field-label">المهندس</span>
-        <span class="cd-split__field-value">{{ ticket.engineer_name || '—' }}</span>
+      <div class="cd-split__field-row flex justify-between text-sm">
+        <span class="cd-split__field-label text-gray-500">المهندس</span>
+        <span class="cd-split__field-value font-medium text-gray-800 dark:text-white">{{ ticket.engineer_name || '—'
+          }}</span>
       </div>
-      <div class="cd-split__field-row">
-        <span class="cd-split__field-label">خدمة العملاء</span>
-        <span class="cd-split__field-value">{{ ticket.customer_care_name || '—' }}</span>
+      <div class="cd-split__field-row flex justify-between text-sm">
+        <span class="cd-split__field-label text-gray-500">خدمة العملاء</span>
+        <span class="cd-split__field-value font-medium text-gray-800 dark:text-white">{{ ticket.customer_care_name ||
+          '—'
+          }}</span>
       </div>
-
+      <div class="cd-split__field-row flex justify-between text-sm">
+        <span class="cd-split__field-label text-gray-500">تقييم التذكرة</span>
+        <span class="cd-split__field-value font-medium text-gray-800 dark:text-white text-left">
+          <ng-container *ngIf="ticket.ticket_rating; else noTicketRating">
+            <p-rating [ngModel]="ticket.ticket_rating" [readonly]="true"></p-rating>
+            <div *ngIf="ticket.ticket_rating_feedback" style="font-size: 0.85rem; color: #6b7280; margin-top: 4px;">
+              {{ ticket.ticket_rating_feedback }}
+            </div>
+          </ng-container>
+          <ng-template #noTicketRating>
+            <span class="text-gray-400" style="font-size: 0.85rem;">لم يتم التقييم بعد</span>
+          </ng-template>
+        </span>
+      </div>
     </div>
 
     <!-- Actions -->
     <div class="cd-split__actions">
       @if (auth.hasPermission('tickets.update')) {
-      <button class="cd-split__btn cd-split__btn--edit" (click)="startEdit()">تعديل</button>
+      <button class="cd-split__btn cd-split__btn--edit" (click)="startEdit()">
+        <i class="pi pi-pencil"></i> تعديل
+      </button>
       }
+
+      @if (canManageTicket && ['open', 'in_progress'].includes(ticket.status)) {
+      <button class="cd-split__btn cd-split__btn--resolve" (click)="openResolve()">
+        <i class="pi pi-check-circle"></i> حل التذكرة
+      </button>
+
+      <button class="cd-split__btn cd-split__btn--cancel" (click)="openCancel()">
+        <i class="pi pi-times-circle"></i> إلغاء التذكرة
+      </button>
+      }
+
       @if (ticket.conversation_id) {
-      <button class="cd-split__btn cd-split__btn--ghost" (click)="goToChat()">فتح المحادثة</button>
-      }
-      @if (auth.hasPermission('tickets.delete')) {
-      <button class="cd-split__btn cd-split__btn--danger" (click)="onDelete()" [disabled]="isDeleting()">
-        {{ isDeleting() ? 'جاري الحذف...' : 'حذف' }}
+      <button class="cd-split__btn cd-split__btn--ghost" (click)="goToChat()">
+        <i class="pi pi-comments"></i> فتح المحادثة
       </button>
       }
     </div>
@@ -62,3 +89,26 @@
   </div>
   }
 </app-shared-modal>
+
+<!-- Resolve Modal -->
+<app-shared-confirmation [(visible)]="showResolveModal" [title]="'حل التذكرة #' + (ticket?.id || '')"
+  message="هل أنت متأكد من رغبتك في حل هذه التذكرة؟ سيتم إغلاق الزيارة المرتبطة بها وإنهاء المحادثة."
+  confirmLabel="حل التذكرة" cancelLabel="إلغاء" type="info" [isLoading]="isResolving()" (confirmed)="confirmResolve()">
+  <div class="flex flex-col gap-1.5 mt-4 text-right" dir="rtl">
+    <label class="text-xs font-bold text-gray-500">ملاحظات الحل (اختياري)</label>
+    <textarea [(ngModel)]="resolveNotes" placeholder="أضف أي ملاحظات حول كيفية حل التذكرة..." rows="3"
+      class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:outline-none dark:bg-gray-700 dark:text-white text-sm"></textarea>
+  </div>
+</app-shared-confirmation>
+
+<!-- Cancel Modal -->
+<app-shared-confirmation [(visible)]="showCancelModal" [title]="'إلغاء التذكرة #' + (ticket?.id || '')"
+  message="هل أنت متأكد من رغبتك في إلغاء هذه التذكرة؟ سيتم إلغاء الزيارة المرتبطة بها وإنهاء المحادثة."
+  confirmLabel="إلغاء التذكرة" cancelLabel="تراجع" type="danger" [isLoading]="isCancelling()"
+  (confirmed)="confirmCancel()">
+  <div class="flex flex-col gap-1.5 mt-4 text-right" dir="rtl">
+    <label class="text-xs font-bold text-gray-500">سبب الإلغاء (اختياري)</label>
+    <textarea [(ngModel)]="cancelReason" placeholder="أدخل سبب إلغاء التذكرة هنا..." rows="3"
+      class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-red-500 focus:outline-none dark:bg-gray-700 dark:text-white text-sm"></textarea>
+  </div>
+</app-shared-confirmation>

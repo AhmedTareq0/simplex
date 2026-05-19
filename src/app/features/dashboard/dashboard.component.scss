@@ -207,6 +207,49 @@ apx-chart {
   white-space: nowrap;
 }
 
+/* ── Chart Dynamic Tabs & Periods ── */
+.chart-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.chart-tabs, .chart-periods {
+  display: flex;
+  background: rgba(99, 102, 241, 0.05);
+  padding: 3px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-card-border);
+}
+
+.chart-tab, .chart-period-btn {
+  background: transparent;
+  border: none;
+  padding: 6px 16px;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: var(--color-text-primary);
+  }
+
+  &--active {
+    background: var(--color-card-bg);
+    color: var(--color-primary-500);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+.chart-period-btn {
+  font-size: var(--text-xs);
+  padding: 6px 14px;
+}
+
 /* ── Activity List ── */
 .activity-list {
   display: flex;
@@ -296,4 +339,14 @@ apx-chart {
 .activity-item__status.status-open {
   background: rgba(110, 193, 228, 0.1);
   color: var(--color-primary-600);
+}
+
+::ng-deep {
+  .st-prime-table .p-datatable-tbody>tr>td.st-td {
+    white-space: pre-line !important;
+    line-height: 1.6 !important;
+  }
+  .st-prime-table .p-datatable-tbody>tr>td.st-td:nth-child(4) {
+    text-align: center !important;
+  }
 }

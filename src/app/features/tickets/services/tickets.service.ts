@@ -20,6 +20,10 @@ export interface Ticket {
   customer_care_name: string | null;
   odoo_task_id: number | null;
   created_at: string;
+  customer_id?: number | null;
+  engineer_id?: number | null;
+  ticket_rating?: number;
+  ticket_rating_feedback?: string;
 }
 
 export interface TicketFilters {
@@ -32,6 +36,7 @@ export interface TicketFilters {
 }
 
 export interface UpdateTicketPayload {
+  title?: string;
   status?: string;
   priority?: string;
   visit_date?: string | null;
@@ -98,6 +103,14 @@ export class TicketsService {
 
   deleteTicket(id: number): Observable<any> {
     return this.http.delete<any>(`${this.base}/api/tickets/${id}`);
+  }
+
+  resolveTicket(id: number, notes?: string): Observable<any> {
+    return this.http.put<any>(`${this.base}/api/tickets/${id}/resolve`, { notes: notes || null });
+  }
+
+  cancelTicket(id: number, reason?: string): Observable<any> {
+    return this.http.put<any>(`${this.base}/api/tickets/${id}/cancel`, { reason: reason || null });
   }
 
   createTicket(payload: CreateTicketPayload): Observable<ApiResponse<Ticket>> {

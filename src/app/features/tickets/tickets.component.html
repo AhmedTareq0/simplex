@@ -21,7 +21,7 @@
     </div>
   } @else {
     <app-shared-table
-      [data]="mappedTickets"
+      [data]="mappedTickets()"
       [columns]="columns"
       title="قائمة التذاكر"
       [showView]="false"
@@ -37,6 +37,7 @@
       (onSync)="onSync()"
       (onPageChange)="onPageChange($event)"
       (onRowClick)="onRowClick($event)"
+      (onAction)="onTableAction($event)"
     />
   }
 </div>
@@ -45,7 +46,6 @@
   [(visible)]="showDetail"
   [ticket]="selectedTicket()"
   (updated)="onTicketUpdated($event)"
-  (delete)="onTicketDeleted($event)"
   (edit)="onEditTicket($event)"
 />
 

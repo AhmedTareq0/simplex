@@ -1,5 +1,5 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SharedTableComponent, TableColumn, ButtonComponent } from '../../shared/components';
 import { TicketDetailComponent } from './components/ticket-detail/ticket-detail.component';
 import { TicketCreateComponent } from './components/ticket-create/ticket-create.component';
@@ -20,6 +20,7 @@ export class TicketsComponent implements OnInit {
   readonly auth = inject(AuthLocalService);
   private readonly syncService = inject(AdminSyncService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   selectedTicket = signal<any>(null);
   showDetail = signal(false);
@@ -59,14 +60,22 @@ export class TicketsComponent implements OnInit {
         { label: 'متوسطة', value: 'medium' },
         { label: 'منخفضة', value: 'low' },
       ],
-      formatter: (value: string) => ({ high: 'عالية', medium: 'متوسطة', low: 'منخفضة' } as Record<string, string>)[value] || value,
+      formatter: (value: string) => ({ high: 'عالية', medium: 'متوسطة', normal: 'متوسطة', low: 'منخفضة' } as Record<string, string>)[value] || value,
     },
     { field: 'engineer_name', header: 'المهندس', type: 'text', filterable: true, filterType: 'text' },
     { field: 'customer_care_name', header: 'خدمة العملاء', type: 'text', filterable: true, filterType: 'text' },
+    { field: 'ticket_rating', header: 'التقييم', type: 'rating' },
 
     {
       field: 'created_at', header: 'تاريخ الإنشاء', type: 'text',
       formatter: (value) => value ? new Date(value).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }) : '—',
+    },
+    {
+      field: 'conversation_id',
+      header: 'المحادثة',
+      type: 'button',
+      icon: 'chat',
+      linkText: 'فتح المحادثة',
     },
   ];
 
@@ -113,6 +122,12 @@ export class TicketsComponent implements OnInit {
     this.showDetail.set(true);
   }
 
+  onTableAction(event: { type: string; data: any }) {
+    if (event.type === 'conversation_id' && event.data.conversation_id) {
+      this.router.navigate(['/chat'], { queryParams: { conversation: event.data.conversation_id } });
+    }
+  }
+
   onTicketCreated() {
     this.loadData();
   }
@@ -136,11 +151,6 @@ export class TicketsComponent implements OnInit {
     this.selectedTicket.set(this.mapTicket(ticket));
   }
 
-  onTicketDeleted(id: string) {
-    this.ticketsService.tickets.update(list => list.filter((t: any) => String(t.id) !== id));
-    this.showDetail.set(false);
-    this.selectedTicket.set(null);
-  }
 
   private mapTicket(ticket: Ticket): any {
     const customerMatch = ticket.title.match(/\(([^)]+)\)/);
@@ -149,20 +159,24 @@ export class TicketsComponent implements OnInit {
     return {
       id: String(ticket.id),
       customer,
+      customer_id: ticket.customer_id || null,
       machine_id: ticket.machine_id,
       status: ticket.status,
       visit_date: ticket.visit_date,
-      priority: ticket.priority,
+      priority: (ticket.priority as any) === 'normal' ? 'medium' : ticket.priority,
       engineer_name: ticket.engineer_name,
+      engineer_id: ticket.engineer_id || null,
       customer_care_name: ticket.customer_care_name,
       created_at: ticket.created_at,
       conversation_id: ticket.conversation_id,
       description: ticket.description,
       title: ticket.title,
+      ticket_rating: (ticket as any).ticket_rating || 0,
+      ticket_rating_feedback: (ticket as any).ticket_rating_feedback || '',
     };
   }
 
-  get mappedTickets(): any[] {
-    return this.ticketsService.tickets().map(ticket => this.mapTicket(ticket));
-  }
+  readonly mappedTickets = computed(() =>
+    this.ticketsService.tickets().map(ticket => this.mapTicket(ticket))
+  );
 }
