@@ -24,6 +24,8 @@ export interface Ticket {
   engineer_id?: number | null;
   ticket_rating?: number;
   ticket_rating_feedback?: string;
+  customer_name?: string;
+  machine_name?: string;
 }
 
 export interface TicketFilters {

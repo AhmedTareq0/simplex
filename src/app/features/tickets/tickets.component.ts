@@ -39,7 +39,7 @@ export class TicketsComponent implements OnInit {
       field: 'customer', header: 'العميل', type: 'text',
       filterable: true, filterType: 'text', placeholder: 'ابحث عن عميل',
     },
-    { field: 'machine_id', header: 'الماكينة', type: 'text', filterable: true, filterType: 'text' },
+    { field: 'machine_name', header: 'الماكينة', type: 'text', filterable: true, filterType: 'text' },
     {
       field: 'status', header: 'الحالة', type: 'badge',
       filterable: true, filterType: 'dropdown',
@@ -50,7 +50,14 @@ export class TicketsComponent implements OnInit {
         { label: 'مغلقة', value: 'closed' },
         { label: 'منتهية', value: 'solved' },
       ],
-      formatter: (value: string) => ({ open: 'مفتوحة', in_progress: 'قيد التنفيذ', resolved: 'محلولة', closed: 'مغلقة', solved: 'منتهية' } as Record<string, string>)[value] || value,
+      formatter: (value: string) => {
+        const val = String(value || '').toLowerCase().trim().replace(/[\s_-]+/g, '_');
+        return ({ open: 'مفتوحة', in_progress: 'قيد التنفيذ', resolved: 'محلولة', closed: 'مغلقة', solved: 'منتهية' } as Record<string, string>)[val] || value;
+      },
+      colorFormatter: (value: string) => {
+        const val = String(value || '').toLowerCase().trim().replace(/[\s_-]+/g, '_');
+        return ({ open: '#3b82f6', in_progress: '#f59e0b', resolved: '#10b981', closed: '#6b7280', solved: '#8b5cf6' } as Record<string, string>)[val] || '#6b7280';
+      }
     },
     {
       field: 'priority', header: 'الأولوية', type: 'badge',
@@ -60,7 +67,14 @@ export class TicketsComponent implements OnInit {
         { label: 'متوسطة', value: 'medium' },
         { label: 'منخفضة', value: 'low' },
       ],
-      formatter: (value: string) => ({ high: 'عالية', medium: 'متوسطة', normal: 'متوسطة', low: 'منخفضة' } as Record<string, string>)[value] || value,
+      formatter: (value: string) => {
+        const val = String(value || '').toLowerCase().trim();
+        return ({ high: 'عالية', medium: 'متوسطة', normal: 'متوسطة', low: 'منخفضة' } as Record<string, string>)[val] || value;
+      },
+      colorFormatter: (value: string) => {
+        const val = String(value || '').toLowerCase().trim();
+        return ({ high: '#ef4444', medium: '#f59e0b', normal: '#f59e0b', low: '#10b981' } as Record<string, string>)[val] || '#6b7280';
+      }
     },
     { field: 'engineer_name', header: 'المهندس', type: 'text', filterable: true, filterType: 'text' },
     { field: 'customer_care_name', header: 'خدمة العملاء', type: 'text', filterable: true, filterType: 'text' },
@@ -154,13 +168,22 @@ export class TicketsComponent implements OnInit {
 
   private mapTicket(ticket: Ticket): any {
     const customerMatch = ticket.title.match(/\(([^)]+)\)/);
-    const customer = customerMatch ? customerMatch[1] : '—';
+    const isId = (val: any) => !val || /^\d+$/.test(String(val).trim());
+
+    const customer = ticket.customer_name && !isId(ticket.customer_name)
+      ? ticket.customer_name
+      : (customerMatch && !isId(customerMatch[1]) ? customerMatch[1] : '—');
+
+    const machineName = ticket.machine_name && !isId(ticket.machine_name)
+      ? ticket.machine_name
+      : (ticket.machine_id && !isId(ticket.machine_id) ? ticket.machine_id : '—');
 
     return {
       id: String(ticket.id),
       customer,
       customer_id: ticket.customer_id || null,
       machine_id: ticket.machine_id,
+      machine_name: machineName,
       status: ticket.status,
       visit_date: ticket.visit_date,
       priority: (ticket.priority as any) === 'normal' ? 'medium' : ticket.priority,

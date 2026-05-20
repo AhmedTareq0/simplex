@@ -156,11 +156,32 @@ export class ReportsComponent implements OnInit {
       next: (res) => {
         if (res.success && res.data) {
           let items = res.data.items || [];
+
+          // Implement client-side sorting fallback
+          const sortByField = this.sortBy();
+          const order = this.sortOrder() || 'desc';
+          if (sortByField) {
+            items = [...items].sort((a: any, b: any) => {
+              const valA = a[sortByField];
+              const valB = b[sortByField];
+              if (valA === null || valA === undefined) return 1;
+              if (valB === null || valB === undefined) return -1;
+              if (typeof valA === 'number' && typeof valB === 'number') {
+                return order === 'asc' ? valA - valB : valB - valA;
+              }
+              return order === 'asc'
+                ? String(valA).toLowerCase().localeCompare(String(valB).toLowerCase(), 'ar')
+                : String(valB).toLowerCase().localeCompare(String(valA).toLowerCase(), 'ar');
+            });
+          }
+
           if (employee_id) {
             items = items.filter(item => item.employee_id === Number(employee_id));
+            this.totalRecords.set(items.length);
+          } else {
+            this.totalRecords.set(res.data.total || items.length || 0);
           }
           this.teamPerformance.set(items);
-          this.totalRecords.set(items.length || 0);
         }
         this.isLoading.set(false);
       },
