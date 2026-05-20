@@ -12,7 +12,7 @@ import { AuthLocalService } from '../../auth/services/auth-local.service';
 @Component({
   selector: 'app-machines',
   standalone: true,
-  imports: [CommonModule, SharedTableComponent, SkeletonLoaderComponent, MachineEditModalComponent, ButtonComponent, MachineDetailComponent],
+  imports: [CommonModule, SharedTableComponent, SkeletonLoaderComponent, MachineEditModalComponent, MachineDetailComponent],
   templateUrl: './machines.component.html',
   styleUrl: './machines.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

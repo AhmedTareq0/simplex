@@ -4,7 +4,7 @@
       <h1 class="machines__title">دليل الماكينات</h1>
       <p class="machines__subtitle">إدارة وتعديل بيانات الماكينات</p>
     </div>
-    <div class="machines__actions">
+    <!-- <div class="machines__actions">
       @if (auth.hasPermission('machines.manage')) {
         <app-button
           label="إضافة ماكينة"
@@ -12,53 +12,29 @@
           (pressed)="onAdd()"
         />
       }
-    </div>
+    </div> -->
   </div>
 
   @if (isLoading) {
-    <div class="machines__skeleton">
-      <app-skeleton-loader type="table" [count]="8" />
-    </div>
+  <div class="machines__skeleton">
+    <app-skeleton-loader type="table" [count]="8" />
+  </div>
   } @else {
-    <app-shared-table
-      [data]="machines"
-      [columns]="columns"
-      title="قائمة الماكينات"
-      [showView]="true"
-      [showEdit]="auth.hasPermission('machines.manage')"
-      [showDelete]="auth.hasPermission('machines.manage')"
-      [showActions]="true"
-      [lazy]="true"
-      [totalRecords]="total"
-      [rows]="pageSize()"
-      [currentPage]="currentPage()"
-      [showSync]="auth.hasPermission('sync.manage')"
-      [isSyncing]="isSyncing()"
-      (onSync)="onSync()"
-      (onPageChange)="onPageChange($event)"
-      (onView)="onRowClick($event)"
-      (onEdit)="onEdit($event)"
-      (onDelete)="onDelete($event)"
-      (onRowClick)="onRowClick($event)"
-    />
+  <app-shared-table [data]="machines" [columns]="columns" title="قائمة الماكينات" [showView]="true"
+    [showEdit]="auth.hasPermission('machines.manage')" [showDelete]="auth.hasPermission('machines.manage')"
+    [showActions]="true" [lazy]="true" [totalRecords]="total" [rows]="pageSize()" [currentPage]="currentPage()"
+    [showSync]="auth.hasPermission('sync.manage')" [isSyncing]="isSyncing()" (onSync)="onSync()"
+    (onPageChange)="onPageChange($event)" (onView)="onRowClick($event)" (onEdit)="onEdit($event)"
+    (onDelete)="onDelete($event)" (onRowClick)="onRowClick($event)" />
   }
 </div>
 
 @if (showDetailModal() && selectedMachine()) {
-  <app-machine-detail
-    [visible]="showDetailModal()"
-    [machine]="selectedMachine()"
-    (close)="showDetailModal.set(false)"
-    (edit)="onEdit($event)"
-  />
+<app-machine-detail [visible]="showDetailModal()" [machine]="selectedMachine()" (close)="showDetailModal.set(false)"
+  (edit)="onEdit($event)" />
 }
 
 @if (showEditModal() && selectedMachine()) {
-  <app-machine-edit-modal
-    [visible]="showEditModal()"
-    [machine]="selectedMachine()!"
-    [isSubmitting]="isUpdatingMachine()"
-    (save)="handleSaveMachine($event)"
-    (cancel)="showEditModal.set(false)"
-  />
+<app-machine-edit-modal [visible]="showEditModal()" [machine]="selectedMachine()!" [isSubmitting]="isUpdatingMachine()"
+  (save)="handleSaveMachine($event)" (cancel)="showEditModal.set(false)" />
 }
