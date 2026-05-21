@@ -14,7 +14,6 @@
       placeholder="اختر العميل"
       [showClear]="!isEditMode"
       [filter]="true"
-      [disabled]="isEditMode"
       class="ticket-create__field"
     ></app-shared-select>
 
@@ -35,21 +34,22 @@
       placeholder="اختر الماكينة"
       [showClear]="!isEditMode"
       [filter]="true"
-      [disabled]="isEditMode"
       class="ticket-create__field"
     ></app-shared-select>
 
-    <app-shared-select
-      label="المهندس المسؤول"
-      [options]="engineerOptions()"
-      [(ngModel)]="formData.engineer_id"
-      optionLabel="label"
-      optionValue="value"
-      placeholder="تعيين مهندس"
-      [showClear]="true"
-      [filter]="true"
-      class="ticket-create__field"
-    ></app-shared-select>
+    @if (auth.isSuperAdmin()) {
+      <app-shared-select
+        label="مسؤول خدمة العملاء *"
+        [options]="customerCareOptions()"
+        [(ngModel)]="formData.customer_care_id"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="تعيين مسؤول خدمة عملاء"
+        [showClear]="false"
+        [filter]="true"
+        class="ticket-create__field"
+      ></app-shared-select>
+    }
 
     <app-shared-select
       label="الأولوية"

@@ -19,6 +19,7 @@ export interface Ticket {
   engineer_name: string | null;
   customer_care_name: string | null;
   odoo_task_id: number | null;
+  visit_id: number | null;
   created_at: string;
   customer_id?: number | null;
   engineer_id?: number | null;
@@ -42,15 +43,17 @@ export interface UpdateTicketPayload {
   status?: string;
   priority?: string;
   visit_date?: string | null;
-  engineer_id?: number | null;
+  customer_care_id?: number | null;
+  customer_id?: number | null;
+  machine_id?: number | null;
 }
 
 export interface CreateTicketPayload {
   customer_id: number;
   title: string;
-  priority: 'low' | 'medium' | 'high';
-  machine_id?: number | string;
-  engineer_id?: number | null;
+  machine_id: number;
+  priority: 'low' | 'normal' | 'medium' | 'high';
+  customer_care_id: number;
 }
 
 export interface SyncResult {
@@ -119,6 +122,10 @@ export class TicketsService {
     return this.http.post<ApiResponse<Ticket>>(`${this.base}/api/tickets`, payload).pipe(
       tap(() => this.loadTickets({ page: this.currentPage(), page_size: 10 }))
     );
+  }
+
+  requestVisit(ticketId: number, metadata?: { issue_type: string; sub_type: string; priority: string; description: string }): Observable<ApiResponse<Ticket>> {
+    return this.http.post<ApiResponse<Ticket>>(`${this.base}/api/tickets/${ticketId}/request-visit`, metadata || {});
   }
 
   syncTickets(): Observable<ApiResponse<SyncResult>> {

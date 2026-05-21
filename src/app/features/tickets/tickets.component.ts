@@ -34,66 +34,84 @@ export class TicketsComponent implements OnInit {
   get isLoading(): boolean { return this.ticketsService.isLoading(); }
   get total(): number { return this.ticketsService.total(); }
 
-  columns: TableColumn[] = [
-    {
-      field: 'customer', header: 'العميل', type: 'text',
-      filterable: true, filterType: 'text', placeholder: 'ابحث عن عميل',
-    },
-    { field: 'machine_name', header: 'الماكينة', type: 'text', filterable: true, filterType: 'text' },
-    {
-      field: 'status', header: 'الحالة', type: 'badge',
-      filterable: true, filterType: 'dropdown',
-      filterOptions: [
-        { label: 'مفتوحة', value: 'open' },
-        { label: 'قيد التنفيذ', value: 'in_progress' },
-        { label: 'محلولة', value: 'resolved' },
-        { label: 'مغلقة', value: 'closed' },
-        { label: 'منتهية', value: 'solved' },
-      ],
-      formatter: (value: string) => {
-        const val = String(value || '').toLowerCase().trim().replace(/[\s_-]+/g, '_');
-        return ({ open: 'مفتوحة', in_progress: 'قيد التنفيذ', resolved: 'محلولة', closed: 'مغلقة', solved: 'منتهية' } as Record<string, string>)[val] || value;
-      },
-      colorFormatter: (value: string) => {
-        const val = String(value || '').toLowerCase().trim().replace(/[\s_-]+/g, '_');
-        return ({ open: '#3b82f6', in_progress: '#f59e0b', resolved: '#10b981', closed: '#6b7280', solved: '#8b5cf6' } as Record<string, string>)[val] || '#6b7280';
-      }
-    },
-    {
-      field: 'priority', header: 'الأولوية', type: 'badge',
-      filterable: true, filterType: 'dropdown',
-      filterOptions: [
-        { label: 'عالية', value: 'high' },
-        { label: 'متوسطة', value: 'medium' },
-        { label: 'منخفضة', value: 'low' },
-      ],
-      formatter: (value: string) => {
-        const val = String(value || '').toLowerCase().trim();
-        return ({ high: 'عالية', medium: 'متوسطة', normal: 'متوسطة', low: 'منخفضة' } as Record<string, string>)[val] || value;
-      },
-      colorFormatter: (value: string) => {
-        const val = String(value || '').toLowerCase().trim();
-        return ({ high: '#ef4444', medium: '#f59e0b', normal: '#f59e0b', low: '#10b981' } as Record<string, string>)[val] || '#6b7280';
-      }
-    },
-    { field: 'engineer_name', header: 'المهندس', type: 'text', filterable: true, filterType: 'text' },
-    { field: 'customer_care_name', header: 'خدمة العملاء', type: 'text', filterable: true, filterType: 'text' },
-    { field: 'ticket_rating', header: 'التقييم', type: 'rating' },
+  columns: TableColumn[] = [];
 
-    {
-      field: 'created_at', header: 'تاريخ الإنشاء', type: 'text',
-      formatter: (value) => value ? new Date(value).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }) : '—',
-    },
-    {
-      field: 'conversation_id',
-      header: 'المحادثة',
-      type: 'button',
-      icon: 'chat',
-      linkText: 'فتح المحادثة',
-    },
-  ];
+  private buildColumns() {
+    const baseColumns: TableColumn[] = [
+      {
+        field: 'customer', header: 'العميل', type: 'text',
+        filterable: true, filterType: 'text', placeholder: 'ابحث عن عميل',
+      },
+      { field: 'machine_name', header: 'الماكينة', type: 'text', filterable: true, filterType: 'text' },
+      {
+        field: 'status', header: 'الحالة', type: 'badge',
+        filterable: true, filterType: 'dropdown',
+        filterOptions: [
+          { label: 'مفتوحة', value: 'open' },
+          { label: 'قيد التنفيذ', value: 'in_progress' },
+          { label: 'محلولة', value: 'resolved' },
+          { label: 'مغلقة', value: 'closed' },
+          { label: 'منتهية', value: 'solved' },
+          { label: 'ملغاة', value: 'cancelled' },
+        ],
+        formatter: (value: string) => {
+          const val = String(value || '').toLowerCase().trim().replace(/[\s_-]+/g, '_');
+          return ({ open: 'مفتوحة', in_progress: 'قيد التنفيذ', resolved: 'محلولة', closed: 'مغلقة', solved: 'منتهية', cancelled: 'ملغاة' } as Record<string, string>)[val] || value;
+        },
+        colorFormatter: (value: string) => {
+          const val = String(value || '').toLowerCase().trim().replace(/[\s_-]+/g, '_');
+          return ({ open: '#3b82f6', in_progress: '#f59e0b', resolved: '#10b981', closed: '#6b7280', solved: '#8b5cf6', cancelled: '#ef4444' } as Record<string, string>)[val] || '#6b7280';
+        }
+      },
+      {
+        field: 'priority', header: 'الأولوية', type: 'badge',
+        filterable: true, filterType: 'dropdown',
+        filterOptions: [
+          { label: 'عالية', value: 'high' },
+          { label: 'متوسطة', value: 'medium' },
+          { label: 'منخفضة', value: 'low' },
+        ],
+        formatter: (value: string) => {
+          const val = String(value || '').toLowerCase().trim();
+          return ({ high: 'عالية', medium: 'متوسطة', normal: 'متوسطة', low: 'منخفضة' } as Record<string, string>)[val] || value;
+        },
+        colorFormatter: (value: string) => {
+          const val = String(value || '').toLowerCase().trim();
+          return ({ high: '#ef4444', medium: '#f59e0b', normal: '#f59e0b', low: '#10b981' } as Record<string, string>)[val] || '#6b7280';
+        }
+      },
+    ];
+
+    if (this.auth.isSuperAdmin()) {
+      baseColumns.push({ 
+        field: 'customer_care_name', 
+        header: 'خدمة العملاء', 
+        type: 'text', 
+        filterable: true, 
+        filterType: 'text' 
+      });
+    }
+
+    baseColumns.push(
+      { field: 'ticket_rating', header: 'التقييم', type: 'rating' },
+      {
+        field: 'created_at', header: 'تاريخ الإنشاء', type: 'text',
+        formatter: (value) => value ? new Date(value).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }) : '—',
+      },
+      {
+        field: 'conversation_id',
+        header: 'المحادثة',
+        type: 'button',
+        icon: 'chat',
+        linkText: 'فتح المحادثة',
+      }
+    );
+
+    this.columns = baseColumns;
+  }
 
   ngOnInit() {
+    this.buildColumns();
     this.loadData();
     this.route.queryParams.subscribe(params => {
       const ticketId = params['id'];
@@ -181,6 +199,7 @@ export class TicketsComponent implements OnInit {
     return {
       id: String(ticket.id),
       customer,
+      customer_name: customer,  
       customer_id: ticket.customer_id || null,
       machine_id: ticket.machine_id,
       machine_name: machineName,
@@ -190,6 +209,7 @@ export class TicketsComponent implements OnInit {
       engineer_name: ticket.engineer_name,
       engineer_id: ticket.engineer_id || null,
       customer_care_name: ticket.customer_care_name,
+      customer_care_id: (ticket as any).customer_care_id || null,
       created_at: ticket.created_at,
       conversation_id: ticket.conversation_id,
       description: ticket.description,

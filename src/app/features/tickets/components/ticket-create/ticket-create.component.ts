@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, inject, signal, computed, effect } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -11,6 +11,7 @@ import { EmployeeService } from '../../../employees/services/employee.service';
 import { ChatService, Conversation } from '../../../chat/services/chat.service';
 import { ClientService } from '../../../clients/services/client.service';
 import { AuthLocalService } from '@/auth/services/auth-local.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-ticket-create',
@@ -31,8 +32,8 @@ export class TicketCreateComponent {
   private readonly machineService = inject(MachineService);
   private readonly employeeService = inject(EmployeeService);
   private readonly chatService = inject(ChatService);
-  private readonly clientService = inject(ClientService);
-  private readonly auth = inject(AuthLocalService);
+  readonly clientService = inject(ClientService);
+  readonly auth = inject(AuthLocalService);
 
   @Input() visible = false;
   @Input() isEditMode = false;
@@ -53,23 +54,10 @@ export class TicketCreateComponent {
     this.clientService.clients().map(c => ({ label: c.name, value: c.odoo_user_id }))
   );
 
-  constructor() {
-    effect(() => {
-      const emps = this.employeeService.employees();
-      if (this.isEditMode && this.editData && emps.length > 0 && !this.formData.engineer_id) {
-        const emp = emps.find(e => e.name === this.editData.engineer_name);
-        if (emp) {
-          this.formData.engineer_id = emp.odoo_user_id;
-        }
-      }
-    });
-  }
-
-
-  readonly engineerOptions = computed(() =>
+  readonly customerCareOptions = computed(() =>
     this.employeeService.employees()
-      .filter(e => e.department === 'Maintenance' || e.employee_role === 'Maintenance')
-      .map(e => ({ label: e.name, value: e.odoo_user_id }))
+      .filter(e => e.employee_role === 'customer_care' || e.employee_role === 'customer_support')
+      .map(e => ({ label: e.name, value: e.id }))
   );
 
   readonly conversationOptions = computed(() =>
@@ -84,7 +72,7 @@ export class TicketCreateComponent {
     title: '',
     priority: 'medium' as string,
     machine_id: null as number | null,
-    engineer_id: null as number | null,
+    customer_care_id: null as number | null,
   };
 
   priorityOptions = [
@@ -98,34 +86,44 @@ export class TicketCreateComponent {
     { label: 'قيد التنفيذ', value: 'in_progress' },
     { label: 'محلولة', value: 'resolved' },
     { label: 'مغلقة', value: 'closed' },
+    { label: 'منتهية', value: 'solved' },
+    { label: 'ملغاة', value: 'cancelled' },
   ];
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   ngOnChanges() {
-    if (this.visible) {
-      if (this.auth.hasPermission('tickets.create') || this.auth.hasPermission('tickets.update')) {
-        this.clientService.loadClients({ page_size: 100 });
-        this.employeeService.loadEmployees({ department: 'Maintenance', page_size: 100 });
-        this.machineService.loadMachines({ pageSize: 100 });
+    if (!this.visible) return;
 
-        if (this.auth.hasPermission('chat.cc') || this.auth.hasPermission('chat.engineer')) {
-          this.chatService.getConversations({ page_size: 100 }).subscribe(res => {
-            this.conversations.set(res.data?.items || []);
-          });
-        }
-      }
+    this.errorMessage.set('');
 
-      this.errorMessage.set('');
+    if (this.auth.hasPermission('chat.cc') || this.auth.hasPermission('chat.engineer')) {
+      this.chatService.getConversations({ page_size: 100 }).subscribe(res => {
+        this.conversations.set(res.data?.items || []);
+      });
+    }
+
+     forkJoin({
+      clients: this.clientService.fetchClients({ page_size: 100 }),
+      employees: this.employeeService.fetchEmployees({ page_size: 100 }),
+      machines: this.machineService.fetchMachines({ pageSize: 100 }),
+    }).subscribe(() => {
       if (this.isEditMode && this.editData) {
-        const emp = this.employeeService.employees().find(e => e.name === this.editData.engineer_name);
+        const ccEmployee = this.employeeService.employees()
+          .find(e => e.name === this.editData.customer_care_name);
+
+        const client = this.clientService.clients()
+          .find(c => c.name === this.editData.customer_name);
+
+        const machine = this.machineService.machines()
+          .find(m => m.id === this.editData.machine_id || m.name === this.editData.machine_name);
+
         this.formData = {
-          customer_id: this.editData.customer_id || null,
+          customer_id: client?.odoo_user_id ?? this.editData.customer_id ?? null,
           title: this.editData.title || '',
-          priority: this.editData.priority === 'normal' ? 'medium' : (this.editData.priority || 'medium'),
-          machine_id: this.editData.machine_id || null,
-          engineer_id: emp ? emp.odoo_user_id : (this.editData.engineer_id || null),
+          priority: (this.editData.priority || 'medium').toLowerCase(),
+          machine_id: machine?.id ?? this.editData.machine_id ?? null,
+          customer_care_id: ccEmployee?.id ?? this.editData.customer_care_id ?? null,
         };
       } else {
         this.formData = {
@@ -133,10 +131,10 @@ export class TicketCreateComponent {
           title: '',
           priority: 'medium',
           machine_id: null,
-          engineer_id: null,
+          customer_care_id: null,
         };
       }
-    }
+    });
   }
 
   close() {
@@ -150,6 +148,11 @@ export class TicketCreateComponent {
       return;
     }
 
+    if (!this.isEditMode && this.auth.isSuperAdmin() && !this.formData.customer_care_id) {
+      this.errorMessage.set('يرجى اختيار مسؤول خدمة العملاء');
+      return;
+    }
+
     this.isSaving.set(true);
     this.errorMessage.set('');
 
@@ -157,7 +160,9 @@ export class TicketCreateComponent {
       const payload: UpdateTicketPayload = {
         title: this.formData.title,
         priority: this.formData.priority,
-        engineer_id: this.formData.engineer_id,
+        ...(this.formData.customer_care_id != null ? { customer_care_id: this.formData.customer_care_id } : {}),
+        ...(this.formData.customer_id != null ? { customer_id: this.formData.customer_id } : {}),
+        ...(this.formData.machine_id != null ? { machine_id: this.formData.machine_id } : {}),
       };
 
       this.ticketsService.updateTicket(Number(this.editData.id), payload).subscribe({
@@ -176,8 +181,8 @@ export class TicketCreateComponent {
         customer_id: this.formData.customer_id!,
         title: this.formData.title,
         priority: this.formData.priority as CreateTicketPayload['priority'],
-        machine_id: this.formData.machine_id || undefined,
-        engineer_id: this.formData.engineer_id,
+        machine_id: this.formData.machine_id!,
+        customer_care_id: this.auth.isSuperAdmin() ? this.formData.customer_care_id! : Number(this.auth.currentUser()?.id),
       };
 
       this.ticketsService.createTicket(payload).subscribe({
