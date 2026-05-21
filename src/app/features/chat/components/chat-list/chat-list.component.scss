@@ -1,7 +1,17 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .chat-list {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
   background: #fff;
 
   &__search-row {
@@ -10,7 +20,9 @@
     padding: 0 var(--space-2);
     align-items: center;
 
-    app-chat-search { flex: 1; }
+    app-chat-search {
+      flex: 1;
+    }
 
     .filter-toggle {
       width: 40px;

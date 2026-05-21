@@ -4,33 +4,16 @@
   min-height: 100%;
 }
 
-:host ::ng-deep .layout-content__inner {
-  padding: 0 !important;
-  max-width: none !important;
-  margin: 0 !important;
-}
-
-:host ::ng-deep .layout-content {
+::ng-deep .layout-content:has(app-chat) {
   overflow: hidden !important;
 }
 
-/* Direct override for layout-content__inner when chat page is active */
-.layout-content__inner.chat-page-active {
+::ng-deep .layout-content__inner:has(app-chat) {
   padding: 0 !important;
   max-width: none !important;
   margin: 0 !important;
-}
-
-@media (min-width: 768px) {
-  .layout-content__inner.chat-page-active {
-    padding: 0 !important;
-  }
-}
-
-@media (min-width: 1024px) {
-  .layout-content__inner.chat-page-active {
-    padding: 0 !important;
-  }
+  min-height: 0 !important;
+  height: 100% !important;
 }
 
 .chat-layout {
@@ -47,6 +30,17 @@
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
+    overflow: hidden;
+    min-height: 0;
+
+    >app-chat-list,
+    >app-skeleton-loader {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
   }
 
   &__right {
