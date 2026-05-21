@@ -18,3 +18,21 @@ export function formatArabicDateTime(val: string | Date | null | undefined): str
 
   return `${dateStr}\n${timeStr}`;
 }
+
+export function formatDateShort(date: string | null | undefined): string {
+  if (!date) return '—';
+  return new Date(date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+export function formatDateLong(date: string | null | undefined): string {
+  if (!date) return '—';
+  return new Date(date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+export function formatDateTime(date: string | null | undefined): string {
+  if (!date) return '—';
+  return new Date(date).toLocaleDateString('ar-EG', {
+    day: 'numeric', month: 'long', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+}

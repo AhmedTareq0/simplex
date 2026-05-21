@@ -7,6 +7,10 @@ import { TicketsService, Ticket } from './services/tickets.service';
 import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader.component';
 import { AuthLocalService } from '../../auth/services/auth-local.service';
 import { AdminSyncService } from '../../core/services/admin-sync.service';
+import {
+  TICKET_STATUS_OPTIONS, TICKET_PRIORITY_OPTIONS,
+  getStatusLabel, getStatusColor, getPriorityLabel, getPriorityColor,
+} from './ticket.constants';
 
 @Component({
   selector: 'app-tickets',
@@ -46,39 +50,16 @@ export class TicketsComponent implements OnInit {
       {
         field: 'status', header: 'الحالة', type: 'badge',
         filterable: true, filterType: 'dropdown',
-        filterOptions: [
-          { label: 'مفتوحة', value: 'open' },
-          { label: 'قيد التنفيذ', value: 'in_progress' },
-          { label: 'محلولة', value: 'resolved' },
-          { label: 'مغلقة', value: 'closed' },
-          { label: 'منتهية', value: 'solved' },
-          { label: 'ملغاة', value: 'cancelled' },
-        ],
-        formatter: (value: string) => {
-          const val = String(value || '').toLowerCase().trim().replace(/[\s_-]+/g, '_');
-          return ({ open: 'مفتوحة', in_progress: 'قيد التنفيذ', resolved: 'محلولة', closed: 'مغلقة', solved: 'منتهية', cancelled: 'ملغاة' } as Record<string, string>)[val] || value;
-        },
-        colorFormatter: (value: string) => {
-          const val = String(value || '').toLowerCase().trim().replace(/[\s_-]+/g, '_');
-          return ({ open: '#3b82f6', in_progress: '#f59e0b', resolved: '#10b981', closed: '#6b7280', solved: '#8b5cf6', cancelled: '#ef4444' } as Record<string, string>)[val] || '#6b7280';
-        }
+        filterOptions: TICKET_STATUS_OPTIONS,
+        formatter: (value: string) => getStatusLabel(value),
+        colorFormatter: (value: string) => getStatusColor(value),
       },
       {
         field: 'priority', header: 'الأولوية', type: 'badge',
         filterable: true, filterType: 'dropdown',
-        filterOptions: [
-          { label: 'عالية', value: 'high' },
-          { label: 'متوسطة', value: 'medium' },
-          { label: 'منخفضة', value: 'low' },
-        ],
-        formatter: (value: string) => {
-          const val = String(value || '').toLowerCase().trim();
-          return ({ high: 'عالية', medium: 'متوسطة', normal: 'متوسطة', low: 'منخفضة' } as Record<string, string>)[val] || value;
-        },
-        colorFormatter: (value: string) => {
-          const val = String(value || '').toLowerCase().trim();
-          return ({ high: '#ef4444', medium: '#f59e0b', normal: '#f59e0b', low: '#10b981' } as Record<string, string>)[val] || '#6b7280';
-        }
+        filterOptions: TICKET_PRIORITY_OPTIONS,
+        formatter: (value: string) => getPriorityLabel(value),
+        colorFormatter: (value: string) => getPriorityColor(value),
       },
     ];
 

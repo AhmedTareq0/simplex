@@ -2,6 +2,7 @@ import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IconComponent, AppIconName } from '@/shared/components';
 import { TimelineItem } from '../../services/visits.service';
+import { VISIT_STATUS } from '@/core/constants/status.constants';
 
 @Component({
   selector: 'app-visit-timeline',
@@ -33,14 +34,5 @@ export class VisitTimelineComponent {
     });
   }
 
-  getStatusLabel(status: string): string {
-    return ({
-      new: 'جديدة',
-      scheduled: 'مجدولة',
-      in_progress: 'قيد التنفيذ',
-      done: 'مكتملة',
-      completed: 'مكتملة',
-      cancelled: 'ملغاة'
-    } as Record<string, string>)[status] || status;
-  }
+  getStatusLabel = VISIT_STATUS.getLabel;
 }

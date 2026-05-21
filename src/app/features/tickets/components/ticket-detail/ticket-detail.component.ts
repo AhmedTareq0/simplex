@@ -7,6 +7,7 @@ import { SharedModalComponent, SharedConfirmationComponent } from '@/shared/comp
 import { RequestVisitModalComponent } from '../../../visits/components/request-visit-modal/request-visit-modal.component';
 import { TicketsService, Ticket } from '../../services/tickets.service';
 import { RatingModule } from 'primeng/rating';
+import { getStatusLabel, getStatusColor, getPriorityLabel, getPriorityColor, isActiveTicketStatus } from '../../ticket.constants';
 
 @Component({
   selector: 'app-ticket-detail',
@@ -25,9 +26,7 @@ export class TicketDetailComponent {
   }
 
   get isActiveTicket(): boolean {
-    if (!this.ticket || !this.ticket.status) return false;
-    const status = this.ticket.status.toLowerCase();
-    return ['open', 'in_progress'].includes(status);
+    return this.ticket?.status ? isActiveTicketStatus(this.ticket.status) : false;
   }
 
   @Input() visible = false;
@@ -139,25 +138,10 @@ export class TicketDetailComponent {
     }
   }
 
-  getStatusLabel(s: string): string {
-    const val = String(s || '').toLowerCase().trim().replace(/[\s_-]+/g, '_');
-    return ({ open: 'مفتوحة', in_progress: 'قيد التنفيذ', resolved: 'محلولة', closed: 'مغلقة', solved: 'منتهية', cancelled: 'ملغاة' } as any)[val] || s;
-  }
-
-  getStatusColor(s: string): string {
-    const val = String(s || '').toLowerCase().trim().replace(/[\s_-]+/g, '_');
-    return ({ open: '#3b82f6', in_progress: '#f59e0b', resolved: '#10b981', closed: '#6b7280', solved: '#8b5cf6', cancelled: '#ef4444' } as any)[val] || '#6b7280';
-  }
-
-  getPriorityLabel(p: string): string {
-    const val = String(p || '').toLowerCase().trim();
-    return ({ high: 'عالية', medium: 'متوسطة', normal: 'متوسطة', low: 'منخفضة' } as any)[val] || p;
-  }
-
-  getPriorityColor(p: string): string {
-    const val = String(p || '').toLowerCase().trim();
-    return ({ high: '#ef4444', medium: '#f59e0b', normal: '#f59e0b', low: '#10b981' } as any)[val] || '#6b7280';
-  }
+  getStatusLabel = getStatusLabel;
+  getStatusColor = getStatusColor;
+  getPriorityLabel = getPriorityLabel;
+  getPriorityColor = getPriorityColor;
 
   formatDate(date: string | null): string {
     if (!date) return '—';
