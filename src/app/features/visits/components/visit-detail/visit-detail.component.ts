@@ -1,4 +1,4 @@
-import { Component, input, output, signal, inject } from '@angular/core';
+import { Component, input, output, signal, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SharedModalComponent, ButtonComponent, SharedConfirmationComponent, SharedInputComponent, SharedSelectComponent } from '@/shared/components';
@@ -57,18 +57,22 @@ export class VisitDetailComponent {
   selectedEngineerId = signal<number | null>(null);
   engineers = signal<Employee[]>([]);
 
-  ngOnChanges() {
-    if (this.visible() && this.visit()) {
-      this.loadActivities();
-      if (this.auth.hasPermission('visits.update')) {
-        if (this.auth.hasPermission('users.manage')) {
-          this.loadEngineers();
-        }
-        if (this.auth.hasPermission('machines.view') || this.auth.hasPermission('machines.manage')) {
-          this.machineService.loadMachines({ pageSize: 100 });
+  constructor() {
+    effect(() => {
+      const isVisible = this.visible();
+      const v = this.visit();
+      if (isVisible && v) {
+        this.loadActivities();
+        if (this.auth.hasPermission('visits.update')) {
+          if (this.auth.hasPermission('users.manage')) {
+            this.loadEngineers();
+          }
+          if (this.auth.hasPermission('machines.view') || this.auth.hasPermission('machines.manage')) {
+            this.machineService.loadMachines({ pageSize: 100 });
+          }
         }
       }
-    }
+    }, { allowSignalWrites: true });
   }
 
   loadEngineers() {

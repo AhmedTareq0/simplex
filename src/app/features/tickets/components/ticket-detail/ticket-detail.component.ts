@@ -31,6 +31,7 @@ export class TicketDetailComponent {
 
   @Input() visible = false;
   @Input() ticket: any = null;
+  @Input() allowEdit = true;
 
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() updated = new EventEmitter<Ticket>();
