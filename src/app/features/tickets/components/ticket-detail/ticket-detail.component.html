@@ -61,7 +61,7 @@
 
     <!-- Actions -->
     <div class="cd-split__actions">
-      @if (auth.hasPermission('tickets.update')) {
+      @if (auth.hasPermission('tickets.update') && allowEdit) {
       <button class="cd-split__btn cd-split__btn--edit" (click)="startEdit()">
         <i class="pi pi-pencil"></i> تعديل
       </button>

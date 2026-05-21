@@ -103,7 +103,7 @@
 
 <!-- Ticket Detail Modal -->
 @if (employeeDetails()?.employee_role !== 'engineer') {
-<app-ticket-detail [(visible)]="showTicketDetail" [ticket]="selectedTicket()" (updated)="handleTicketUpdate()" />
+<app-ticket-detail [(visible)]="showTicketDetail" [ticket]="selectedTicket()" [allowEdit]="false" (updated)="handleTicketUpdate()" />
 }
 
 <!-- Visit Detail Modal -->

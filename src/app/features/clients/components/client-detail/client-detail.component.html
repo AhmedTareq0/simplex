@@ -130,6 +130,7 @@
   <app-ticket-detail
     [visible]="showTicketDetail()"
     [ticket]="selectedTicket()"
+    [allowEdit]="false"
     (visibleChange)="showTicketDetail.set($event)"
     (updated)="handleTicketUpdate()"
   />

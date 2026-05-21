@@ -143,7 +143,7 @@ export class EmployeeDetailComponent implements OnInit {
 
   onVisitClick(visit: any) {
     this.isLoadingVisits.set(true);
-    this.visitsService.getVisit(visit.id).subscribe({
+    this.visitsService.getVisitDetail(visit.id).subscribe({
       next: (res) => {
         this.selectedVisit.set(res.data || res);
         this.showVisitDetail.set(true);
