@@ -4,6 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { IconComponent, ButtonComponent, SharedTableComponent, TableColumn, SkeletonLoaderComponent } from '../../../../shared/components';
 import { TicketDetailComponent } from '../../../tickets/components/ticket-detail/ticket-detail.component';
 import { VisitDetailComponent } from '../../../visits/components/visit-detail/visit-detail.component';
+import { TicketsService } from '../../../tickets/services/tickets.service';
+import { VisitsService } from '../../../visits/services/visits.service';
 import { Employee, EmployeeService, EmployeeDetails, SupportTicket, Visit } from '../../services/employee.service';
 import { AuthLocalService } from '../../../../auth/services/auth-local.service';
 import { TICKET_STATUS, VISIT_STATUS, PRIORITY } from '@/core/constants/status.constants';
@@ -26,6 +28,8 @@ import { TICKET_STATUS, VISIT_STATUS, PRIORITY } from '@/core/constants/status.c
 export class EmployeeDetailComponent implements OnInit {
   readonly auth = inject(AuthLocalService);
   readonly employeeService = inject(EmployeeService);
+  private readonly ticketsService = inject(TicketsService);
+  private readonly visitsService = inject(VisitsService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
@@ -126,13 +130,27 @@ export class EmployeeDetailComponent implements OnInit {
   }
 
   onTicketClick(ticket: any) {
-    this.selectedTicket.set(ticket);
-    this.showTicketDetail.set(true);
+    this.isLoadingTickets.set(true);
+    this.ticketsService.getTicket(ticket.id).subscribe({
+      next: (res) => {
+        this.selectedTicket.set(res.data || res);
+        this.showTicketDetail.set(true);
+        this.isLoadingTickets.set(false);
+      },
+      error: () => this.isLoadingTickets.set(false)
+    });
   }
 
   onVisitClick(visit: any) {
-    this.selectedVisit.set(visit);
-    this.showVisitDetail.set(true);
+    this.isLoadingVisits.set(true);
+    this.visitsService.getVisit(visit.id).subscribe({
+      next: (res) => {
+        this.selectedVisit.set(res.data || res);
+        this.showVisitDetail.set(true);
+        this.isLoadingVisits.set(false);
+      },
+      error: () => this.isLoadingVisits.set(false)
+    });
   }
 
   handleTicketUpdate() {
