@@ -8,6 +8,8 @@ import { EmployeeService, Employee } from '@/features/employees/services/employe
 import { MachineService } from '@/features/machines/services/machine.service';
 import { AuthLocalService } from '@/auth/services/auth-local.service';
 import { RatingModule } from 'primeng/rating';
+import { VISIT_STATUS, PRIORITY } from '@/core/constants/status.constants';
+import { formatDateTime } from '@/core/utils/date.util';
 
 @Component({
   selector: 'app-visit-detail',
@@ -93,47 +95,10 @@ export class VisitDetailComponent {
     });
   }
 
-  getStatusLabel(status: string): string {
-    return ({
-      new: 'جديدة',
-      scheduled: 'مجدولة',
-      in_progress: 'قيد التنفيذ',
-      done: 'مكتملة',
-      completed: 'مكتملة',
-      cancelled: 'ملغاة'
-    } as Record<string, string>)[status] || status;
-  }
-
-  getPriorityLabel(priority: string): string {
-    return ({
-      high: 'عالية',
-      medium: 'متوسطة',
-      normal: 'عادية',
-      low: 'منخفضة'
-    } as Record<string, string>)[priority] || priority;
-  }
-
-  getStatusColor(status: string): string {
-    return ({
-      new: '#8b5cf6',
-      scheduled: '#3b82f6',
-      in_progress: '#f59e0b',
-      done: '#10b981',
-      completed: '#10b981',
-      cancelled: '#ef4444'
-    } as Record<string, string>)[status] || '#6b7280';
-  }
-
-  formatDate(date: string | null): string {
-    if (!date) return '—';
-    return new Date(date).toLocaleDateString('ar-EG', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
+  getStatusLabel = VISIT_STATUS.getLabel;
+  getPriorityLabel = PRIORITY.getLabel;
+  getStatusColor = VISIT_STATUS.getColor;
+  formatDate = formatDateTime;
 
   get customerName(): string {
     const visit = this.visit();

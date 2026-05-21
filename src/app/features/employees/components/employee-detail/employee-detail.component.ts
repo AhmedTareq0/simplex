@@ -6,6 +6,7 @@ import { TicketDetailComponent } from '../../../tickets/components/ticket-detail
 import { VisitDetailComponent } from '../../../visits/components/visit-detail/visit-detail.component';
 import { Employee, EmployeeService, EmployeeDetails, SupportTicket, Visit } from '../../services/employee.service';
 import { AuthLocalService } from '../../../../auth/services/auth-local.service';
+import { TICKET_STATUS, VISIT_STATUS, PRIORITY } from '@/core/constants/status.constants';
 
 @Component({
   selector: 'app-employee-detail',
@@ -44,11 +45,11 @@ export class EmployeeDetailComponent implements OnInit {
     { field: 'title', header: 'عنوان التذكرة', type: 'text' },
     {
       field: 'status', header: 'الحالة', type: 'badge',
-      formatter: (val: string) => ({ open: 'مفتوحة', in_progress: 'قيد التنفيذ', resolved: 'محلولة', closed: 'مغلقة', solved: 'منتهية' } as any)[val] || val
+      formatter: (val: string) => TICKET_STATUS.getLabel(val)
     },
     {
       field: 'priority', header: 'الأولوية', type: 'badge',
-      formatter: (val: string) => ({ high: 'عالية', medium: 'متوسطة', low: 'منخفضة' } as any)[val] || val
+      formatter: (val: string) => PRIORITY.getLabel(val)
     },
     {
       field: 'created_at', header: 'تاريخ الإنشاء', type: 'text',
@@ -64,7 +65,7 @@ export class EmployeeDetailComponent implements OnInit {
     },
     {
       field: 'status', header: 'الحالة', type: 'badge',
-      formatter: (val: string) => ({ new: 'جديدة', in_progress: 'قيد التنفيذ', done: 'مكتمل', cancelled: 'ملغى', scheduled: 'مجدول', completed: 'مكتمل' } as any)[val] || val
+      formatter: (val: string) => VISIT_STATUS.getLabel(val)
     }
   ];
 

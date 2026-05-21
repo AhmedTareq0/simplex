@@ -10,6 +10,7 @@ import { Subscription, interval } from 'rxjs';
 import { startWith, switchMap } from 'rxjs/operators';
 import { ticketStatusConfig, monthlyTicketsConfig, visitsTrendConfig } from './chart-config';
 import { formatArabicDateTime } from '../../core/utils/date.util';
+import { VISIT_STATUS, PRIORITY } from '@/core/constants/status.constants';
 
 @Component({
   selector: 'app-dashboard',
@@ -61,28 +62,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
       field: 'priority',
       header: 'الأولوية',
       type: 'badge',
-      formatter: (val: string) => {
-        switch (val) {
-          case 'urgent': return 'عاجل';
-          case 'high': return 'مرتفع';
-          case 'medium': return 'متوسط';
-          default: return 'عادي';
-        }
-      }
+      formatter: (val: string) => PRIORITY.getLabel(val)
     },
     {
       field: 'status',
       header: 'الحالة',
       type: 'badge',
-      formatter: (val: string) => {
-        switch (val) {
-          case 'new': return 'جديدة';
-          case 'in_progress': return 'قيد التنفيذ';
-          case 'done': return 'مكتملة';
-          case 'cancelled': return 'ملغاة';
-          default: return val || 'جديدة';
-        }
-      }
+      formatter: (val: string) => VISIT_STATUS.getLabel(val)
     }
   ];
 

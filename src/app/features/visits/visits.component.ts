@@ -6,6 +6,7 @@ import { ApiResponse } from '@/core/interfaces/api-response.interface';
 import { AuthLocalService } from '@/auth/services/auth-local.service';
 import { AdminSyncService } from '@/core/services/admin-sync.service';
 import { VisitsService, Visit } from './services/visits.service';
+import { VISIT_STATUS } from '@/core/constants/status.constants';
 import { VisitDetailComponent } from './components/visit-detail/visit-detail.component';
 import { VisitEditModalComponent } from './components/visit-edit-modal/visit-edit-modal.component';
 
@@ -65,17 +66,7 @@ export class VisitsComponent implements OnInit {
     return new Date(dateStr).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
-  getStatusLabel(status: string): string {
-    const labels: Record<string, string> = {
-      new: 'جديدة',
-      in_progress: 'قيد التنفيذ',
-      done: 'مكتمل',
-      cancelled: 'ملغى',
-      scheduled: 'مجدول',
-      completed: 'مكتمل'
-    };
-    return labels[status] || status;
-  }
+  getStatusLabel = VISIT_STATUS.getLabel;
 
   columns: TableColumn[] = [
     {
@@ -113,23 +104,8 @@ export class VisitsComponent implements OnInit {
       type: 'badge',
       filterable: true,
       filterType: 'dropdown',
-      filterOptions: [
-        { label: 'جديدة', value: 'new' },
-        { label: 'قيد التنفيذ', value: 'in_progress' },
-        { label: 'مكتمل', value: 'done' },
-        { label: 'ملغى', value: 'cancelled' }
-      ],
-      formatter: (value: string) => {
-        const labels: Record<string, string> = {
-          new: 'جديدة',
-          in_progress: 'قيد التنفيذ',
-          done: 'مكتمل',
-          cancelled: 'ملغى',
-          scheduled: 'مجدول',
-          completed: 'مكتمل'
-        };
-        return labels[value] || value;
-      }
+      filterOptions: VISIT_STATUS.options,
+      formatter: (value: string) => VISIT_STATUS.getLabel(value),
     },
     {
       field: 'engineer_rating',

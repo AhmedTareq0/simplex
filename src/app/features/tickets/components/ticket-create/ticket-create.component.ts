@@ -11,6 +11,7 @@ import { EmployeeService } from '../../../employees/services/employee.service';
 import { ChatService, Conversation } from '../../../chat/services/chat.service';
 import { ClientService } from '../../../clients/services/client.service';
 import { AuthLocalService } from '@/auth/services/auth-local.service';
+import { TICKET_STATUS, PRIORITY } from '@/core/constants/status.constants';
 import { forkJoin } from 'rxjs';
 
 @Component({
@@ -75,20 +76,8 @@ export class TicketCreateComponent {
     customer_care_id: null as number | null,
   };
 
-  priorityOptions = [
-    { label: 'عالية', value: 'high' },
-    { label: 'متوسطة', value: 'medium' },
-    { label: 'منخفضة', value: 'low' },
-  ];
-
-  statusOptions = [
-    { label: 'مفتوحة', value: 'open' },
-    { label: 'قيد التنفيذ', value: 'in_progress' },
-    { label: 'محلولة', value: 'resolved' },
-    { label: 'مغلقة', value: 'closed' },
-    { label: 'منتهية', value: 'solved' },
-    { label: 'ملغاة', value: 'cancelled' },
-  ];
+  priorityOptions = PRIORITY.options;
+  statusOptions = TICKET_STATUS.options;
 
   ngOnInit() {}
 
