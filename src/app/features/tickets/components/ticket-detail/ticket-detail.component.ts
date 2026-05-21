@@ -1,16 +1,17 @@
-import { Component, EventEmitter, Input, Output, inject, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthLocalService } from '@/auth/services/auth-local.service';
 import { SharedModalComponent, SharedConfirmationComponent } from '@/shared/components';
+import { RequestVisitModalComponent } from '../../../visits/components/request-visit-modal/request-visit-modal.component';
 import { TicketsService, Ticket } from '../../services/tickets.service';
 import { RatingModule } from 'primeng/rating';
 
 @Component({
   selector: 'app-ticket-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, SharedModalComponent, SharedConfirmationComponent, RatingModule],
+  imports: [CommonModule, FormsModule, SharedModalComponent, SharedConfirmationComponent, RatingModule, RequestVisitModalComponent],
   templateUrl: './ticket-detail.component.html',
   styleUrl: './ticket-detail.component.scss',
 })
@@ -21,6 +22,12 @@ export class TicketDetailComponent {
 
   get canManageTicket(): boolean {
     return this.auth.isCustomerSupport() || this.auth.isSuperAdmin();
+  }
+
+  get isActiveTicket(): boolean {
+    if (!this.ticket || !this.ticket.status) return false;
+    const status = this.ticket.status.toLowerCase();
+    return ['open', 'in_progress'].includes(status);
   }
 
   @Input() visible = false;
@@ -39,6 +46,10 @@ export class TicketDetailComponent {
   showCancelModal = signal(false);
   isCancelling = signal(false);
   cancelReason = '';
+
+  // Request Visit fields
+  showVisitForm = signal(false);
+  isRequestingVisit = signal(false);
 
   close() {
     this.visible = false;
@@ -97,6 +108,30 @@ export class TicketDetailComponent {
 
 
 
+  openRequestVisit() {
+    this.showVisitForm.set(true);
+  }
+
+  submitVisitRequest(metadata: any) {
+    if (this.isRequestingVisit()) return;
+
+    this.isRequestingVisit.set(true);
+
+    this.ticketsService.requestVisit(+this.ticket.id, metadata).subscribe({
+      next: (res) => {
+        this.isRequestingVisit.set(false);
+        this.showVisitForm.set(false);
+        
+        // Update ticket with new data from server (engineer_name, visit_id, status)
+        if (res.data) {
+          Object.assign(this.ticket, res.data);
+          this.updated.emit(this.ticket);
+        }
+      },
+      error: () => this.isRequestingVisit.set(false)
+    });
+  }
+
   goToChat() {
     if (this.ticket?.conversation_id) {
       this.close();
@@ -106,12 +141,12 @@ export class TicketDetailComponent {
 
   getStatusLabel(s: string): string {
     const val = String(s || '').toLowerCase().trim().replace(/[\s_-]+/g, '_');
-    return ({ open: 'مفتوحة', in_progress: 'قيد التنفيذ', resolved: 'محلولة', closed: 'مغلقة', solved: 'منتهية' } as any)[val] || s;
+    return ({ open: 'مفتوحة', in_progress: 'قيد التنفيذ', resolved: 'محلولة', closed: 'مغلقة', solved: 'منتهية', cancelled: 'ملغاة' } as any)[val] || s;
   }
 
   getStatusColor(s: string): string {
     const val = String(s || '').toLowerCase().trim().replace(/[\s_-]+/g, '_');
-    return ({ open: '#3b82f6', in_progress: '#f59e0b', resolved: '#10b981', closed: '#6b7280', solved: '#8b5cf6' } as any)[val] || '#6b7280';
+    return ({ open: '#3b82f6', in_progress: '#f59e0b', resolved: '#10b981', closed: '#6b7280', solved: '#8b5cf6', cancelled: '#ef4444' } as any)[val] || '#6b7280';
   }
 
   getPriorityLabel(p: string): string {

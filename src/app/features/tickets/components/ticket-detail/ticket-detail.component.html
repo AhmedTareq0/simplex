@@ -34,17 +34,15 @@
         <span class="cd-split__field-label text-gray-500">المكنة</span>
         <span class="cd-split__field-value font-medium text-gray-800 dark:text-white">{{ ticket.machine_name }}</span>
       </div>
-      <div class="cd-split__field-row flex justify-between text-sm">
-        <span class="cd-split__field-label text-gray-500">المهندس</span>
-        <span class="cd-split__field-value font-medium text-gray-800 dark:text-white">{{ ticket.engineer_name || '—'
-          }}</span>
-      </div>
-      <div class="cd-split__field-row flex justify-between text-sm">
-        <span class="cd-split__field-label text-gray-500">خدمة العملاء</span>
-        <span class="cd-split__field-value font-medium text-gray-800 dark:text-white">{{ ticket.customer_care_name ||
-          '—'
-          }}</span>
-      </div>
+
+      @if (auth.isSuperAdmin()) {
+        <div class="cd-split__field-row flex justify-between text-sm">
+          <span class="cd-split__field-label text-gray-500">خدمة العملاء</span>
+          <span class="cd-split__field-value font-medium text-gray-800 dark:text-white">{{ ticket.customer_care_name ||
+            '—'
+            }}</span>
+        </div>
+      }
       <div class="cd-split__field-row flex justify-between text-sm">
         <span class="cd-split__field-label text-gray-500">تقييم التذكرة</span>
         <span class="cd-split__field-value font-medium text-gray-800 dark:text-white text-left">
@@ -69,13 +67,19 @@
       </button>
       }
 
-      @if (canManageTicket && ['open', 'in_progress'].includes(ticket.status)) {
+      @if (canManageTicket && isActiveTicket) {
       <button class="cd-split__btn cd-split__btn--resolve" (click)="openResolve()">
         <i class="pi pi-check-circle"></i> حل التذكرة
       </button>
 
       <button class="cd-split__btn cd-split__btn--cancel" (click)="openCancel()">
         <i class="pi pi-times-circle"></i> إلغاء التذكرة
+      </button>
+      }
+
+      @if (auth.hasPermission('tickets.update') && !ticket.visit_id && isActiveTicket) {
+      <button class="cd-split__btn cd-split__btn--primary" (click)="openRequestVisit()">
+        <i class="pi pi-calendar-plus"></i> طلب زيارة
       </button>
       }
 
@@ -94,10 +98,14 @@
 <app-shared-confirmation [(visible)]="showResolveModal" [title]="'حل التذكرة #' + (ticket?.id || '')"
   message="هل أنت متأكد من رغبتك في حل هذه التذكرة؟ سيتم إغلاق الزيارة المرتبطة بها وإنهاء المحادثة."
   confirmLabel="حل التذكرة" cancelLabel="إلغاء" type="info" [isLoading]="isResolving()" (confirmed)="confirmResolve()">
-  <div class="flex flex-col gap-1.5 mt-4 text-right" dir="rtl">
-    <label class="text-xs font-bold text-gray-500">ملاحظات الحل (اختياري)</label>
-    <textarea [(ngModel)]="resolveNotes" placeholder="أضف أي ملاحظات حول كيفية حل التذكرة..." rows="3"
-      class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:outline-none dark:bg-gray-700 dark:text-white text-sm"></textarea>
+  <div class="resolve-notes" dir="rtl">
+    <label class="resolve-notes__label">ملاحظات الحل (اختياري)</label>
+    <textarea 
+      [(ngModel)]="resolveNotes" 
+      placeholder="أضف أي ملاحظات حول كيفية حل التذكرة..." 
+      rows="6"
+      class="resolve-notes__textarea"
+    ></textarea>
   </div>
 </app-shared-confirmation>
 
@@ -106,9 +114,20 @@
   message="هل أنت متأكد من رغبتك في إلغاء هذه التذكرة؟ سيتم إلغاء الزيارة المرتبطة بها وإنهاء المحادثة."
   confirmLabel="إلغاء التذكرة" cancelLabel="تراجع" type="danger" [isLoading]="isCancelling()"
   (confirmed)="confirmCancel()">
-  <div class="flex flex-col gap-1.5 mt-4 text-right" dir="rtl">
-    <label class="text-xs font-bold text-gray-500">سبب الإلغاء (اختياري)</label>
-    <textarea [(ngModel)]="cancelReason" placeholder="أدخل سبب إلغاء التذكرة هنا..." rows="3"
-      class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-red-500 focus:outline-none dark:bg-gray-700 dark:text-white text-sm"></textarea>
+  <div class="cancel-reason" dir="rtl">
+    <label class="cancel-reason__label">سبب الإلغاء (اختياري)</label>
+    <textarea 
+      [(ngModel)]="cancelReason" 
+      placeholder="أدخل سبب إلغاء التذكرة هنا..." 
+      rows="6"
+      class="cancel-reason__textarea"
+    ></textarea>
   </div>
 </app-shared-confirmation>
+
+<!-- Request Visit Modal -->
+<app-request-visit-modal
+  [(visible)]="showVisitForm"
+  [isSubmitting]="isRequestingVisit()"
+  (submitted)="submitVisitRequest($event)"
+/>

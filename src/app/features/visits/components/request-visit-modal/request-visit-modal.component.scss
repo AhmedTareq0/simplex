@@ -1,238 +1,11 @@
-.cd-split {
-  &__info {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    padding: 8px 0;
-  }
-
-  &__section {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  &__ticket-title {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text-primary);
-    margin: 0;
-    line-height: 1.5;
-  }
-
-  &__description {
-    font-size: var(--text-sm);
-    color: var(--color-text-secondary);
-    margin: 0;
-    line-height: 1.6;
-  }
-
-  &__badges {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  &__badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 12px;
-    border-radius: var(--radius-full);
-    font-size: var(--text-xs);
-    font-weight: var(--font-weight-semibold);
-  }
-
-  &__fields {
-    display: flex;
-    flex-direction: column;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-  }
-
-  &__field-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 16px;
-    background: var(--color-background);
-    &:not(:last-child) { border-bottom: 1px solid var(--color-border); }
-  }
-
-  &__field-label {
-    font-size: var(--text-sm);
-    color: var(--color-text-tertiary);
-    font-weight: var(--font-weight-medium);
-  }
-
-  &__field-value {
-    font-size: var(--text-sm);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text-primary);
-  }
-
-  &__form {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    padding: 16px;
-    background: var(--color-background);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--color-border);
-  }
-
-  &__field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  &__label {
-    font-size: var(--text-sm);
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text-secondary);
-  }
-
-  &__select, &__input {
-    height: 40px;
-    padding: 0 12px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    font-size: var(--text-sm);
-    color: var(--color-text-primary);
-    background: var(--color-surface);
-    outline: none;
-    &:focus { border-color: var(--color-primary); }
-  }
-
-  &__actions {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 20px;
-  }
-
-  &__btn {
-    flex: 1 1 calc(50% - 6px);
-    min-width: 120px;
-    min-height: 40px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border-radius: var(--radius-md);
-    font-size: var(--text-sm);
-    font-weight: var(--font-weight-semibold);
-    cursor: pointer;
-    border: none;
-    transition: var(--transition-all);
-    white-space: nowrap;
-
-    i {
-      font-size: 1.1em;
-    }
-
-    &--edit {
-      background: var(--color-primary);
-      color: white;
-      &:hover { filter: brightness(1.1); }
-    }
-
-    &--primary {
-      background: var(--color-primary);
-      color: white;
-      transition: all 0.2s ease;
-      &:hover { filter: brightness(1.15); transform: translateY(-1px); }
-      &:active { transform: translateY(0); }
-    }
-
-    &--resolve {
-      background: #10b981;
-      color: white;
-      &:hover { background: #059669; }
-    }
-
-    &--cancel {
-      background: #ef4444;
-      color: white;
-      &:hover { background: #dc2626; }
-    }
-
-    &--ghost {
-      background: var(--color-surface);
-      color: var(--color-text-secondary);
-      border: 1px solid var(--color-border);
-      &:hover { background: var(--color-border); }
-    }
-
-    &--danger {
-      background: transparent;
-      color: var(--color-danger);
-      border: 1px solid var(--color-danger);
-      &:hover { background: var(--color-danger); color: white; }
-    }
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    @media (max-width: 480px) {
-      flex: 1 1 100%;
-      white-space: normal;
-      text-align: center;
-    }
-  }
-}
-
-.resolve-notes,
-.cancel-reason {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 16px;
-
-  &__label {
-    font-size: var(--text-sm);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text-secondary);
-  }
-
-  &__textarea {
-    width: 100%;
-    padding: 14px 16px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    font-size: var(--text-base);
-    font-family: inherit;
-    color: var(--color-text-primary);
-    background: var(--color-surface);
-    resize: vertical;
-    min-height: 120px;
-    line-height: 1.6;
-    transition: var(--transition-all);
-
-    &::placeholder {
-      color: var(--color-text-tertiary);
-    }
-
-    &:focus {
-      outline: none;
-      border-color: var(--color-primary);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-  }
-}
-
 /* ═══════════════════════════════════════════════════════════
    ENGINEER VISIT FORM POPUP MODAL (PREMIUM & STUNNING)
    ═══════════════════════════════════════════════════════════ */
 .visit-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.45); // Sleek overlay shadow
-  backdrop-filter: blur(10px) saturate(130%); // Premium blurred glass backdrop
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(10px) saturate(130%);
   z-index: 1000;
   animation: modal-fade-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -254,12 +27,12 @@
   border: 1px solid var(--color-border, #e2e8f0);
   width: 100%;
   max-width: 600px;
-  border-radius: 24px; // Beautiful curvy corners
+  border-radius: 24px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 40px rgba(0, 0, 0, 0.03);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  direction: rtl; // RTL layout
+  direction: rtl;
   animation: modal-slide-up 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
@@ -368,7 +141,7 @@
   transition: all 0.2s ease;
   user-select: none;
   font-family: inherit;
-  
+
   &:hover {
     background-color: var(--color-border-light, #e2e8f0);
     border-color: var(--color-border-hover, #94a3b8);
@@ -379,7 +152,7 @@
     color: var(--color-primary, #3b82f6);
     border-color: var(--color-primary, #3b82f6);
     font-weight: 600;
-    
+
     &:hover {
       background-color: var(--color-primary-100, #dbeafe);
       border-color: var(--color-primary, #3b82f6);
@@ -397,9 +170,9 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--color-text-secondary, #334155);
+  color: var(--color-text-primary, #0f172a);
 }
 
 .visit-required {
@@ -435,7 +208,7 @@
 
   &--error {
     border-color: var(--color-danger, #ef4444) !important;
-    
+
     &:focus {
       box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger, #ef4444) 12%, transparent) !important;
     }
@@ -473,7 +246,7 @@ select.visit-input {
   justify-content: flex-end;
   gap: 12px;
   padding: 16px 24px;
-  border-top: 1px solid var(--color-border, #f1f5f9);
+  // border-top: 1px solid var(--color-border, #f1f5f9);
   background: var(--color-surface, #f8fafc);
 }
 
@@ -540,12 +313,19 @@ select.visit-input {
 }
 
 @keyframes visit-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes modal-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes modal-slide-up {
@@ -553,6 +333,7 @@ select.visit-input {
     opacity: 0;
     transform: translateY(20px) scale(0.96);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);

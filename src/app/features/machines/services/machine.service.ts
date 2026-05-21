@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, map, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ApiResponse, PagedResult } from '../../../core/interfaces/api-response.interface';
 import { buildHttpParams } from '../../../core/utils/http-params.util';
@@ -55,44 +55,37 @@ export class MachineService {
   readonly total = signal(0);
 
   loadMachines(filters: MachineFilters = {}): void {
+    this.fetchMachines(filters).subscribe();
+  }
+
+  fetchMachines(filters: MachineFilters = {}): Observable<Machine[]> {
     this.isLoading.set(true);
     const page = filters.page ?? 1;
     const pageSize = filters.pageSize ?? 10;
 
-    const params = buildHttpParams({
-      page,
-      pageSize,
-      search: filters.search,
-    });
+    const params = buildHttpParams({ page, pageSize, search: filters.search });
 
-    this.http.get<ApiResponse<PagedResult<Machine> | Machine[]>>(
+    return this.http.get<ApiResponse<PagedResult<Machine> | Machine[]>>(
       `${this.apiUrl}/api/machines/all`, { params }
-    )
-      .subscribe({
+    ).pipe(
+      tap({
         next: (res) => {
           const data = res.data;
-
           if (Array.isArray(data)) {
             const start = (page - 1) * pageSize;
-            const machines = data.map(machine => ({
-              ...machine,
-              odooId: machine.odooId ?? machine.odoo_id ?? machine.id
-            }));
-
+            const machines = data.map(m => ({ ...m, odooId: m.odooId ?? m.odoo_id ?? m.id }));
             this.machines.set(machines.slice(start, start + pageSize));
             this.total.set(machines.length);
           } else {
-            this.machines.set((data?.items || []).map(machine => ({
-              ...machine,
-              odooId: machine.odooId ?? machine.odoo_id ?? machine.id
-            })));
+            this.machines.set((data?.items || []).map(m => ({ ...m, odooId: m.odooId ?? m.odoo_id ?? m.id })));
             this.total.set(data?.total || 0);
           }
-
           this.isLoading.set(false);
         },
-        error: () => this.isLoading.set(false)
-      });
+        error: () => this.isLoading.set(false),
+      }),
+      map(() => this.machines())
+    );
   }
 
   getCategories(): Observable<MachineCategory[]> {

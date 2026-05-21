@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { ApiResponse, PagedResult } from '../../../core/interfaces/api-response.interface';
 import { buildHttpParams } from '../../../core/utils/http-params.util';
-import { Observable } from 'rxjs';
+import { Observable, map, tap } from 'rxjs';
 
 export interface Employee {
   id: number;
@@ -70,6 +70,10 @@ export class EmployeeService {
   readonly total = signal(0);
 
   loadEmployees(filters: EmployeeFilters = {}): void {
+    this.fetchEmployees(filters).subscribe();
+  }
+
+  fetchEmployees(filters: EmployeeFilters = {}): Observable<Employee[]> {
     this.isLoading.set(true);
 
     const params = buildHttpParams({
@@ -80,17 +84,19 @@ export class EmployeeService {
       employee_role: filters.employee_role,
     });
 
-    this.http.get<ApiResponse<PagedResult<Employee>>>(
+    return this.http.get<ApiResponse<PagedResult<Employee>>>(
       `${this.apiUrl}/api/users/employees`, { params }
-    )
-      .subscribe({
+    ).pipe(
+      tap({
         next: (res) => {
           this.employees.set(res.data?.items || []);
           this.total.set(res.data?.total || 0);
           this.isLoading.set(false);
         },
-        error: () => this.isLoading.set(false)
-      });
+        error: () => this.isLoading.set(false),
+      }),
+      map(() => this.employees())
+    );
   }
 
   getEmployeeDetails(id: number): Observable<ApiResponse<EmployeeDetails>> {

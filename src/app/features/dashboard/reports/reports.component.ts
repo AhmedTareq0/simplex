@@ -59,8 +59,8 @@ export class ReportsComponent implements OnInit {
     { field: 'open_tickets_count', header: 'تذاكر مفتوحة', type: 'number' },
     { field: 'resolved_visits_count', header: 'زيارات محلولة', type: 'number' },
     { field: 'open_visits_count', header: 'زيارات مفتوحة', type: 'number' },
-    { field: 'satisfaction_percentage', header: 'نسبة الرضا', type: 'number', formatter: (val: any) => val != null ? `${val}%` : '—' },
-    { field: 'average_response_time_minutes', header: 'سرعة الاستجابة', type: 'number', formatter: (val: any) => val != null ? `${val} د` : '—' }
+    { field: 'satisfaction_percentage', header: 'نسبة الرضا', type: 'number', formatter: (val: any) => val != null ? `${Math.round(Number(val))}%` : '—' },
+    { field: 'average_response_time_minutes', header: 'سرعة الاستجابة', type: 'number', formatter: (val: any) => val != null ? `${Math.round(Number(val))} د` : '—' }
   ];
 
   ngOnInit() {
