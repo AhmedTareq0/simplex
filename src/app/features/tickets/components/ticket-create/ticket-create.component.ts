@@ -126,6 +126,13 @@ export class TicketCreateComponent {
     });
   }
 
+  private resolveCurrentEmployeeId(): number {
+    const currentUser = this.auth.currentUser();
+     const match = this.employeeService.employees()
+      .find(e => e.email === currentUser?.email);
+    return match?.id ?? 0;
+  }
+
   close() {
     this.visible = false;
     this.visibleChange.emit(false);
@@ -171,7 +178,9 @@ export class TicketCreateComponent {
         title: this.formData.title,
         priority: this.formData.priority as CreateTicketPayload['priority'],
         machine_id: this.formData.machine_id!,
-        customer_care_id: this.auth.isSuperAdmin() ? this.formData.customer_care_id! : Number(this.auth.currentUser()?.id),
+        customer_care_id: this.auth.isSuperAdmin()
+          ? this.formData.customer_care_id!
+          : this.resolveCurrentEmployeeId(),
       };
 
       this.ticketsService.createTicket(payload).subscribe({
