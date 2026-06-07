@@ -1,6 +1,6 @@
 <app-shared-modal [visible]="visible" (visibleChange)="onVisibleChange($event)" title="طلب زيارة مهندس" maxWidth="38rem"
   contentClass="p-0">
-  <div class="visit-modal-body" style="padding-top: 8px; display: flex; flex-direction: column; gap: 16px;" dir="rtl">
+  <div class="visit-modal-body" dir="rtl">
 
     <div class="visit-field">
       <label class="visit-label">
@@ -8,44 +8,58 @@
         <span class="visit-required">*</span>
       </label>
       <div class="visit-chips">
-        @for (option of issueTypeOptions; track option.value) {
-        <button type="button" class="visit-chip" [class.visit-chip--active]="visitIssueType() === option.value"
-          (click)="setIssueType(option.value)">
+        @for (option of visitTypeOptions; track option.value) {
+        <button type="button" class="visit-chip" [class.visit-chip--active]="visitType() === option.value"
+          (click)="setVisitType(option.value)">
           {{ option.label }}
         </button>
         }
       </div>
     </div>
 
+    @if (visitType() === 'maintenance') {
     <div class="visit-field">
       <label class="visit-label">
-        <span>{{ visitIssueType() === 'Maintenance' ? 'نوع الصيانة' : 'نوع الماكينة' }}</span>
+        <span>نوع الصيانة</span>
         <span class="visit-required">*</span>
       </label>
       <div class="visit-chips">
-        @if (visitIssueType() === 'Maintenance') {
-        @for (option of maintenanceSubTypes; track option.value) {
-        <button type="button" class="visit-chip" [class.visit-chip--active]="visitSubType() === option.value"
-          (click)="setSubType(option.value)">
+        @for (option of maintenanceTypeOptions; track option.value) {
+        <button type="button" class="visit-chip" [class.visit-chip--active]="maintenanceType() === option.value"
+          (click)="setMaintenanceType(option.value)">
           {{ option.label }}
         </button>
-        }
-        } @else if (visitIssueType() === 'Installation') {
-        @for (option of installationSubTypes; track option.value) {
-        <button type="button" class="visit-chip" [class.visit-chip--active]="visitSubType() === option.value"
-          (click)="setSubType(option.value)">
-          {{ option.label }}
-        </button>
-        }
         }
       </div>
-      @if (visitSubTypeError()) {
+      @if (maintenanceTypeError()) {
       <span class="visit-error-text" style="margin-top: 4px;">
         <app-icon name="alert-triangle" size="sm" />
-        {{ visitSubTypeError() }}
+        {{ maintenanceTypeError() }}
       </span>
       }
     </div>
+    } @else if (visitType() === 'installation') {
+    <div class="visit-field">
+      <label class="visit-label">
+        <span>نوع الماكينة</span>
+        <span class="visit-required">*</span>
+      </label>
+      <div class="visit-chips">
+        @for (option of installationSubTypes; track option.value) {
+        <button type="button" class="visit-chip" [class.visit-chip--active]="maintenanceType() === option.value"
+          (click)="setMaintenanceType(option.value)">
+          {{ option.label }}
+        </button>
+        }
+      </div>
+      @if (maintenanceTypeError()) {
+      <span class="visit-error-text" style="margin-top: 4px;">
+        <app-icon name="alert-triangle" size="sm" />
+        {{ maintenanceTypeError() }}
+      </span>
+      }
+    </div>
+    }
 
     <div class="visit-field">
       <label class="visit-label">
@@ -70,7 +84,7 @@
       <div class="visit-input-wrap">
         <textarea id="visit-description" rows="4" class="visit-input visit-textarea"
           [class.visit-input--error]="visitDescriptionError()"
-          placeholder="يرجى وصف الأعطال بدقة، متى بدأت والمشكلة بالتفصيل..." [ngModel]="visitDescription()"
+          placeholder="صِف العطل بدقة: متى بدأ، ما الأعراض، وهل جُرِّبت أي حلول — سيُرسَل هذا الوصف للمهندس المُعيَّن مباشرةً" [ngModel]="visitDescription()"
           (ngModelChange)="visitDescription.set($event)" (blur)="visitDescriptionTouched.set(true)"></textarea>
         @if (visitDescriptionError()) {
         <span class="visit-error-text">
@@ -79,6 +93,56 @@
         </span>
         }
       </div>
+    </div>
+
+    <!-- Product IDs — optional machines selection -->
+    <div class="visit-field">
+      <label class="visit-label">
+        <span>قطع الغيار المطلوبة</span>
+        <span class="visit-label-hint">(اختياري)</span>
+      </label>
+
+      @if (isMachinesLoading()) {
+      <div class="visit-machines-loading">
+        <span class="visit-spinner visit-spinner--dark"></span>
+        <span>جاري تحميل قطع الغيار المتاحة...</span>
+      </div>
+      } @else if (availableMachines().length === 0) {
+      <p class="visit-machines-empty">لا توجد قطع غيار متاحة في المخزون حالياً</p>
+      } @else {
+      <div class="visit-machines-grid">
+        @for (machine of availableMachines(); track machine.id) {
+        <button type="button" class="visit-machine-card"
+          [class.visit-machine-card--selected]="isProductSelected(machine.id)"
+          (click)="toggleProduct(machine.id)">
+          <img class="visit-machine-card__img"
+            [src]="machine.image_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'"
+            [alt]="machine.display_name" />
+          <div class="visit-machine-card__body">
+            <span class="visit-machine-card__name">{{ machine.display_name }}</span>
+            @if (machine.default_code) {
+            <span class="visit-machine-card__code">{{ machine.default_code }}</span>
+            }
+            <span class="visit-machine-card__stock">متاح: {{ machine.free_to_use }} وحدة</span>
+          </div>
+          @if (isProductSelected(machine.id)) {
+          <span class="visit-machine-card__check">
+            <app-icon name="check" size="sm" />
+          </span>
+          }
+        </button>
+        }
+      </div>
+      @if (selectedProductIds().length > 0) {
+      <div class="visit-parts-notice">
+        <app-icon name="info" size="sm" />
+        <div>
+          <strong>تم اختيار {{ selectedProductIds().length }} قطعة</strong>
+          <span> — سيُنشأ أمر بيع تلقائياً ويجب على المهندس استلام القطع قبل الزيارة</span>
+        </div>
+      </div>
+      }
+      }
     </div>
   </div>
 

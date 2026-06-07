@@ -45,6 +45,26 @@
           <label>الحالة</label>
           <div class="detail-item__value">{{ getStatusLabel(machine()?.active) }}</div>
         </div>
+
+        @if (machine()?.default_code) {
+        <div class="detail-item">
+          <label>الكود الافتراضي</label>
+          <div class="detail-item__value">{{ machine()?.default_code }}</div>
+        </div>
+        }
+
+        <div class="detail-item">
+          <label>متاح للاستخدام</label>
+          <div class="detail-item__value" [class.detail-item__value--success]="(machine()?.free_to_use ?? 0) > 0"
+            [class.detail-item__value--danger]="(machine()?.free_to_use ?? 0) === 0">
+            {{ machine()?.free_to_use ?? 0 }} وحدة
+          </div>
+        </div>
+
+        <div class="detail-item">
+          <label>إجمالي المخزون</label>
+          <div class="detail-item__value">{{ machine()?.qty_available ?? 0 }} وحدة</div>
+        </div>
       </div>
     </div>
 

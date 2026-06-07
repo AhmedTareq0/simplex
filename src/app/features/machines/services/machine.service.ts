@@ -11,6 +11,7 @@ export interface Machine {
   odoo_id?: number;
   name: string;
   display_name: string;
+  default_code: string | null;
   description: string;
   description_sale: string;
   list_price: number;
@@ -18,6 +19,8 @@ export interface Machine {
   category_id?: number;
   type: string;
   active: boolean;
+  free_to_use: number;
+  qty_available: number;
   create_date: string;
   write_date: string;
   synced_at: string;
@@ -41,6 +44,9 @@ export interface MachineFilters {
   page?: number;
   pageSize?: number;
   search?: string;
+  category?: string;
+  type?: string;
+  available?: boolean;
 }
 
 @Injectable({
@@ -63,7 +69,7 @@ export class MachineService {
     const page = filters.page ?? 1;
     const pageSize = filters.pageSize ?? 10;
 
-    const params = buildHttpParams({ page, pageSize, search: filters.search });
+    const params = buildHttpParams({ page, pageSize, search: filters.search, category: filters.category, type: filters.type, available: filters.available });
 
     return this.http.get<ApiResponse<PagedResult<Machine> | Machine[]>>(
       `${this.apiUrl}/api/machines/all`, { params }

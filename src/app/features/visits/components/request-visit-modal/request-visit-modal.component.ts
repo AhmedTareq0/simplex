@@ -1,8 +1,9 @@
-import { Component, EventEmitter, Input, Output, signal, computed, effect } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal, computed, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IconComponent } from '@/shared/components/icon/icon.component';
 import { SharedModalComponent } from '@/shared/components/shared-modal/shared-modal.component';
+import { MachineService, Machine } from '@/features/machines/services/machine.service';
 
 @Component({
   selector: 'app-request-visit-modal',
@@ -12,31 +13,37 @@ import { SharedModalComponent } from '@/shared/components/shared-modal/shared-mo
   styleUrl: './request-visit-modal.component.scss'
 })
 export class RequestVisitModalComponent {
+  private readonly machineService = inject(MachineService);
+
   @Input() visible = false;
   @Input() isSubmitting = false;
 
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() submitted = new EventEmitter<any>();
 
+  // Available machines loaded from API (free_to_use > 0)
+  readonly availableMachines = signal<Machine[]>([]);
+  readonly isMachinesLoading = signal(false);
+  readonly selectedProductIds = signal<number[]>([]);
+
   // Pop-up Form Signals
-  readonly visitIssueType = signal('Maintenance');
-  readonly visitSubType = signal('');
-  readonly visitPriority = signal('normal');
+  readonly visitType = signal<'maintenance' | 'installation'>('maintenance');
+  readonly maintenanceType = signal('');
+  readonly visitPriority = signal('low');
   readonly visitDescription = signal('');
 
   readonly priorityOptions = [
     { label: 'منخفضة', value: 'low' },
-    { label: 'عادية', value: 'normal' },
+    { label: 'متوسطة', value: 'medium' },
     { label: 'عالية', value: 'high' },
-    { label: 'حرجة / طارئة', value: 'urgent' }
   ];
 
-  readonly issueTypeOptions = [
-    { label: 'صيانة (Maintenance)', value: 'Maintenance' },
-    { label: 'تركيب (Installation)', value: 'Installation' }
+  readonly visitTypeOptions = [
+    { label: 'صيانة (Maintenance)', value: 'maintenance' },
+    { label: 'تركيب (Installation)', value: 'installation' }
   ];
 
-  readonly maintenanceSubTypes = [
+  readonly maintenanceTypeOptions = [
     { label: 'ميكانيكا (Mechanical)', value: 'Mechanical' },
     { label: 'كهرباء (Electrical)', value: 'Electrical' },
     { label: 'تشغيل (Operating)', value: 'Operating' },
@@ -53,14 +60,13 @@ export class RequestVisitModalComponent {
   ];
 
   // Validation Touched flags
-  readonly visitSubTypeTouched = signal(false);
+  readonly maintenanceTypeTouched = signal(false);
   readonly visitDescriptionTouched = signal(false);
 
   // Field validation error computations
-  readonly visitSubTypeError = computed(() => {
-    if (!this.visitSubTypeTouched()) return '';
-    const val = this.visitSubType();
-    if (!val) return 'التفاصيل مطلوبة';
+  readonly maintenanceTypeError = computed(() => {
+    if (!this.maintenanceTypeTouched()) return '';
+    if (!this.maintenanceType()) return this.visitType() === 'maintenance' ? 'نوع الصيانة مطلوب' : 'نوع الماكينة مطلوب';
     return '';
   });
 
@@ -73,12 +79,10 @@ export class RequestVisitModalComponent {
   });
 
   readonly isVisitFormValid = computed(() => {
-    const subTypeVal = this.visitSubType();
+    // maintenance_type required for both visit types (maintenance sub-type or installation machine type)
+    if (!this.maintenanceType()) return false;
     const descVal = this.visitDescription().trim();
-
-    if (!subTypeVal) return false;
     if (!descVal || descVal.length < 10) return false;
-
     return true;
   });
 
@@ -86,30 +90,53 @@ export class RequestVisitModalComponent {
     effect(() => {
       if (this.visible) {
         this.resetForm();
+        this.loadAvailableMachines();
       }
     });
   }
 
-  resetForm(): void {
-    this.visitIssueType.set('Maintenance');
-    this.visitSubType.set('');
-    this.visitPriority.set('normal');
-    this.visitDescription.set('');
-    this.visitSubTypeTouched.set(false);
-    this.visitDescriptionTouched.set(false);
+  private loadAvailableMachines(): void {
+    this.isMachinesLoading.set(true);
+    this.machineService.fetchMachines({ available: true, pageSize: 100 }).subscribe({
+      next: (machines) => {
+        this.availableMachines.set(machines);
+        this.isMachinesLoading.set(false);
+      },
+      error: () => this.isMachinesLoading.set(false),
+    });
   }
 
-  setIssueType(type: string): void {
-    if (this.visitIssueType() !== type) {
-      this.visitIssueType.set(type);
-      this.visitSubType.set('');
-      this.visitSubTypeTouched.set(false);
+  toggleProduct(id: number): void {
+    this.selectedProductIds.update(ids =>
+      ids.includes(id) ? ids.filter(i => i !== id) : [...ids, id]
+    );
+  }
+
+  isProductSelected(id: number): boolean {
+    return this.selectedProductIds().includes(id);
+  }
+
+  resetForm(): void {
+    this.visitType.set('maintenance');
+    this.maintenanceType.set('');
+    this.visitPriority.set('low');
+    this.visitDescription.set('');
+    this.maintenanceTypeTouched.set(false);
+    this.visitDescriptionTouched.set(false);
+    this.selectedProductIds.set([]);
+  }
+
+  setVisitType(type: string): void {
+    if (this.visitType() !== type) {
+      this.visitType.set(type as 'maintenance' | 'installation');
+      this.maintenanceType.set('');
+      this.maintenanceTypeTouched.set(false);
     }
   }
 
-  setSubType(type: string): void {
-    this.visitSubType.set(type);
-    this.visitSubTypeTouched.set(true);
+  setMaintenanceType(type: string): void {
+    this.maintenanceType.set(type);
+    this.maintenanceTypeTouched.set(true);
   }
 
   onVisibleChange(val: boolean): void {
@@ -122,16 +149,23 @@ export class RequestVisitModalComponent {
   }
 
   submit(): void {
-    this.visitSubTypeTouched.set(true);
+    this.maintenanceTypeTouched.set(true);
     this.visitDescriptionTouched.set(true);
 
     if (!this.isVisitFormValid()) return;
 
-    this.submitted.emit({
-      issue_type: this.visitIssueType(),
-      sub_type: this.visitSubType(),
+    const payload: any = {
+      visit_type: this.visitType(),
+      maintenance_type: this.maintenanceType(),
       priority: this.visitPriority(),
       description: this.visitDescription().trim()
-    });
+    };
+
+    const ids = this.selectedProductIds();
+    if (ids.length > 0) {
+      payload.product_ids = ids;
+    }
+
+    this.submitted.emit(payload);
   }
 }
