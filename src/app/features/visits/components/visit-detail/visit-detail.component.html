@@ -94,6 +94,32 @@
     </div>
     }
 
+    <!-- Products -->
+    @if (visit()?.products && visit()!.products!.length > 0) {
+    <div class="visit-detail__section">
+      <h3 class="visit-detail__section-title">المنتجات المطلوبة</h3>
+      <div class="visit-detail__products">
+        @for (product of visit()!.products!; track product.name) {
+        <div class="visit-detail__product-card">
+          @if (product.image_url) {
+          <img [src]="product.image_url" [alt]="product.name" class="visit-detail__product-img" />
+          } @else {
+          <div class="visit-detail__product-img visit-detail__product-img--placeholder">
+            <span>📦</span>
+          </div>
+          }
+          <div class="visit-detail__product-info">
+            <span class="visit-detail__product-name">{{ product.name }}</span>
+            @if (product.description) {
+            <span class="visit-detail__product-desc">{{ product.description }}</span>
+            }
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
     <!-- (Timeline) -->
     <div class="visit-detail__section">
       <h3 class="visit-detail__section-title">سجل النشاطات</h3>

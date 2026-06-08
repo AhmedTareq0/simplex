@@ -1,4 +1,4 @@
-<app-shared-modal [visible]="visible" (visibleChange)="onVisibleChange($event)" title="طلب زيارة مهندس" maxWidth="38rem"
+<app-shared-modal [visible]="visible()" (visibleChange)="visible.set($event)" title="طلب زيارة مهندس" maxWidth="38rem"
   contentClass="p-0">
   <div class="visit-modal-body" dir="rtl">
 
@@ -147,11 +147,11 @@
   </div>
 
   <div class="visit-modal-footer">
-    <button class="visit-btn visit-btn--secondary" (click)="close()" [disabled]="isSubmitting">
+    <button class="visit-btn visit-btn--secondary" (click)="close()" [disabled]="isSubmitting()">
       إلغاء
     </button>
-    <button class="visit-btn visit-btn--primary" (click)="submit()" [disabled]="!isVisitFormValid() || isSubmitting">
-      @if (isSubmitting) {
+    <button class="visit-btn visit-btn--primary" (click)="submit()" [disabled]="!isVisitFormValid() || isSubmitting()">
+      @if (isSubmitting()) {
       <span class="visit-spinner"></span>
       <span>جاري إرسال الطلب...</span>
       } @else {

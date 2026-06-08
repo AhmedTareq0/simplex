@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, signal, computed, effect, inject } from '@angular/core';
+import { Component, model, input, output, signal, computed, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IconComponent } from '@/shared/components/icon/icon.component';
@@ -15,18 +15,18 @@ import { MachineService, Machine } from '@/features/machines/services/machine.se
 export class RequestVisitModalComponent {
   private readonly machineService = inject(MachineService);
 
-  @Input() visible = false;
-  @Input() isSubmitting = false;
+  // model() = signal input مع two-way binding تلقائي [(visible)]
+  readonly visible = model(false);
+  readonly isSubmitting = input(false);
 
-  @Output() visibleChange = new EventEmitter<boolean>();
-  @Output() submitted = new EventEmitter<any>();
+  readonly submitted = output<any>();
 
   // Available machines loaded from API (free_to_use > 0)
   readonly availableMachines = signal<Machine[]>([]);
   readonly isMachinesLoading = signal(false);
   readonly selectedProductIds = signal<number[]>([]);
 
-  // Pop-up Form Signals
+  // Form Signals
   readonly visitType = signal<'maintenance' | 'installation'>('maintenance');
   readonly maintenanceType = signal('');
   readonly visitPriority = signal('low');
@@ -63,7 +63,6 @@ export class RequestVisitModalComponent {
   readonly maintenanceTypeTouched = signal(false);
   readonly visitDescriptionTouched = signal(false);
 
-  // Field validation error computations
   readonly maintenanceTypeError = computed(() => {
     if (!this.maintenanceTypeTouched()) return '';
     if (!this.maintenanceType()) return this.visitType() === 'maintenance' ? 'نوع الصيانة مطلوب' : 'نوع الماكينة مطلوب';
@@ -79,7 +78,6 @@ export class RequestVisitModalComponent {
   });
 
   readonly isVisitFormValid = computed(() => {
-    // maintenance_type required for both visit types (maintenance sub-type or installation machine type)
     if (!this.maintenanceType()) return false;
     const descVal = this.visitDescription().trim();
     if (!descVal || descVal.length < 10) return false;
@@ -87,8 +85,9 @@ export class RequestVisitModalComponent {
   });
 
   constructor() {
+    // effect يشتغل صح دلوقتي لأن visible بقى signal حقيقي
     effect(() => {
-      if (this.visible) {
+      if (this.visible()) {
         this.resetForm();
         this.loadAvailableMachines();
       }
@@ -139,13 +138,8 @@ export class RequestVisitModalComponent {
     this.maintenanceTypeTouched.set(true);
   }
 
-  onVisibleChange(val: boolean): void {
-    this.visible = val;
-    this.visibleChange.emit(val);
-  }
-
   close(): void {
-    this.onVisibleChange(false);
+    this.visible.set(false);
   }
 
   submit(): void {
