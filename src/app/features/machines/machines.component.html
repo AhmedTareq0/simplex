@@ -4,15 +4,17 @@
       <h1 class="machines__title">دليل الماكينات</h1>
       <p class="machines__subtitle">إدارة وتعديل بيانات الماكينات</p>
     </div>
-    <!-- <div class="machines__actions">
-      @if (auth.hasPermission('machines.manage')) {
-        <app-button
-          label="إضافة ماكينة"
-          icon="plus"
-          (pressed)="onAdd()"
-        />
-      }
-    </div> -->
+    <div class="machines__actions">
+      <button
+        class="machines__filter-btn"
+        [class.machines__filter-btn--active]="activeFilters().available === true"
+        (click)="onFilterAvailable(activeFilters().available === true ? undefined : true)"
+        title="عرض المتاح للاستخدام فقط"
+      >
+        <span class="machines__filter-dot"></span>
+       عرض المتاح للاستخدام
+      </button>
+    </div>
   </div>
 
   @if (isLoading) {

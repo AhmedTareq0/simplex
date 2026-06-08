@@ -124,7 +124,7 @@ export class TicketsService {
     );
   }
 
-  requestVisit(ticketId: number, metadata?: { issue_type: string; sub_type: string; priority: string; description: string }): Observable<ApiResponse<Ticket>> {
+  requestVisit(ticketId: number, metadata?: { visit_type: string; maintenance_type?: string; priority: string; description: string; product_ids?: number[] }): Observable<ApiResponse<Ticket>> {
     return this.http.post<ApiResponse<Ticket>>(`${this.base}/api/tickets/${ticketId}/request-visit`, metadata || {});
   }
 

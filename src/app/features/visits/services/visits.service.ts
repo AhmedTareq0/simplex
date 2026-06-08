@@ -17,6 +17,12 @@ export interface VisitCustomer {
   name: string;
 }
 
+export interface VisitProduct {
+  name: string;
+  image_url: string | null;
+  description: string;
+}
+
 export interface Visit {
   id: number;
   name: string;
@@ -43,6 +49,7 @@ export interface Visit {
   engineer_rating?: number;
   engineer_rating_feedback?: string;
   activities?: any[];
+  products?: VisitProduct[];
 }
 
 export interface VisitFilters {

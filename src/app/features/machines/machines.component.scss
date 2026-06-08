@@ -33,4 +33,48 @@
     border-radius: 1.5rem;
     overflow: hidden;
   }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  &__filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    border: 1.5px solid var(--color-border, #e2e8f0);
+    background: var(--color-card-bg, #fff);
+    color: var(--color-text-secondary, #64748b);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+      border-color: #16a34a;
+      color: #15803d;
+    }
+
+    &--active {
+      border-color: #16a34a;
+      background: #f0fdf4;
+      color: #15803d;
+
+      .machines__filter-dot {
+        background: #16a34a;
+      }
+    }
+  }
+
+  &__filter-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-border, #cbd5e1);
+    transition: background 0.15s ease;
+  }
 }

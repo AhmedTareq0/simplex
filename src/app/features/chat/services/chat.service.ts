@@ -205,7 +205,7 @@ export class ChatService {
     return this.http.post<any>(endpoint, form);
   }
 
-  requestVisit(conversationId: string, metadata?: { issue_type: string; sub_type: string; priority: string; description: string }): Observable<any> {
+  requestVisit(conversationId: string, metadata?: { visit_type: string; maintenance_type?: string; priority: string; description: string; product_ids?: number[] }): Observable<any> {
     return this.http.post<any>(
       `${this.base}/api/ai-assistant/customer-care/request-engineer-visit`,
       { 

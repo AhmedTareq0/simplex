@@ -30,6 +30,9 @@ export class MachinesComponent implements OnInit {
   currentPage = signal(1);
   pageSize = signal(10);
 
+  // Active filters
+  activeFilters = signal<{ search?: string; category?: string; type?: string; available?: boolean }>({});
+
   get isLoading(): boolean { return this.machineService.isLoading(); }
   get total(): number { return this.machineService.total(); }
   get machines(): Machine[] { return this.machineService.machines(); }
@@ -37,6 +40,7 @@ export class MachinesComponent implements OnInit {
   columns: TableColumn[] = [
     { field: 'image_url', header: 'الصورة', type: 'image' },
     { field: 'display_name', header: 'الاسم', type: 'text', filterable: true },
+    { field: 'default_code', header: 'الكود', type: 'text' },
     { field: 'category', header: 'الفئة', type: 'text', filterable: true },
     {
       field: 'description',
@@ -50,6 +54,19 @@ export class MachinesComponent implements OnInit {
       header: 'السعر',
       type: 'number',
       formatter: (value: number) => value ? `${value.toLocaleString('ar-EG')} ج.م` : 'مجاني'
+    },
+    {
+      field: 'free_to_use',
+      header: 'متاح للاستخدام',
+      type: 'badge',
+      formatter: (value: number) => `${value ?? 0} وحدة`,
+      colorFormatter: (value: number) => (value ?? 0) > 0 ? 'success' : 'danger',
+    },
+    {
+      field: 'qty_available',
+      header: 'المخزون الكلي',
+      type: 'number',
+      formatter: (value: number) => `${value ?? 0} وحدة`,
     },
     {
       field: 'document_url',
@@ -95,7 +112,19 @@ export class MachinesComponent implements OnInit {
   onPageChange(event: { page: number; rows: number }) {
     this.currentPage.set(event.page);
     this.pageSize.set(event.rows);
-    this.machineService.loadMachines({ page: event.page, pageSize: event.rows });
+    this.machineService.loadMachines({ page: event.page, pageSize: event.rows, ...this.activeFilters() });
+  }
+
+  onFilterAvailable(available: boolean | undefined) {
+    this.activeFilters.update(f => ({ ...f, available }));
+    this.currentPage.set(1);
+    this.machineService.loadMachines({ page: 1, pageSize: this.pageSize(), ...this.activeFilters() });
+  }
+
+  onSearch(search: string) {
+    this.activeFilters.update(f => ({ ...f, search: search || undefined }));
+    this.currentPage.set(1);
+    this.machineService.loadMachines({ page: 1, pageSize: this.pageSize(), ...this.activeFilters() });
   }
 
   onDelete(machine: Machine) {
@@ -116,7 +145,8 @@ export class MachinesComponent implements OnInit {
     this.syncService.syncModule('machines').subscribe({
       next: (res) => {
         if (res.success) {
-          this.machineService.loadMachines({ page: 1, pageSize: this.pageSize() });
+          this.currentPage.set(1);
+          this.machineService.loadMachines({ page: 1, pageSize: this.pageSize(), ...this.activeFilters() });
         }
       }
     });
@@ -146,7 +176,7 @@ export class MachinesComponent implements OnInit {
           this.showEditModal.set(false);
           this.selectedMachine.set(null);
           this.currentPage.set(1);
-          this.machineService.loadMachines({ page: 1, pageSize: this.pageSize() });
+          this.machineService.loadMachines({ page: 1, pageSize: this.pageSize(), ...this.activeFilters() });
         }
       },
       error: () => this.isUpdatingMachine.set(false)

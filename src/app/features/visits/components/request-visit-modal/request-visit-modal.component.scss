@@ -99,12 +99,10 @@
 }
 
 .visit-modal-body {
-  padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  max-height: 70vh;
-  overflow-y: auto;
+  gap: 16px;
+  padding-top: 8px;
 }
 
 .visit-row {
@@ -310,6 +308,11 @@ select.visit-input {
   border-radius: 50%;
   border-top-color: white;
   animation: visit-spin 0.8s linear infinite;
+
+  &--dark {
+    border-color: var(--color-border, #e2e8f0);
+    border-top-color: var(--color-primary, #3b82f6);
+  }
 }
 
 @keyframes visit-spin {
@@ -337,5 +340,146 @@ select.visit-input {
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+/* ═══════ Machines picker ═══════ */
+.visit-label-hint {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--color-text-tertiary, #94a3b8);
+  margin-right: 4px;
+}
+
+.visit-machines-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-secondary, #64748b);
+  font-size: 13px;
+  padding: 8px 0;
+}
+
+.visit-machines-empty {
+  font-size: 13px;
+  color: var(--color-text-tertiary, #94a3b8);
+  margin: 0;
+  padding: 8px 0;
+}
+
+.visit-machines-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.visit-machine-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--color-border, #e2e8f0);
+  border-radius: 12px;
+  background: var(--color-card-bg, #fff);
+  cursor: pointer;
+  text-align: right;
+  transition: all 0.18s ease;
+  font-family: inherit;
+
+  &:hover {
+    border-color: var(--color-primary, #3b82f6);
+    background: var(--color-primary-50, #eff6ff);
+  }
+
+  &--selected {
+    border-color: var(--color-primary, #3b82f6);
+    background: var(--color-primary-50, #eff6ff);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #3b82f6) 12%, transparent);
+  }
+
+  &__img {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--color-border, #e2e8f0);
+    background: var(--color-surface, #f8fafc);
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  &__name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-text-primary, #0f172a);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__code {
+    font-size: 11px;
+    color: var(--color-text-tertiary, #94a3b8);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__stock {
+    font-size: 11px;
+    font-weight: 600;
+    color: #15803d;
+  }
+
+  &__check {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--color-primary, #3b82f6);
+    color: #fff;
+  }
+}
+
+.visit-machines-selected-hint {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary, #3b82f6);
+  margin: 6px 0 0;
+}
+
+.visit-parts-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #92400e;
+  font-size: 13px;
+  line-height: 1.6;
+
+  app-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: #f97316;
+  }
+
+  strong {
+    font-weight: 700;
+    color: #c2410c;
   }
 }
