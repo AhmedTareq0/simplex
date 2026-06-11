@@ -367,10 +367,90 @@ select.visit-input {
   padding: 8px 0;
 }
 
+.visit-machine-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--color-border, #cbd5e1);
+  border-radius: 12px;
+  background: var(--color-card-bg, #fff);
+  transition: all 0.2s ease;
+
+  &:focus-within {
+    border-color: var(--color-primary, #3b82f6);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #3b82f6) 12%, transparent);
+  }
+
+  app-icon {
+    color: var(--color-text-tertiary, #94a3b8);
+    flex-shrink: 0;
+  }
+
+  &__input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: var(--color-text-primary, #0f172a);
+    background: transparent;
+    font-family: inherit;
+    width: 100%;
+
+    &::placeholder {
+      color: var(--color-text-tertiary, #94a3b8);
+    }
+  }
+
+  &__clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: var(--color-surface, #f1f5f9);
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--color-text-secondary, #64748b);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+
+    &:hover {
+      background: var(--color-border, #e2e8f0);
+      color: var(--color-text-primary, #0f172a);
+    }
+  }
+}
+
 .visit-machines-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 2px;
+  
+  /* Custom scrollbar */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--color-surface, #f8fafc);
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-border, #cbd5e1);
+    border-radius: 4px;
+    
+    &:hover {
+      background: var(--color-text-tertiary, #94a3b8);
+    }
+  }
 }
 
 .visit-machine-card {
@@ -481,5 +561,29 @@ select.visit-input {
   strong {
     font-weight: 700;
     color: #c2410c;
+  }
+}
+
+.visit-machines-load-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.visit-btn--outline {
+  background: transparent;
+  border: 1.5px dashed var(--color-border, #cbd5e1);
+  color: var(--color-text-secondary, #64748b);
+  font-weight: 600;
+
+  &:hover:not(:disabled) {
+    background: var(--color-surface, #f8fafc);
+    border-color: var(--color-primary, #3b82f6);
+    color: var(--color-primary, #3b82f6);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }

@@ -110,8 +110,35 @@
       } @else if (availableMachines().length === 0) {
       <p class="visit-machines-empty">لا توجد قطع غيار متاحة في المخزون حالياً</p>
       } @else {
+      
+      <!-- Search Box -->
+      <div class="visit-machine-search">
+        <app-icon name="search" size="sm" />
+        <input 
+          type="text" 
+          class="visit-machine-search__input" 
+          placeholder="ابحث بالاسم أو الكود..." 
+          [ngModel]="machineSearchQuery()"
+          (ngModelChange)="onMachineSearchChange($event)"
+        />
+        @if (machineSearchQuery()) {
+        <button 
+          type="button" 
+          class="visit-machine-search__clear"
+          (click)="onMachineSearchChange('')"
+          title="مسح البحث"
+        >
+          <app-icon name="close" size="sm" />
+        </button>
+        }
+      </div>
+
+      @if (filteredMachines().length === 0) {
+      <p class="visit-machines-empty">لا توجد نتائج تطابق البحث</p>
+      } @else {
+      
       <div class="visit-machines-grid">
-        @for (machine of availableMachines(); track machine.id) {
+        @for (machine of displayedMachines(); track machine.id) {
         <button type="button" class="visit-machine-card"
           [class.visit-machine-card--selected]="isProductSelected(machine.id)"
           (click)="toggleProduct(machine.id)">
@@ -133,6 +160,17 @@
         </button>
         }
       </div>
+
+      <!-- Load More Button -->
+      @if (hasMoreMachines()) {
+      <div class="visit-machines-load-more">
+        <button type="button" class="visit-btn visit-btn--outline" (click)="loadMoreMachines()">
+          <app-icon name="chevronDown" size="sm" />
+          <span>عرض المزيد ({{ filteredMachines().length - displayedMachinesLimit() }} متبقي)</span>
+        </button>
+      </div>
+      }
+
       @if (selectedProductIds().length > 0) {
       <div class="visit-parts-notice">
         <app-icon name="info" size="sm" />
@@ -141,6 +179,8 @@
           <span> — سيُنشأ أمر بيع تلقائياً ويجب على المهندس استلام القطع قبل الزيارة</span>
         </div>
       </div>
+      }
+      
       }
       }
     </div>
