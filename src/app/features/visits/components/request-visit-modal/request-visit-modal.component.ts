@@ -25,6 +25,11 @@ export class RequestVisitModalComponent {
   readonly availableMachines = signal<Machine[]>([]);
   readonly isMachinesLoading = signal(false);
   readonly selectedProductIds = signal<number[]>([]);
+  
+  // Search and pagination for machines
+  readonly machineSearchQuery = signal('');
+  readonly displayedMachinesLimit = signal(4);
+  readonly MACHINES_PAGE_SIZE = 4;
 
   // Form Signals
   readonly visitType = signal<'maintenance' | 'installation'>('maintenance');
@@ -44,18 +49,18 @@ export class RequestVisitModalComponent {
   ];
 
   readonly maintenanceTypeOptions = [
-    { label: 'ميكانيكا (Mechanical)', value: 'Mechanical' },
-    { label: 'كهرباء (Electrical)', value: 'Electrical' },
-    { label: 'تشغيل (Operating)', value: 'Operating' },
-    { label: 'دورية (Periodic)', value: 'Periodic' }
+    { label: 'ميكانيكا (Mechanical)', value: 'mechanical' },
+    { label: 'كهرباء (Electrical)', value: 'electrical' },
+    { label: 'تشغيل (Operating)', value: 'operating' },
+    { label: 'دورية (Periodic)', value: 'periodic' }
   ];
 
   readonly installationSubTypes = [
-    { label: 'غير راوتر (Non-router)', value: 'Non-router' },
-    { label: 'تجميع (Assembled)', value: 'Assembled' },
-    { label: 'فايبر ليزر (Fiber Laser G, N, NP)', value: 'Fiber Laser G OR N OR NP' },
-    { label: 'فايبر ليزر (Fiber Laser H Model)', value: 'Fiber Laser H Model' },
-    { label: 'تناية ومقص (Press Bending & Shearing)', value: 'Press Bending&SHEARING Machine' },
+    { label: 'غير راوتر (Non-router)', value: 'non_router' },
+    { label: 'تجميع (Assembly)', value: 'assembly' },
+    { label: 'فايبر ليزر (Fiber Laser G, N, P)', value: 'fiber_laser_gnp' },
+    { label: 'فايبر ليزر (Fiber Laser H)', value: 'fiber_laser_h' },
+    { label: 'مكبس تناية ومقص (Press Brake & Shearing)', value: 'press_brake_shearing' },
     { label: 'مخرطة (Lathe)', value: 'lathe' }
   ];
 
@@ -82,6 +87,27 @@ export class RequestVisitModalComponent {
     const descVal = this.visitDescription().trim();
     if (!descVal || descVal.length < 10) return false;
     return true;
+  });
+
+  // Filtered and limited machines based on search query
+  readonly filteredMachines = computed(() => {
+    const query = this.machineSearchQuery().toLowerCase().trim();
+    const machines = this.availableMachines();
+    
+    if (!query) return machines;
+    
+    return machines.filter(machine => 
+      machine.display_name.toLowerCase().includes(query) ||
+      (machine.default_code && machine.default_code.toLowerCase().includes(query))
+    );
+  });
+
+  readonly displayedMachines = computed(() => {
+    return this.filteredMachines().slice(0, this.displayedMachinesLimit());
+  });
+
+  readonly hasMoreMachines = computed(() => {
+    return this.filteredMachines().length > this.displayedMachinesLimit();
   });
 
   constructor() {
@@ -123,6 +149,17 @@ export class RequestVisitModalComponent {
     this.maintenanceTypeTouched.set(false);
     this.visitDescriptionTouched.set(false);
     this.selectedProductIds.set([]);
+    this.machineSearchQuery.set('');
+    this.displayedMachinesLimit.set(this.MACHINES_PAGE_SIZE);
+  }
+
+  loadMoreMachines(): void {
+    this.displayedMachinesLimit.update(limit => limit + this.MACHINES_PAGE_SIZE);
+  }
+
+  onMachineSearchChange(query: string): void {
+    this.machineSearchQuery.set(query);
+    this.displayedMachinesLimit.set(this.MACHINES_PAGE_SIZE); // Reset limit when searching
   }
 
   setVisitType(type: string): void {
