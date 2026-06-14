@@ -99,6 +99,32 @@ export class VisitsComponent implements OnInit {
       }
     },
     {
+      field: 'received_product',
+      header: 'استلام القطع',
+      type: 'badge',
+      filterable: true,
+      filterType: 'dropdown',
+      filterOptions: [
+        { label: 'تم الاستلام', value: 'true' },
+        { label: 'لم يتم الاستلام', value: 'false' }
+      ],
+      formatter: (value: boolean) => value ? 'تم الاستلام ✓' : 'لم يتم الاستلام'
+    },
+    {
+      field: 'received_at',
+      header: 'تاريخ الاستلام',
+      type: 'text',
+      formatter: (value: string | null) => {
+        return value ? new Date(value).toLocaleDateString('ar-EG', { 
+          day: 'numeric', 
+          month: 'short', 
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }) : '—';
+      }
+    },
+    {
       field: 'status',
       header: 'الحالة',
       type: 'badge',

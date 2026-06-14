@@ -50,6 +50,8 @@ export interface Visit {
   engineer_rating_feedback?: string;
   activities?: any[];
   products?: VisitProduct[];
+  received_product?: boolean;
+  received_at?: string | null;
 }
 
 export interface VisitFilters {
