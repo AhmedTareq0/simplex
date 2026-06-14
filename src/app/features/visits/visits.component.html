@@ -56,6 +56,16 @@
             <span class="info-label">الحالة:</span>
             <span class="info-value">{{ getStatusLabel(nextVisit()!.status) }}</span>
           </div>
+          @if (nextVisit()!.products && nextVisit()!.products!.length > 0) {
+            <div class="info-group">
+              <span class="info-label">استلام القطع:</span>
+              @if (nextVisit()!.received_product) {
+                <span class="info-value" style="color: #10b981; font-weight: 600;">تم الاستلام ✓</span>
+              } @else {
+                <span class="info-value" style="color: #f59e0b; font-weight: 600;">لم يتم الاستلام</span>
+              }
+            </div>
+          }
         </div>
       </div>
     }

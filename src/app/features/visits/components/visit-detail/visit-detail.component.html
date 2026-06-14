@@ -76,6 +76,31 @@
       </div>
     </div>
 
+    <!-- Products Reception Status -->
+    @if (visit()?.products && visit()!.products!.length > 0) {
+    <div class="visit-detail__section">
+      <h3 class="visit-detail__section-title">حالة استلام قطع الغيار</h3>
+      <div class="visit-detail__grid">
+        <div class="visit-detail__item">
+          <span class="visit-detail__label">حالة الاستلام</span>
+          @if (visit()?.received_product) {
+          <span class="visit-detail__badge" style="background-color: #10b981;">
+            تم الاستلام ✓
+          </span>
+          } @else {
+          <span class="visit-detail__badge" style="background-color: #f59e0b;">
+            لم يتم الاستلام
+          </span>
+          }
+        </div>
+        <div class="visit-detail__item">
+          <span class="visit-detail__label">تاريخ الاستلام</span>
+          <span class="visit-detail__value">{{ formatDate(visit()?.received_at || null) }}</span>
+        </div>
+      </div>
+    </div>
+    }
+
     @if (visit()?.tags && visit()! .tags! .length > 0) {
     <div class="visit-detail__section">
       <h3 class="visit-detail__section-title">الوسوم (Tags)</h3>
