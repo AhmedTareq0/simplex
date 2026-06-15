@@ -29,6 +29,7 @@ export class ChatHeaderComponent {
 
   @Output() close = new EventEmitter<void>();
   @Output() deleted = new EventEmitter<string>();
+  @Output() back = new EventEmitter<void>();
 
   readonly showMenu = signal(false);
   readonly isRequestingVisit = signal(false);

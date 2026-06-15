@@ -253,6 +253,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     while (parent) {
       if (parent.classList && parent.classList.contains('layout-content__inner')) {
         parent.classList.add('chat-page-active');
+        // Also mark the layout-content parent
+        if (parent.parentElement?.classList?.contains('layout-content')) {
+          parent.parentElement.classList.add('chat-page-active');
+        }
         break;
       }
       parent = parent.parentElement;
@@ -282,6 +286,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onConversationDeleted(id: string) {
     this.users.update(prev => prev.filter(u => u.sub !== id));
+    this.selectedPerson.set(null);
+  }
+
+  onBack() {
     this.selectedPerson.set(null);
   }
 

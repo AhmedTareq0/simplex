@@ -6,6 +6,7 @@
     [conversationId]="conversationId()"
     [status]="person()?.status"
     (deleted)="deleted.emit($event)"
+    (back)="back.emit()"
   />
   <app-chat-messages
     [messages]="messages()"
