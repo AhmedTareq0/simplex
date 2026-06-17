@@ -5,17 +5,19 @@
   (closed)="close()"
 >
   <div class="ticket-create__form">
-    <app-shared-select
-      label="العميل *"
-      [options]="clientOptions()"
-      [(ngModel)]="formData.customer_id"
-      optionLabel="label"
-      optionValue="value"
-      placeholder="اختر العميل"
-      [showClear]="!isEditMode"
-      [filter]="true"
-      class="ticket-create__field"
-    ></app-shared-select>
+    @if (!isEditMode) {
+      <app-shared-select
+        label="العميل *"
+        [options]="clientOptions()"
+        [(ngModel)]="formData.customer_id"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="اختر العميل"
+        [showClear]="true"
+        [filter]="true"
+        class="ticket-create__field"
+      ></app-shared-select>
+    }
 
     <app-shared-input
       label="العنوان *"
@@ -25,19 +27,21 @@
       class="ticket-create__field"
     ></app-shared-input>
 
-    <app-shared-select
-      label="الماكينة *"
-      [options]="machineOptions()"
-      [(ngModel)]="formData.machine_id"
-      optionLabel="label"
-      optionValue="value"
-      placeholder="اختر الماكينة"
-      [showClear]="!isEditMode"
-      [filter]="true"
-      class="ticket-create__field"
-    ></app-shared-select>
+    @if (!isEditMode) {
+      <app-shared-select
+        label="الماكينة *"
+        [options]="machineOptions()"
+        [(ngModel)]="formData.machine_id"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="اختر الماكينة"
+        [showClear]="true"
+        [filter]="true"
+        class="ticket-create__field"
+      ></app-shared-select>
+    }
 
-    @if (auth.isSuperAdmin()) {
+    @if (!isEditMode && auth.isSuperAdmin()) {
       <app-shared-select
         label="مسؤول خدمة العملاء *"
         [options]="customerCareOptions()"
