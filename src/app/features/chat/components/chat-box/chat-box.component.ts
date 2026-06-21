@@ -20,4 +20,5 @@ export class ChatBoxComponent {
   readonly users = input<any[]>([]);
 
   @Output() deleted = new EventEmitter<string>();
+  @Output() back = new EventEmitter<void>();
 }

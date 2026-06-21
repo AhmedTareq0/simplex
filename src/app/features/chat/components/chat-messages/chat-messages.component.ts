@@ -1,10 +1,11 @@
 import {
-  Component, input, signal, ViewChild, ElementRef,
+  Component, input, signal, computed, ViewChild, ElementRef,
   AfterViewChecked, OnChanges, SimpleChanges, inject
 } from '@angular/core';
 import { ChatMessageComponent } from '../chat-message/chat-message.component';
 import { ChatFooterComponent, SendPayload } from '../chat-footer/chat-footer.component';
 import { ChatService } from '../../services/chat.service';
+import { AuthLocalService } from '@/auth/services/auth-local.service';
 
 export interface MessageGroup {
   type: 'date' | 'message' | 'system';
@@ -38,6 +39,10 @@ export class ChatMessagesComponent implements AfterViewChecked, OnChanges {
   readonly users = input<any[]>([]);
 
   private readonly chatService = inject(ChatService);
+  private readonly auth = inject(AuthLocalService);
+
+  /** Superadmin can view chats but cannot send messages */
+  readonly canSend = computed(() => !this.auth.isSuperAdmin());
 
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
 

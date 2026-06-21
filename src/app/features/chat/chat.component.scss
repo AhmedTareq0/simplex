@@ -1,75 +1,104 @@
-:host {
-  display: block;
-  height: 100%;
-  min-height: 100%;
-}
+ app-chat {
+   display: flex;
+   flex-direction: column;
+   height: 100%;
+   min-height: 0;
+   overflow: hidden;
+ }
 
-:host ::ng-deep .layout-content__inner {
-  padding: 0 !important;
-  max-width: none !important;
-  margin: 0 !important;
-}
 
-:host ::ng-deep .layout-content {
-  overflow: hidden !important;
-}
+ .layout-content__inner.chat-page-active {
+   padding: 0 !important;
+   max-width: none !important;
+   margin: 0 !important;
+   display: flex !important;
+   flex-direction: column !important;
+   flex: 1 !important;
+   min-height: 0 !important;
+   overflow: hidden !important;
+   height: 100% !important;
+ }
 
-/* Direct override for layout-content__inner when chat page is active */
-.layout-content__inner.chat-page-active {
-  padding: 0 !important;
-  max-width: none !important;
-  margin: 0 !important;
-}
+ .layout-content.chat-page-active {
+   overflow: hidden !important;
+   display: flex !important;
+   flex-direction: column !important;
+ }
 
-@media (min-width: 768px) {
-  .layout-content__inner.chat-page-active {
-    padding: 0 !important;
-  }
-}
+ @media (min-width: 768px) {
+   .layout-content__inner.chat-page-active {
+     padding: 0 !important;
+   }
+ }
 
-@media (min-width: 1024px) {
-  .layout-content__inner.chat-page-active {
-    padding: 0 !important;
-  }
-}
+ @media (min-width: 1024px) {
+   .layout-content__inner.chat-page-active {
+     padding: 0 !important;
+   }
+ }
 
-.chat-layout {
-  display: flex;
-  height: 90vh;
-  background: #fff;
-  overflow: hidden;
+ /* ═══════════════════════════════════════════
+   Chat Layout — Desktop
+   ═══════════════════════════════════════════ */
+ .chat-layout {
+   display: flex;
+   height: 90vh;
+   background: #fff;
+   overflow: hidden;
 
-  &__left {
-    min-width: 350px;
-    width: 30%;
-    max-width: 450px;
-    border-left: 1px solid rgba(0, 0, 0, 0.14);
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    overflow: hidden;
-    min-height: 0;
-  }
+   &__left {
+     min-width: 350px;
+     width: 30%;
+     max-width: 450px;
+     border-left: 1px solid rgba(0, 0, 0, 0.14);
+     display: flex;
+     flex-direction: column;
+     flex-shrink: 0;
+     overflow: hidden;
+     min-height: 0;
+   }
 
-  &__right {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    border-left: 1px solid rgba(0, 0, 0, 0.14);
-  }
-}
+   &__right {
+     flex: 1;
+     display: flex;
+     flex-direction: column;
+     min-width: 0;
+     min-height: 0;
+     overflow: hidden;
+     border-left: 1px solid rgba(0, 0, 0, 0.14);
+   }
+ }
 
-@media (max-width: 768px) {
-  .chat-layout {
-    &__left {
-      min-width: 100%;
-      width: 100%;
-      max-width: 100%;
-    }
+ /* ═══════════════════════════════════════════
+   Chat Layout — Mobile
+   ═══════════════════════════════════════════ */
+ @media (max-width: 768px) {
+   .chat-layout {
+     height: 100%;
+     flex: 1;
+     min-height: 0;
 
-    &__right {
-      display: none;
-    }
-  }
-}
+     &__left {
+       min-width: 100%;
+       width: 100%;
+       max-width: 100%;
+     }
+
+     &__right {
+       display: none;
+       min-width: 100%;
+       width: 100%;
+     }
+
+     /* When a chat is selected, show chat and hide list */
+     &--chat-open {
+       .chat-layout__left {
+         display: none;
+       }
+
+       .chat-layout__right {
+         display: flex;
+       }
+     }
+   }
+ }

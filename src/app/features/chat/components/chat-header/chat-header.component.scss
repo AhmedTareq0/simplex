@@ -8,6 +8,31 @@
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
 
+  /* Back button - mobile only */
+  &__back-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: #54656f;
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    transition: background 0.15s;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+
+    @media (max-width: 768px) {
+      display: flex;
+    }
+  }
+
   &__avatar-wrap {
     position: relative;
     flex-shrink: 0;

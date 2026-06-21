@@ -1,4 +1,4 @@
-<div class="chat-layout">
+<div class="chat-layout" [class.chat-layout--chat-open]="selectedPerson()">
   <div class="chat-layout__left">
     @if (isLoading()) {
       <app-skeleton-loader type="chat-list" [count]="6" />
@@ -43,6 +43,7 @@
           [userName]="userData()?.name || ''"
           [users]="users()"
           (deleted)="onConversationDeleted($any($event))"
+          (back)="onBack()"
         />
       }
     } @else {

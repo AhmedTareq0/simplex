@@ -105,6 +105,28 @@
     line-height: 1.5;
     user-select: none;
   }
+
+  &__readonly {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: #f0f2f5;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    color: #667781;
+    font-size: 13px;
+    font-weight: 500;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+    direction: rtl;
+
+    svg {
+      color: #8696a0;
+      flex-shrink: 0;
+    }
+  }
 }
 
 @media (max-width: 768px) {

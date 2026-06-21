@@ -156,9 +156,6 @@ export class TicketCreateComponent {
       const payload: UpdateTicketPayload = {
         title: this.formData.title,
         priority: this.formData.priority,
-        ...(this.formData.customer_care_id != null ? { customer_care_id: this.formData.customer_care_id } : {}),
-        ...(this.formData.customer_id != null ? { customer_id: this.formData.customer_id } : {}),
-        ...(this.formData.machine_id != null ? { machine_id: this.formData.machine_id } : {}),
       };
 
       this.ticketsService.updateTicket(Number(this.editData.id), payload).subscribe({
