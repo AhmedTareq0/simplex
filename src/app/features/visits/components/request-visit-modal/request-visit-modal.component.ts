@@ -122,7 +122,7 @@ export class RequestVisitModalComponent {
 
   private loadAvailableMachines(): void {
     this.isMachinesLoading.set(true);
-    this.machineService.fetchMachines({ available: true, pageSize: 100 }).subscribe({
+    this.machineService.fetchSpareParts({ available: true, pageSize: 100 }).subscribe({
       next: (machines) => {
         this.availableMachines.set(machines);
         this.isMachinesLoading.set(false);

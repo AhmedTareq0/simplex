@@ -18,6 +18,7 @@ export interface Machine {
   category: string;
   category_id?: number;
   type: string;
+  product_kind?: string;
   active: boolean;
   free_to_use: number;
   qty_available: number;
@@ -47,6 +48,7 @@ export interface MachineFilters {
   category?: string;
   type?: string;
   available?: boolean;
+  productKind?: 'machine' | 'spareparts';
 }
 
 @Injectable({
@@ -65,32 +67,60 @@ export class MachineService {
   }
 
   fetchMachines(filters: MachineFilters = {}): Observable<Machine[]> {
-    this.isLoading.set(true);
+    return this.fetchMachineList(filters, true);
+  }
+
+  fetchSpareParts(filters: Omit<MachineFilters, 'productKind'> = {}): Observable<Machine[]> {
+    return this.fetchMachineList({ ...filters, productKind: 'spareparts' }, false);
+  }
+
+  private fetchMachineList(filters: MachineFilters = {}, updateState: boolean): Observable<Machine[]> {
+    if (updateState) this.isLoading.set(true);
     const page = filters.page ?? 1;
     const pageSize = filters.pageSize ?? 10;
 
-    const params = buildHttpParams({ page, pageSize, search: filters.search, category: filters.category, type: filters.type, available: filters.available });
+    const params = buildHttpParams({
+      page,
+      pageSize,
+      search: filters.search,
+      category: filters.category,
+      type: filters.type,
+      available: filters.available,
+      productKind: filters.productKind ?? 'machine',
+    });
 
     return this.http.get<ApiResponse<PagedResult<Machine> | Machine[]>>(
       `${this.apiUrl}/api/machines/all`, { params }
     ).pipe(
-      tap({
-        next: (res) => {
-          const data = res.data;
-          if (Array.isArray(data)) {
-            const start = (page - 1) * pageSize;
-            const machines = data.map(m => ({ ...m, odooId: m.odooId ?? m.odoo_id ?? m.id }));
-            this.machines.set(machines.slice(start, start + pageSize));
-            this.total.set(machines.length);
-          } else {
-            this.machines.set((data?.items || []).map(m => ({ ...m, odooId: m.odooId ?? m.odoo_id ?? m.id })));
-            this.total.set(data?.total || 0);
-          }
-          this.isLoading.set(false);
-        },
-        error: () => this.isLoading.set(false),
+      map((res) => {
+        const data = res.data;
+        if (Array.isArray(data)) {
+          const start = (page - 1) * pageSize;
+          const machines = data.map(m => ({ ...m, odooId: m.odooId ?? m.odoo_id ?? m.id }));
+          return {
+            machines: machines.slice(start, start + pageSize),
+            total: machines.length,
+          };
+        }
+
+        return {
+          machines: (data?.items || []).map(m => ({ ...m, odooId: m.odooId ?? m.odoo_id ?? m.id })),
+          total: data?.total || 0,
+        };
       }),
-      map(() => this.machines())
+      tap({
+        next: ({ machines, total }) => {
+          if (updateState) {
+            this.machines.set(machines);
+            this.total.set(total);
+            this.isLoading.set(false);
+          }
+        },
+        error: () => {
+          if (updateState) this.isLoading.set(false);
+        },
+      }),
+      map(({ machines }) => machines)
     );
   }
 
