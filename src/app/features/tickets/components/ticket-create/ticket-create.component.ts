@@ -12,8 +12,8 @@ import { ChatService, Conversation } from '../../../chat/services/chat.service';
 import { ClientService } from '../../../clients/services/client.service';
 import { AuthLocalService } from '@/auth/services/auth-local.service';
 import { TICKET_STATUS, PRIORITY } from '@/core/constants/status.constants';
-import { forkJoin } from 'rxjs';
-
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 @Component({
   selector: 'app-ticket-create',
   standalone: true,
@@ -93,9 +93,9 @@ export class TicketCreateComponent {
     }
 
      forkJoin({
-      clients: this.clientService.fetchClients({ page_size: 100 }),
-      employees: this.employeeService.fetchEmployees({ page_size: 100 }),
-      machines: this.machineService.fetchMachines({ pageSize: 100 }),
+      clients: this.clientService.fetchClients({ page_size: 100 }).pipe(catchError(() => of([]))),
+      employees: this.employeeService.fetchEmployees({ page_size: 100 }).pipe(catchError(() => of([]))),
+      machines: this.machineService.fetchMachines({ pageSize: 100 }).pipe(catchError(() => of([]))),
     }).subscribe(() => {
       if (this.isEditMode && this.editData) {
         const ccEmployee = this.employeeService.employees()
