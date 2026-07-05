@@ -14,7 +14,6 @@ export function buildHttpParams(
 
   let params = new HttpParams()
     .set('page', page.toString())
-    .set('pageSize', pageSize.toString())
     .set('page_size', pageSize.toString());
 
   for (const [key, value] of Object.entries(filters)) {
