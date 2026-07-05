@@ -84,22 +84,28 @@ export const VISIT_STATUS = {
 // ════════════════════════════════════════════════════════════════════
 const PRIORITY_LABELS: Record<string, string> = {
   high: 'عالية',
+  priority_high: 'عالية',
   medium: 'متوسطة',
   normal: 'متوسطة',
+  priority_normal: 'متوسطة',
   low: 'منخفضة',
+  priority_low: 'منخفضة',
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
   high: '#ef4444',
+  priority_high: '#ef4444',
   medium: '#f59e0b',
   normal: '#f59e0b',
+  priority_normal: '#f59e0b',
   low: '#10b981',
+  priority_low: '#10b981',
 };
 
 export const PRIORITY = {
   labels: PRIORITY_LABELS,
   colors: PRIORITY_COLORS,
-  options: toOptions(PRIORITY_LABELS, ['normal']),
+  options: toOptions(PRIORITY_LABELS, ['normal', 'priority_normal', 'priority_high', 'priority_low']),
   getLabel: (p: string) => lookup(PRIORITY_LABELS, p),
   getColor: (p: string) => lookup(PRIORITY_COLORS, p, '#6b7280'),
 };
