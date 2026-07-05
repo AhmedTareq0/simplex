@@ -170,15 +170,16 @@ export class TicketCreateComponent {
         },
       });
     } else {
-      const payload: CreateTicketPayload = {
+      const payload: any = {
         customer_id: this.formData.customer_id!,
         title: this.formData.title,
-        priority: this.formData.priority as CreateTicketPayload['priority'],
+        priority: this.formData.priority,
         machine_id: this.formData.machine_id!,
-        customer_care_id: this.auth.isSuperAdmin()
-          ? this.formData.customer_care_id!
-          : this.resolveCurrentEmployeeId(),
       };
+
+      if (this.auth.isSuperAdmin()) {
+        payload.customer_care_id = this.formData.customer_care_id!;
+      }
 
       this.ticketsService.createTicket(payload).subscribe({
         next: () => {
