@@ -39,7 +39,19 @@ export interface Visit {
   engineer_id?: number;
   machine_id?: number;
   machine_name?: string;
+  machine?: {
+    id: number;
+    name: string;
+    image_url?: string;
+    description?: string;
+  };
   ticket_id?: number;
+  ticket?: {
+    id: number;
+    title: string;
+    status?: string;
+    priority?: string;
+  };
   visit_date?: string;
   priority?: string;
   notes?: string;

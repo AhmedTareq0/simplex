@@ -1,4 +1,4 @@
-import { Component, input, output, signal, inject, effect } from '@angular/core';
+import { Component, input, output, signal, inject, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SharedModalComponent, ButtonComponent, SharedConfirmationComponent, SharedInputComponent, SharedSelectComponent } from '@/shared/components';
@@ -36,6 +36,7 @@ export class VisitDetailComponent {
 
   visit = input.required<Visit | null>();
   visible = input<boolean>(false);
+  activeVisit = signal<Visit | null>(null);
 
   close = output<void>();
   edit = output<Visit>();
@@ -62,15 +63,27 @@ export class VisitDetailComponent {
       const isVisible = this.visible();
       const v = this.visit();
       if (isVisible && v) {
-        this.loadActivities();
-        if (this.auth.hasPermission('visits.update')) {
-          if (this.auth.hasPermission('users.manage')) {
-            this.loadEngineers();
+        untracked(() => {
+          this.activeVisit.set(v);
+          this.loadActivities();
+          
+          this.visitsService.getVisitDetail(v.id).subscribe({
+            next: (res) => {
+              if (res.data) {
+                this.activeVisit.set(res.data);
+              }
+            }
+          });
+
+          if (this.auth.hasPermission('visits.update')) {
+            if (this.auth.hasPermission('users.manage')) {
+              this.loadEngineers();
+            }
+            if (this.auth.hasPermission('machines.view') || this.auth.hasPermission('machines.manage')) {
+              this.machineService.loadMachines({ pageSize: 100 });
+            }
           }
-          if (this.auth.hasPermission('machines.view') || this.auth.hasPermission('machines.manage')) {
-            this.machineService.loadMachines({ pageSize: 100 });
-          }
-        }
+        });
       }
     }, { allowSignalWrites: true });
   }
@@ -86,7 +99,7 @@ export class VisitDetailComponent {
   }
 
   loadActivities() {
-    const visit = this.visit();
+    const visit = this.activeVisit();
     if (!visit) return;
 
     this.isLoadingActivities.set(true);
@@ -105,17 +118,18 @@ export class VisitDetailComponent {
   formatDate = formatDateTime;
 
   get customerName(): string {
-    const visit = this.visit();
+    const visit = this.activeVisit();
     return visit?.customer?.name || visit?.customer_name || '—';
   }
 
   get engineerName(): string {
-    const visit = this.visit();
+    const visit = this.activeVisit();
     return visit?.engineer?.name || visit?.engineer_name || '—';
   }
 
   get machineName(): string {
-    const visit = this.visit();
+    const visit = this.activeVisit();
+    if (visit?.machine?.name) return visit.machine.name;
     if (visit?.machine_name) return visit.machine_name;
     if (visit?.machine_id) {
       const machine = this.machineService.machines().find(m => m.id === visit.machine_id);
@@ -125,12 +139,12 @@ export class VisitDetailComponent {
   }
 
   get visitDate(): string | null {
-    const visit = this.visit();
+    const visit = this.activeVisit();
     return visit?.planned_start || visit?.visit_date || null;
   }
 
   onComplete() {
-    const visit = this.visit();
+    const visit = this.activeVisit();
     if (!visit || this.isSaving()) return;
 
     this.isSaving.set(true);
@@ -144,12 +158,12 @@ export class VisitDetailComponent {
   }
 
   onEdit() {
-    const visit = this.visit();
+    const visit = this.activeVisit();
     if (visit) this.edit.emit(visit);
   }
 
   onCancelVisit() {
-    const visit = this.visit();
+    const visit = this.activeVisit();
     if (!visit || !this.cancelReason()) return;
 
     this.isSaving.set(true);
@@ -165,7 +179,7 @@ export class VisitDetailComponent {
   }
 
   onReschedule() {
-    const visit = this.visit();
+    const visit = this.activeVisit();
     if (!visit || !this.newPlannedDate()) return;
 
     this.isSaving.set(true);
@@ -181,7 +195,7 @@ export class VisitDetailComponent {
   }
 
   onReassign() {
-    const visit = this.visit();
+    const visit = this.activeVisit();
     if (!visit || !this.selectedEngineerId()) return;
 
     // Convert local id to odoo_user_id for the API
@@ -202,22 +216,22 @@ export class VisitDetailComponent {
 
   // Dynamic buttons logic
   get showStartBtn(): boolean {
-    return this.visit()?.status === 'scheduled';
+    return this.activeVisit()?.status === 'scheduled';
   }
 
   get showCompleteBtn(): boolean {
-    return this.visit()?.status === 'in_progress' || this.visit()?.status === 'scheduled';
+    return this.activeVisit()?.status === 'in_progress' || this.activeVisit()?.status === 'scheduled';
   }
 
   get showRescheduleBtn(): boolean {
-    return ['new', 'scheduled'].includes(this.visit()?.status || '');
+    return ['new', 'scheduled'].includes(this.activeVisit()?.status || '');
   }
 
   get showReassignBtn(): boolean {
-    return ['new', 'scheduled'].includes(this.visit()?.status || '');
+    return ['new', 'scheduled'].includes(this.activeVisit()?.status || '');
   }
 
   get showCancelBtn(): boolean {
-    return ['new', 'scheduled', 'in_progress'].includes(this.visit()?.status || '');
+    return ['new', 'scheduled', 'in_progress'].includes(this.activeVisit()?.status || '');
   }
 }

@@ -85,6 +85,99 @@
       </div>
     }
 
+    <!-- Product IDs — optional machines selection -->
+    <div class="visit-form__full">
+      <label class="visit-form__label">
+        <span>قطع الغيار المطلوبة</span>
+        <span class="visit-label-hint">(اختياري)</span>
+      </label>
+
+      @if (isMachinesLoading()) {
+      <div class="visit-machines-loading">
+        <span class="visit-spinner visit-spinner--dark"></span>
+        <span>جاري تحميل قطع الغيار المتاحة...</span>
+      </div>
+      } @else if (availableMachines().length === 0) {
+      <p class="visit-machines-empty">لا توجد قطع غيار متاحة في المخزون حالياً</p>
+      } @else {
+      
+      <!-- Search Box -->
+      <div class="visit-machine-search">
+        <app-icon name="search" size="sm" />
+        <input 
+          type="text" 
+          class="visit-machine-search__input" 
+          placeholder="ابحث بالاسم أو الكود..." 
+          [ngModel]="machineSearchQuery()"
+          (ngModelChange)="onMachineSearchChange($event)"
+          [ngModelOptions]="{standalone: true}"
+        />
+        @if (machineSearchQuery()) {
+        <button 
+          type="button" 
+          class="visit-machine-search__clear"
+          (click)="onMachineSearchChange('')"
+          title="مسح البحث"
+        >
+          <app-icon name="close" size="sm" />
+        </button>
+        }
+      </div>
+
+      @if (filteredMachines().length === 0) {
+      <p class="visit-machines-empty">لا توجد نتائج تطابق البحث</p>
+      } @else {
+      
+      <div class="visit-machines-grid">
+        @for (machine of displayedMachines(); track machine.id) {
+        <button type="button" class="visit-machine-card"
+          [class.visit-machine-card--selected]="isProductSelected(machine.id)"
+          (click)="toggleProduct(machine.id)">
+          <img class="visit-machine-card__img"
+            [src]="machine.image_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'"
+            [alt]="machine.display_name" />
+          <div class="visit-machine-card__body">
+            <span class="visit-machine-card__name">{{ machine.display_name }}</span>
+            @if (machine.default_code) {
+            <span class="visit-machine-card__code">{{ machine.default_code }}</span>
+            }
+            <span class="visit-machine-card__stock" [class.visit-machine-card__stock--empty]="machine.free_to_use <= 0">
+              {{ machine.free_to_use > 0 ? 'متاح: ' + machine.free_to_use + ' وحدة' : 'غير متوفر' }}
+            </span>
+          </div>
+          @if (isProductSelected(machine.id)) {
+          <span class="visit-machine-card__check">
+            <app-icon name="check" size="sm" />
+          </span>
+          }
+        </button>
+        }
+      </div>
+
+      <!-- Load More Button -->
+      @if (hasMoreMachines()) {
+      <div class="visit-machines-load-more">
+        <button type="button" class="visit-btn visit-btn--outline" (click)="loadMoreMachines()">
+          <app-icon name="chevronDown" size="sm" />
+          <span>عرض المزيد ({{ filteredMachines().length - displayedMachinesLimit() }} متبقي)</span>
+        </button>
+      </div>
+      }
+
+      @if (selectedProductIds().length > 0) {
+      <div class="visit-parts-notice">
+        <app-icon name="info" size="sm" />
+        <div>
+          <strong>تم اختيار {{ selectedProductIds().length }} قطعة</strong>
+          <span> — سيُنشأ أمر بيع تلقائياً ويجب على المهندس استلام القطع قبل الزيارة</span>
+        </div>
+      </div>
+      }
+      
+      }
+      }
+    </div>
+
     <div class="visit-form__actions">
       <app-button
         type="button"

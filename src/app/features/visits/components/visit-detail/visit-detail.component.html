@@ -1,10 +1,10 @@
 <app-shared-modal [visible]="visible()" [title]="'تفاصيل الزيارة'" [maxWidth]="'50rem'" (visibleChange)="close.emit()">
-  @if (visit()) {
+  @if (activeVisit()) {
   <div class="visit-detail">
     <div class="visit-detail__section">
       <!-- <h3 class="visit-detail__section-title">معلومات الزيارة</h3> -->
       <div class="visit-detail__main-info">
-        <h2 class="visit-detail__name">{{ visit()?.name }}</h2>
+        <h2 class="visit-detail__name">{{ activeVisit()?.name }}</h2>
       </div>
       <div class="visit-detail__grid">
         <div class="visit-detail__item">
@@ -19,31 +19,37 @@
           <span class="visit-detail__label">الماكينة</span>
           <span class="visit-detail__value">{{ machineName }}</span>
         </div>
+        @if (activeVisit()?.ticket) {
+        <div class="visit-detail__item">
+          <span class="visit-detail__label">التذكرة المرتبطة</span>
+          <span class="visit-detail__value">#{{ activeVisit()?.ticket?.id }} - {{ activeVisit()?.ticket?.title }}</span>
+        </div>
+        }
         <div class="visit-detail__item">
           <span class="visit-detail__label">تاريخ الزيارة</span>
           <span class="visit-detail__value">{{ formatDate(visitDate) }}</span>
         </div>
         <div class="visit-detail__item">
           <span class="visit-detail__label">الحالة</span>
-          <span class="visit-detail__badge" [style.background-color]="getStatusColor(visit()?.status || '')">
-            {{ getStatusLabel(visit()?.status || '') }}
+          <span class="visit-detail__badge" [style.background-color]="getStatusColor(activeVisit()?.status || '')">
+            {{ getStatusLabel(activeVisit()?.status || '') }}
           </span>
         </div>
         <div class="visit-detail__item">
           <span class="visit-detail__label">المرحلة</span>
-          <span class="visit-detail__value">{{ visit()?.stage || '—' }}</span>
+          <span class="visit-detail__value">{{ activeVisit()?.stage || '—' }}</span>
         </div>
         <div class="visit-detail__item">
           <span class="visit-detail__label">الأولوية</span>
-          <span class="visit-detail__value">{{ getPriorityLabel(visit()?.priority || '') }}</span>
+          <span class="visit-detail__value">{{ getPriorityLabel(activeVisit()?.priority || '') }}</span>
         </div>
         <div class="visit-detail__item">
           <span class="visit-detail__label">تقييم المهندس</span>
           <div class="visit-detail__value">
-            <ng-container *ngIf="visit()?.engineer_rating; else noRating">
-              <p-rating [ngModel]="visit()?.engineer_rating" [readonly]="true"></p-rating>
-              <div *ngIf="visit()?.engineer_rating_feedback" style="font-size: 0.85rem; color: #6b7280; margin-top: 4px;">
-                {{ visit()?.engineer_rating_feedback }}
+            <ng-container *ngIf="activeVisit()?.engineer_rating; else noRating">
+              <p-rating [ngModel]="activeVisit()?.engineer_rating" [readonly]="true"></p-rating>
+              <div *ngIf="activeVisit()?.engineer_rating_feedback" style="font-size: 0.85rem; color: #6b7280; margin-top: 4px;">
+                {{ activeVisit()?.engineer_rating_feedback }}
               </div>
             </ng-container>
             <ng-template #noRating>
@@ -59,31 +65,31 @@
       <div class="visit-detail__grid">
         <div class="visit-detail__item">
           <span class="visit-detail__label">تاريخ البداية المخطط</span>
-          <span class="visit-detail__value">{{ formatDate(visit()?.planned_start || null) }}</span>
+          <span class="visit-detail__value">{{ formatDate(activeVisit()?.planned_start || null) }}</span>
         </div>
         <div class="visit-detail__item">
           <span class="visit-detail__label">تاريخ النهاية المخطط</span>
-          <span class="visit-detail__value">{{ formatDate(visit()?.planned_end || null) }}</span>
+          <span class="visit-detail__value">{{ formatDate(activeVisit()?.planned_end || null) }}</span>
         </div>
         <div class="visit-detail__item">
           <span class="visit-detail__label">الموعد النهائي (Deadline)</span>
-          <span class="visit-detail__value">{{ formatDate(visit()?.deadline || null) }}</span>
+          <span class="visit-detail__value">{{ formatDate(activeVisit()?.deadline || null) }}</span>
         </div>
         <div class="visit-detail__item">
           <span class="visit-detail__label">تاريخ الإنشاء</span>
-          <span class="visit-detail__value">{{ formatDate(visit()?.created_at || null) }}</span>
+          <span class="visit-detail__value">{{ formatDate(activeVisit()?.created_at || null) }}</span>
         </div>
       </div>
     </div>
 
     <!-- Products Reception Status -->
-    @if (visit()?.products && visit()!.products!.length > 0) {
+    @if (activeVisit()?.products && activeVisit()!.products!.length > 0) {
     <div class="visit-detail__section">
       <h3 class="visit-detail__section-title">حالة استلام قطع الغيار</h3>
       <div class="visit-detail__grid">
         <div class="visit-detail__item">
           <span class="visit-detail__label">حالة الاستلام</span>
-          @if (visit()?.received_product) {
+          @if (activeVisit()?.received_product) {
           <span class="visit-detail__badge" style="background-color: #10b981;">
             تم الاستلام ✓
           </span>
@@ -95,36 +101,36 @@
         </div>
         <div class="visit-detail__item">
           <span class="visit-detail__label">تاريخ الاستلام</span>
-          <span class="visit-detail__value">{{ formatDate(visit()?.received_at || null) }}</span>
+          <span class="visit-detail__value">{{ formatDate(activeVisit()?.received_at || null) }}</span>
         </div>
       </div>
     </div>
     }
 
-    @if (visit()?.tags && visit()! .tags! .length > 0) {
+    @if (activeVisit()?.tags && activeVisit()! .tags! .length > 0) {
     <div class="visit-detail__section">
       <h3 class="visit-detail__section-title">الوسوم (Tags)</h3>
       <div class="visit-detail__tags">
-        @for (tag of visit()?.tags; track tag) {
+        @for (tag of activeVisit()?.tags; track tag) {
         <span class="visit-detail__tag">{{ tag }}</span>
         }
       </div>
     </div>
     }
 
-    @if (visit()?.notes) {
+    @if (activeVisit()?.notes) {
     <div class="visit-detail__section">
       <h3 class="visit-detail__section-title">ملاحظات</h3>
-      <p class="visit-detail__notes">{{ visit()?.notes }}</p>
+      <p class="visit-detail__notes">{{ activeVisit()?.notes }}</p>
     </div>
     }
 
     <!-- Products -->
-    @if (visit()?.products && visit()!.products!.length > 0) {
+    @if (activeVisit()?.products && activeVisit()!.products!.length > 0) {
     <div class="visit-detail__section">
       <h3 class="visit-detail__section-title">المنتجات المطلوبة</h3>
       <div class="visit-detail__products">
-        @for (product of visit()!.products!; track product.name) {
+        @for (product of activeVisit()!.products!; track product.name) {
         <div class="visit-detail__product-card">
           @if (product.image_url) {
           <img [src]="product.image_url" [alt]="product.name" class="visit-detail__product-img" />
