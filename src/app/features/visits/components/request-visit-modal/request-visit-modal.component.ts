@@ -25,7 +25,7 @@ export class RequestVisitModalComponent {
   readonly availableMachines = signal<Machine[]>([]);
   readonly isMachinesLoading = signal(false);
   readonly selectedProductIds = signal<number[]>([]);
-  
+
   // Search and pagination for machines
   readonly machineSearchQuery = signal('');
   readonly displayedMachinesLimit = signal(4);
@@ -64,6 +64,17 @@ export class RequestVisitModalComponent {
     { label: 'مخرطة (Lathe)', value: 'lathe' }
   ];
 
+  // Crew Requirements Signals
+  readonly isCrewEnabled = signal(false);
+  readonly crewRequirements = signal<{ type: string; count: number }[]>([]);
+
+  readonly crewTypeOptions = [
+    { label: 'كهرباء (Electrical)', value: 'electrical' },
+    { label: 'ميكانيكا (Mechanical)', value: 'mechanical' },
+    { label: 'تشغيل (Operating)', value: 'operating' },
+    // { label: 'برمجة (Programming)', value: 'programming' }
+  ];
+
   // Validation Touched flags
   readonly maintenanceTypeTouched = signal(false);
   readonly visitDescriptionTouched = signal(false);
@@ -82,21 +93,98 @@ export class RequestVisitModalComponent {
     return '';
   });
 
+  readonly crewRequirementError = computed(() => {
+    if (!this.isCrewEnabled()) return '';
+    const crew = this.crewRequirements();
+    if (crew.length === 0) return 'يجب إضافة تخصص واحد على الأقل عند تفعيل الطاقم';
+    if (crew.some(item => !item.type || item.count < 1)) return 'برجاء استكمال بيانات جميع التخصصات المطلوبة';
+    return '';
+  });
+
   readonly isVisitFormValid = computed(() => {
     if (!this.maintenanceType()) return false;
     const descVal = this.visitDescription().trim();
     if (!descVal || descVal.length < 10) return false;
+
+    if (this.isCrewEnabled()) {
+      const crew = this.crewRequirements();
+      if (crew.length === 0) return false;
+      if (crew.some(item => !item.type || item.count < 1)) return false;
+    }
+
     return true;
   });
+
+  getAvailableCrewTypes(currentIndex: number) {
+    const selectedTypesInOtherRows = this.crewRequirements()
+      .filter((_, idx) => idx !== currentIndex)
+      .map(item => item.type);
+
+    return this.crewTypeOptions.filter(opt => !selectedTypesInOtherRows.includes(opt.value));
+  }
+
+  toggleCrewEnabled(enabled: boolean): void {
+    this.isCrewEnabled.set(enabled);
+    if (enabled && this.crewRequirements().length === 0) {
+      this.addCrewRequirement();
+    }
+  }
+
+  addCrewRequirement(): void {
+    const selectedTypes = this.crewRequirements().map(item => item.type);
+    const available = this.crewTypeOptions.find(opt => !selectedTypes.includes(opt.value));
+    if (available) {
+      this.crewRequirements.update(list => [...list, { type: available.value, count: 1 }]);
+    }
+  }
+
+  removeCrewRequirement(index: number): void {
+    this.crewRequirements.update(list => list.filter((_, i) => i !== index));
+  }
+
+  updateCrewCount(index: number, delta: number): void {
+    this.crewRequirements.update(list => {
+      return list.map((item, i) => {
+        if (i === index) {
+          const newCount = Math.max(1, item.count + delta);
+          return { ...item, count: newCount };
+        }
+        return item;
+      });
+    });
+  }
+
+  onCrewCountInputChange(index: number, val: any): void {
+    const parsed = Math.max(1, parseInt(String(val), 10) || 1);
+    this.crewRequirements.update(list => {
+      return list.map((item, i) => {
+        if (i === index) {
+          return { ...item, count: parsed };
+        }
+        return item;
+      });
+    });
+  }
+
+  onCrewTypeChange(index: number, newType: string): void {
+    this.crewRequirements.update(list => {
+      return list.map((item, i) => {
+        if (i === index) {
+          return { ...item, type: newType };
+        }
+        return item;
+      });
+    });
+  }
 
   // Filtered and limited machines based on search query
   readonly filteredMachines = computed(() => {
     const query = this.machineSearchQuery().toLowerCase().trim();
     const machines = this.availableMachines();
-    
+
     if (!query) return machines;
-    
-    return machines.filter(machine => 
+
+    return machines.filter(machine =>
       machine.display_name.toLowerCase().includes(query) ||
       (machine.default_code && machine.default_code.toLowerCase().includes(query))
     );
@@ -151,6 +239,8 @@ export class RequestVisitModalComponent {
     this.selectedProductIds.set([]);
     this.machineSearchQuery.set('');
     this.displayedMachinesLimit.set(this.MACHINES_PAGE_SIZE);
+    this.isCrewEnabled.set(false);
+    this.crewRequirements.set([]);
   }
 
   loadMoreMachines(): void {
@@ -191,6 +281,13 @@ export class RequestVisitModalComponent {
       priority: this.visitPriority(),
       description: this.visitDescription().trim()
     };
+
+    if (this.isCrewEnabled()) {
+      payload.crew_requirements = this.crewRequirements().map(item => ({
+        skill: item.type,
+        count: item.count
+      }));
+    }
 
     const ids = this.selectedProductIds();
     if (ids.length > 0) {

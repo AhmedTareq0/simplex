@@ -38,7 +38,7 @@ export class ChatHeaderComponent {
   readonly showVisitForm = signal(false);
 
   readonly canDeleteChat = computed(() => this.auth.hasPermission('chat.delete'));
-  readonly canRequestVisit = computed(() => this.status() === 'with_customer_care' && this.auth.hasPermission('chat.cc'));
+  readonly canRequestVisit = this.auth.isCustomerSupport() && computed(() => this.status() === 'with_customer_care' && this.auth.hasPermission('chat.cc')) ? true : this.auth.isEngineer() && computed(() => this.status() === 'with_engineer' && this.auth.hasPermission('chat.engineer')) ? true : false;
   readonly isWithEngineer = computed(() => this.status() === 'with_engineer');
 
   toggleMenu(): void {

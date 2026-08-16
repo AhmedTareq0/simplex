@@ -28,7 +28,7 @@
   </div>
 
   <div class="chat-header__actions">
-    @if (canRequestVisit()) {
+    @if (canRequestVisit) {
       <button class="chat-header__btn chat-header__btn--primary" (click)="openVisitForm()"
         [disabled]="isRequestingVisit()">
         <app-icon name="calendarPlus" size="sm" />
