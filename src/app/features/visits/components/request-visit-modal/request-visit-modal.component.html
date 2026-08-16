@@ -95,6 +95,117 @@
       </div>
     </div>
 
+    <!-- Crew Requirements — optional custom crew allocation -->
+    <div class="visit-crew-card">
+      <div class="visit-crew-header">
+        <div class="visit-crew-title-group">
+          <div class="visit-crew-icon">
+            <app-icon name="users" size="sm" />
+          </div>
+          <div>
+            <div class="visit-label">
+              <span>متطلبات طاقم العمل</span>
+              <span class="visit-label-hint">(اختياري)</span>
+            </div>
+            <p class="visit-crew-subtitle">تحديد تخصصات الفنيين المطلوبة لهذه الزيارة وعددهم</p>
+          </div>
+        </div>
+
+        <label class="visit-switch">
+          <input 
+            type="checkbox" 
+            [ngModel]="isCrewEnabled()" 
+            (ngModelChange)="toggleCrewEnabled($event)" 
+          />
+          <span class="visit-switch-slider"></span>
+        </label>
+      </div>
+
+      @if (isCrewEnabled()) {
+      <div class="visit-crew-body">
+        <div class="visit-crew-actions">
+          <span class="visit-crew-count-badge">عدد التخصصات المحدد: {{ crewRequirements().length }}</span>
+          <button 
+            type="button" 
+            class="visit-btn visit-btn--outline visit-btn--xs"
+            (click)="addCrewRequirement()"
+            [disabled]="crewRequirements().length >= crewTypeOptions.length"
+          >
+            <app-icon name="plus" size="sm" />
+            <span>إضافة تخصص</span>
+          </button>
+        </div>
+
+        @if (crewRequirements().length === 0) {
+        <p class="visit-crew-empty">اضغط على "إضافة تخصص" لإضافة التخصص الفني المطلوب وتحديد العدد</p>
+        } @else {
+        <div class="visit-crew-list">
+          @for (crew of crewRequirements(); track $index; let i = $index) {
+          <div class="visit-crew-row">
+            <div class="visit-crew-row__select">
+              <select 
+                class="visit-input" 
+                [ngModel]="crew.type"
+                (ngModelChange)="onCrewTypeChange(i, $event)"
+              >
+                @for (opt of getAvailableCrewTypes(i); track opt.value) {
+                <option [value]="opt.value">{{ opt.label }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="visit-qty-picker">
+              <button 
+                type="button" 
+                class="visit-qty-btn" 
+                (click)="updateCrewCount(i, -1)"
+                [disabled]="crew.count <= 1"
+                title="إنقاص العدد"
+              >
+                <app-icon name="minus" size="sm" />
+              </button>
+              
+              <input 
+                type="number" 
+                min="1" 
+                class="visit-qty-input" 
+                [ngModel]="crew.count" 
+                (ngModelChange)="onCrewCountInputChange(i, $event)"
+              />
+
+              <button 
+                type="button" 
+                class="visit-qty-btn" 
+                (click)="updateCrewCount(i, 1)"
+                title="زيادة العدد"
+              >
+                <app-icon name="plus" size="sm" />
+              </button>
+            </div>
+
+            <button 
+              type="button" 
+              class="visit-crew-remove-btn" 
+              (click)="removeCrewRequirement(i)"
+              title="حذف التخصص"
+            >
+              <app-icon name="trash" size="sm" />
+            </button>
+          </div>
+          }
+        </div>
+        }
+
+        @if (crewRequirementError()) {
+        <span class="visit-error-text" style="margin-top: 8px;">
+          <app-icon name="alert-triangle" size="sm" />
+          {{ crewRequirementError() }}
+        </span>
+        }
+      </div>
+      }
+    </div>
+
     <!-- Product IDs — optional machines selection -->
     <div class="visit-field">
       <label class="visit-label">

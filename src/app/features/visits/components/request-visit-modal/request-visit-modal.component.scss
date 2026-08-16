@@ -587,3 +587,229 @@ select.visit-input {
     cursor: not-allowed;
   }
 }
+
+/* ═══════ Crew Requirements Section ═══════ */
+.visit-crew-card {
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 16px;
+  background: var(--color-surface, #f8fafc);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.visit-crew-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--color-card-bg, #ffffff);
+}
+
+.visit-crew-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.visit-crew-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--color-primary-50, #eff6ff);
+  color: var(--color-primary, #3b82f6);
+  flex-shrink: 0;
+}
+
+.visit-crew-subtitle {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--color-text-tertiary, #64748b);
+}
+
+/* Switch Toggle Styling */
+.visit-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+
+    &:checked + .visit-switch-slider {
+      background-color: var(--color-primary, #3b82f6);
+
+      &:before {
+        transform: translateX(-20px);
+      }
+    }
+
+    &:focus + .visit-switch-slider {
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #3b82f6) 20%, transparent);
+    }
+  }
+}
+
+.visit-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: var(--color-border, #cbd5e1);
+  transition: 0.25s ease;
+  border-radius: 24px;
+
+  &:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    right: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.25s ease;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.visit-crew-body {
+  padding: 14px 16px;
+  border-top: 1px solid var(--color-border, #e2e8f0);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: modal-fade-in 0.2s ease-out forwards;
+}
+
+.visit-crew-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.visit-crew-count-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary, #475569);
+}
+
+.visit-btn--xs {
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+.visit-crew-empty {
+  font-size: 12px;
+  color: var(--color-text-tertiary, #94a3b8);
+  margin: 4px 0;
+  text-align: center;
+}
+
+.visit-crew-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.visit-crew-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-card-bg, #ffffff);
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border, #e2e8f0);
+
+  &__select {
+    flex: 1;
+    min-width: 0;
+
+    .visit-input {
+      padding: 8px 12px;
+      font-size: 13px;
+    }
+  }
+}
+
+/* Stepper (- / +) */
+.visit-qty-picker {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-border, #cbd5e1);
+  border-radius: 10px;
+  background: var(--color-surface, #f8fafc);
+  overflow: hidden;
+  height: 38px;
+}
+
+.visit-qty-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 100%;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary, #475569);
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: var(--color-border-light, #e2e8f0);
+    color: var(--color-text-primary, #0f172a);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.visit-qty-input {
+  width: 44px;
+  height: 100%;
+  border: none;
+  border-left: 1px solid var(--color-border, #e2e8f0);
+  border-right: 1px solid var(--color-border, #e2e8f0);
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-primary, #0f172a);
+  background: var(--color-card-bg, #ffffff);
+  outline: none;
+  -moz-appearance: textfield;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+.visit-crew-remove-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: none;
+  background: color-mix(in srgb, var(--color-danger, #ef4444) 8%, transparent);
+  color: var(--color-danger, #ef4444);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background: var(--color-danger, #ef4444);
+    color: white;
+  }
+}
