@@ -8,12 +8,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-chat-header',
   standalone: true,
-  imports: [
-    CommonModule,
-    IconComponent,
-    SharedConfirmationComponent,
-    RequestVisitModalComponent,
-  ],
+  imports: [CommonModule, IconComponent, SharedConfirmationComponent, RequestVisitModalComponent],
   templateUrl: './chat-header.component.html',
   styleUrl: './chat-header.component.scss',
 })
@@ -38,11 +33,20 @@ export class ChatHeaderComponent {
   readonly showVisitForm = signal(false);
 
   readonly canDeleteChat = computed(() => this.auth.hasPermission('chat.delete'));
-  readonly canRequestVisit = this.auth.isCustomerSupport() && computed(() => this.status() === 'with_customer_care' && this.auth.hasPermission('chat.cc')) ? true : this.auth.isEngineer() && computed(() => this.status() === 'with_engineer' && this.auth.hasPermission('chat.engineer')) ? true : false;
+  readonly canRequestVisit =
+    this.auth.isCustomerSupport() &&
+    computed(() => this.status() === 'with_customer_care' && this.auth.hasPermission('chat.cc'))
+      ? true
+      : this.auth.isEngineer() &&
+          computed(
+            () => (this.status() === 'with_engineer' && this.auth.hasPermission('chat.engineer')),
+          )
+        ? true
+        : false;
   readonly isWithEngineer = computed(() => this.status() === 'with_engineer');
 
   toggleMenu(): void {
-    this.showMenu.update(v => !v);
+    this.showMenu.update((v) => !v);
   }
 
   openVisitForm(): void {

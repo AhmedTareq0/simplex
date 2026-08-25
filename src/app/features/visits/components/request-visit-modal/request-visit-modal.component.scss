@@ -432,7 +432,7 @@ select.visit-input {
   max-height: 400px;
   overflow-y: auto;
   padding: 2px;
-  
+
   /* Custom scrollbar */
   &::-webkit-scrollbar {
     width: 8px;
@@ -446,7 +446,7 @@ select.visit-input {
   &::-webkit-scrollbar-thumb {
     background: var(--color-border, #cbd5e1);
     border-radius: 4px;
-    
+
     &:hover {
       background: var(--color-text-tertiary, #94a3b8);
     }

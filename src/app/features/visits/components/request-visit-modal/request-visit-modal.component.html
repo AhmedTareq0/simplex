@@ -112,10 +112,10 @@
         </div>
 
         <label class="visit-switch">
-          <input 
-            type="checkbox" 
-            [ngModel]="isCrewEnabled()" 
-            (ngModelChange)="toggleCrewEnabled($event)" 
+          <input
+            type="checkbox"
+            [ngModel]="isCrewEnabled()"
+            (ngModelChange)="toggleCrewEnabled($event)"
           />
           <span class="visit-switch-slider"></span>
         </label>
@@ -125,8 +125,8 @@
       <div class="visit-crew-body">
         <div class="visit-crew-actions">
           <span class="visit-crew-count-badge">عدد التخصصات المحدد: {{ crewRequirements().length }}</span>
-          <button 
-            type="button" 
+          <button
+            type="button"
             class="visit-btn visit-btn--outline visit-btn--xs"
             (click)="addCrewRequirement()"
             [disabled]="crewRequirements().length >= crewTypeOptions.length"
@@ -143,8 +143,8 @@
           @for (crew of crewRequirements(); track $index; let i = $index) {
           <div class="visit-crew-row">
             <div class="visit-crew-row__select">
-              <select 
-                class="visit-input" 
+              <select
+                class="visit-input"
                 [ngModel]="crew.type"
                 (ngModelChange)="onCrewTypeChange(i, $event)"
               >
@@ -155,27 +155,27 @@
             </div>
 
             <div class="visit-qty-picker">
-              <button 
-                type="button" 
-                class="visit-qty-btn" 
+              <button
+                type="button"
+                class="visit-qty-btn"
                 (click)="updateCrewCount(i, -1)"
                 [disabled]="crew.count <= 1"
                 title="إنقاص العدد"
               >
                 <app-icon name="minus" size="sm" />
               </button>
-              
-              <input 
-                type="number" 
-                min="1" 
-                class="visit-qty-input" 
-                [ngModel]="crew.count" 
+
+              <input
+                type="number"
+                min="1"
+                class="visit-qty-input"
+                [ngModel]="crew.count"
                 (ngModelChange)="onCrewCountInputChange(i, $event)"
               />
 
-              <button 
-                type="button" 
-                class="visit-qty-btn" 
+              <button
+                type="button"
+                class="visit-qty-btn"
                 (click)="updateCrewCount(i, 1)"
                 title="زيادة العدد"
               >
@@ -183,9 +183,9 @@
               </button>
             </div>
 
-            <button 
-              type="button" 
-              class="visit-crew-remove-btn" 
+            <button
+              type="button"
+              class="visit-crew-remove-btn"
               (click)="removeCrewRequirement(i)"
               title="حذف التخصص"
             >
@@ -221,20 +221,20 @@
       } @else if (availableMachines().length === 0) {
       <p class="visit-machines-empty">لا توجد قطع غيار متاحة في المخزون حالياً</p>
       } @else {
-      
+
       <!-- Search Box -->
       <div class="visit-machine-search">
         <app-icon name="search" size="sm" />
-        <input 
-          type="text" 
-          class="visit-machine-search__input" 
-          placeholder="ابحث بالاسم أو الكود..." 
+        <input
+          type="text"
+          class="visit-machine-search__input"
+          placeholder="ابحث بالاسم أو الكود..."
           [ngModel]="machineSearchQuery()"
           (ngModelChange)="onMachineSearchChange($event)"
         />
         @if (machineSearchQuery()) {
-        <button 
-          type="button" 
+        <button
+          type="button"
           class="visit-machine-search__clear"
           (click)="onMachineSearchChange('')"
           title="مسح البحث"
@@ -247,7 +247,7 @@
       @if (filteredMachines().length === 0) {
       <p class="visit-machines-empty">لا توجد نتائج تطابق البحث</p>
       } @else {
-      
+
       <div class="visit-machines-grid">
         @for (machine of displayedMachines(); track machine.id) {
         <button type="button" class="visit-machine-card"
@@ -291,7 +291,7 @@
         </div>
       </div>
       }
-      
+
       }
       }
     </div>
