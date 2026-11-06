@@ -55,6 +55,11 @@ export const routes: Routes = [
           import('./features/chat/chat.component').then((m) => m.ChatComponent),
       },
       {
+        path: 'ai-assistant',
+        loadComponent: () =>
+          import('./features/ai-assistant/ai-assistant-page.component').then((m) => m.AiAssistantPageComponent),
+      },
+      {
         path: 'employees',
         canActivate: [permissionGuard],
         data: { permission: 'users.manage' },

@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, signal, computed, inject } from '@a
 import { RouterOutlet } from '@angular/router';
 import { SidebarComponent, SidebarItem } from '../sidebar/sidebar.component';
 import { MainLayoutHeaderComponent } from './header/main-layout-header.component';
+import { AiAssistantWidgetComponent } from '@/shared/components/ai-assistant/ai-assistant-widget.component';
 import { AuthLocalService } from '@/auth/services/auth-local.service';
 import { Permission } from '@/auth/roles';
 
@@ -21,6 +22,7 @@ const NAV_ITEMS: NavItem[] = [
   { link: 'employees', title: 'الموظفين', icon: 'users', permissions: ['users.manage'] },
   { link: 'clients', title: 'العملاء', icon: 'user', permissions: ['users.manage'] },
   { link: 'chat', title: 'الدردشة', icon: 'chat', permissions: ['chat.cc', 'chat.engineer'] },
+  { link: 'ai-assistant', title: 'مساعد الذكاء الاصطناعي', icon: 'zap', permissions: ['ai_assistant.view', 'chat.cc', 'tickets.view_cc'] },
   { link: 'calendar', title: 'التقويم', icon: 'calendarClock', permissions: ['calendar.view'] },
   { link: 'notifications', title: 'الإشعارات', icon: 'bell', permissions: ['notifications.view'] },
   { link: 'settings', title: 'الإعدادات', icon: 'cog', permissions: ['settings.view'] },
@@ -29,7 +31,7 @@ const NAV_ITEMS: NavItem[] = [
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [RouterOutlet, SidebarComponent, MainLayoutHeaderComponent],
+  imports: [RouterOutlet, SidebarComponent, MainLayoutHeaderComponent, AiAssistantWidgetComponent],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,8 +39,13 @@ const NAV_ITEMS: NavItem[] = [
 export class MainLayoutComponent {
   private readonly auth = inject(AuthLocalService);
 
+  readonly canUseAiAssistant = computed(() => this.auth.isLoggedIn());
+
   readonly sidebarList = computed<SidebarItem[]>(() =>
-    NAV_ITEMS.filter((item) => item.permissions.some(p => this.auth.hasPermission(p))).map(item => ({
+    NAV_ITEMS.filter((item) => {
+      if (item.link === 'ai-assistant') return true;
+      return item.permissions.some(p => this.auth.hasPermission(p));
+    }).map(item => ({
       link: item.link,
       title: item.title,
       icon: item.icon

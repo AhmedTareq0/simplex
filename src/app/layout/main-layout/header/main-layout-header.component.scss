@@ -119,6 +119,20 @@
     color: var(--sidebar-item-active);
     border-color: var(--color-primary-100);
   }
+
+  &--ai {
+    background: linear-gradient(135deg, rgba(2, 132, 199, 0.1) 0%, rgba(14, 165, 233, 0.15) 100%);
+    border-color: rgba(2, 132, 199, 0.3);
+    color: #0284c7;
+
+    &:hover {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: #ffffff;
+      border-color: #0284c7;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+    }
+  }
 }
 
 .layout-header__divider {

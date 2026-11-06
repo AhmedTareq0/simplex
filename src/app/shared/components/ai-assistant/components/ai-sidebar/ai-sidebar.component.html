@@ -1,0 +1,201 @@
+<div class="ai-sidebar" [class.ai-sidebar--open]="isOpen" dir="rtl">
+  <!-- Backdrop -->
+  @if (isOpen) {
+    <div class="ai-sidebar__backdrop" (click)="close()"></div>
+  }
+
+  <!-- Sidebar Content Drawer -->
+  <aside class="ai-sidebar__drawer">
+    <!-- Header -->
+    <div class="ai-sidebar__header">
+      <div class="ai-sidebar__header-info">
+        <div class="ai-sidebar__ai-badge">
+          <app-icon name="zap" size="sm" />
+        </div>
+        <div class="ai-sidebar__header-titles">
+          <span class="ai-sidebar__header-title">مساعد الذكاء الاصطناعي</span>
+          <span class="ai-sidebar__header-sub">Simplex AI Assistant</span>
+        </div>
+      </div>
+
+      <div class="ai-sidebar__header-actions">
+        <button
+          type="button"
+          class="ai-sidebar__icon-btn"
+          aria-label="إغلاق الدرج"
+          (click)="close()"
+        >
+          <app-icon name="close" size="sm" />
+        </button>
+      </div>
+    </div>
+
+    <!-- New Chat Trigger Bar -->
+    <div class="ai-sidebar__new-chat-bar">
+      <button
+        type="button"
+        class="ai-sidebar__new-chat-btn"
+        (click)="openNewSession()"
+      >
+        <app-icon name="plus" size="sm" />
+        <span>محادثة جديدة مع المساعد</span>
+      </button>
+    </div>
+
+    <!-- Search Box -->
+    <div class="ai-sidebar__search">
+      <div class="ai-sidebar__search-inner">
+        <app-icon name="search" size="sm" class="ai-sidebar__search-icon" />
+        <input
+          type="text"
+          class="ai-sidebar__search-input"
+          placeholder="البحث في محادثات الـ AI السابقة..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+        />
+        @if (searchQuery()) {
+          <button
+            type="button"
+            class="ai-sidebar__search-clear"
+            (click)="searchQuery.set('')"
+          >
+            <app-icon name="close" size="sm" />
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Conversations List -->
+    <div class="ai-sidebar__list">
+      @if (filteredConversations().length === 0) {
+        <div class="ai-sidebar__empty">
+          <div class="ai-sidebar__empty-icon">
+            <app-icon name="chat" size="lg" />
+          </div>
+          <span class="ai-sidebar__empty-title">لا توجد محادثات سابقة</span>
+          <span class="ai-sidebar__empty-desc">
+            ابدأ محادثة جديدة مع الذكاء الاصطناعي للاستفسار عن أي ماكينة.
+          </span>
+          <button
+            type="button"
+            class="ai-sidebar__empty-btn"
+            (click)="openNewSession()"
+          >
+            <app-icon name="plus" size="sm" />
+            <span>بدء أول محادثة</span>
+          </button>
+        </div>
+      } @else {
+        @for (conv of filteredConversations(); track conv.id) {
+          <div
+            class="ai-sidebar__item"
+            [class.ai-sidebar__item--active]="activeConversation()?.id === conv.id"
+            (click)="onSelectConversation(conv)"
+          >
+            <!-- Machine Avatar / Image -->
+            <div class="ai-sidebar__avatar-wrap">
+              @if (conv.machine_image) {
+                <img [src]="conv.machine_image" [alt]="conv.machine_name" class="ai-sidebar__avatar-img" />
+              } @else {
+                <div class="ai-sidebar__avatar-placeholder">
+                  <app-icon name="table" size="sm" />
+                </div>
+              }
+              <span
+                class="ai-sidebar__status-dot"
+                [class.ai-sidebar__status-dot--active]="!isExpired(conv)"
+                [class.ai-sidebar__status-dot--expired]="isExpired(conv)"
+                [title]="isExpired(conv) ? 'منتهية الصلاحية (للقراءة فقط)' : 'جلسة نشطة'"
+              ></span>
+            </div>
+
+            <!-- Details -->
+            <div class="ai-sidebar__item-content">
+              <div class="ai-sidebar__item-row">
+                <!-- Editable title or view -->
+                @if (editingConvId() === conv.id) {
+                  <div class="ai-sidebar__inline-edit" (click)="$event.stopPropagation()">
+                    <input
+                      #editTitleInput
+                      type="text"
+                      class="ai-sidebar__inline-input"
+                      [value]="conv.title"
+                      (keydown.enter)="saveInlineRename(conv.id, editTitleInput.value)"
+                      (keydown.escape)="cancelInlineRename()"
+                    />
+                    <button
+                      type="button"
+                      class="ai-sidebar__inline-btn ai-sidebar__inline-btn--save"
+                      (click)="saveInlineRename(conv.id, editTitleInput.value)"
+                    >
+                      <app-icon name="check-circle" size="sm" />
+                    </button>
+                    <button
+                      type="button"
+                      class="ai-sidebar__inline-btn ai-sidebar__inline-btn--cancel"
+                      (click)="cancelInlineRename()"
+                    >
+                      <app-icon name="close" size="sm" />
+                    </button>
+                  </div>
+                } @else {
+                  <span class="ai-sidebar__item-title" [title]="conv.title">
+                    {{ conv.title }}
+                  </span>
+                }
+
+                <span class="ai-sidebar__item-time">
+                  {{ formatDisplayTime(conv.last_message_at || conv.created_at) }}
+                </span>
+              </div>
+
+              <!-- Machine name tag & TTL badge -->
+              <div class="ai-sidebar__item-row ai-sidebar__item-row--meta">
+                <span class="ai-sidebar__machine-tag">
+                  <app-icon name="table" size="sm" />
+                  {{ conv.machine_name || 'ماكينة' }}
+                </span>
+
+                <span
+                  class="ai-sidebar__ttl-badge"
+                  [class.ai-sidebar__ttl-badge--active]="!isExpired(conv)"
+                  [class.ai-sidebar__ttl-badge--expired]="isExpired(conv)"
+                >
+                  <app-icon [name]="isExpired(conv) ? 'lock' : 'clock'" size="sm" />
+                  {{ getTtlLabel(conv) }}
+                </span>
+              </div>
+
+              <!-- Last message snippet & actions -->
+              <div class="ai-sidebar__item-row ai-sidebar__item-row--footer">
+                <span class="ai-sidebar__item-snippet" [title]="conv.last_message || ''">
+                  {{ conv.last_message || 'لا توجد رسائل بعد' }}
+                </span>
+
+                <!-- Action icons -->
+                <div class="ai-sidebar__item-actions" (click)="$event.stopPropagation()">
+                  <button
+                    type="button"
+                    class="ai-sidebar__item-action-btn"
+                    title="إعادة التسمية"
+                    (click)="startInlineRename(conv.id)"
+                  >
+                    <app-icon name="pencil" size="sm" />
+                  </button>
+                  <button
+                    type="button"
+                    class="ai-sidebar__item-action-btn ai-sidebar__item-action-btn--delete"
+                    title="حذف من السجل المحلي"
+                    (click)="deleteConversation(conv.id)"
+                  >
+                    <app-icon name="trash" size="sm" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  </aside>
+</div>

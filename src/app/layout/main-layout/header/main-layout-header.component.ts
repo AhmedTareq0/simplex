@@ -4,6 +4,7 @@ import { IconComponent } from '@/shared/components/icon/icon.component';
 import { NotificationDropdownComponent, NotificationItem } from '@/shared/components/notification-dropdown/notification-dropdown.component';
 import { ChatService } from '../../../features/chat/services/chat.service';
 import { NotificationsService } from '../../../features/notifications/services/notifications.service';
+import { AiAssistantService } from '@/shared/components/ai-assistant/services/ai-assistant.service';
 
 @Component({
   selector: 'app-main-layout-header',
@@ -20,6 +21,11 @@ export class MainLayoutHeaderComponent implements OnInit {
   readonly isArabic = signal(true);
   private readonly chatService = inject(ChatService);
   private readonly notifService = inject(NotificationsService);
+  private readonly aiService = inject(AiAssistantService);
+
+  toggleAiAssistant(): void {
+    this.aiService.toggleSidebar();
+  }
 
   readonly mappedNotifications = computed<NotificationItem[]>(() => {
     return this.notifService.notifications().slice(0, 5).map(n => ({

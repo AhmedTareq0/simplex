@@ -1,0 +1,91 @@
+<app-shared-modal
+  [visible]="visible"
+  (visibleChange)="onVisibleChange($event)"
+  title="بدء جلسة جديدة مع مساعد الذكاء الاصطناعي"
+  maxWidth="34rem"
+>
+  <div class="ai-new-session">
+    <div class="ai-new-session__desc">
+      اختر الماكينة التي ترغب في الاستفسار عنها لربط سياق الذكاء الاصطناعي بها وتحقيق أفضل دقة وسرعة في الإجابات:
+    </div>
+
+    <!-- Search machine -->
+    <div class="ai-new-session__search">
+      <app-icon name="search" size="sm" class="ai-new-session__search-icon" />
+      <input
+        type="text"
+        class="ai-new-session__search-input"
+        placeholder="ابحث عن ماكينة باسمها أو كودها..."
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
+      />
+    </div>
+
+    <!-- Machine list -->
+    <div class="ai-new-session__list">
+      @if (isLoadingMachines()) {
+        <div class="ai-new-session__loading">
+          <app-loading-spinner size="md" />
+          <span>جاري تحميل الماكينات...</span>
+        </div>
+      } @else if (filteredMachines().length === 0) {
+        <div class="ai-new-session__empty">
+          <app-icon name="table" size="lg" />
+          <span>لم يتم العثور على ماكينات مطابقة للبحث</span>
+        </div>
+      } @else {
+        @for (m of filteredMachines(); track m.id) {
+          <div
+            class="ai-new-session__item"
+            [class.ai-new-session__item--selected]="selectedMachine()?.id === m.id"
+            (click)="selectMachine(m)"
+          >
+            <div class="ai-new-session__item-img-wrap">
+              @if (m.image_url) {
+                <img [src]="m.image_url" [alt]="m.name" class="ai-new-session__item-img" />
+              } @else {
+                <div class="ai-new-session__item-placeholder">
+                  <app-icon name="table" size="md" />
+                </div>
+              }
+            </div>
+
+            <div class="ai-new-session__item-info">
+              <span class="ai-new-session__item-name">{{ m.name || m.display_name }}</span>
+              <span class="ai-new-session__item-code">
+                {{ m.default_code ? 'الكود: ' + m.default_code : '' }}
+                {{ m.type ? ' • النوع: ' + m.type : '' }}
+              </span>
+            </div>
+
+            <div class="ai-new-session__item-radio">
+              <span class="ai-new-session__radio-circle" [class.ai-new-session__radio-circle--active]="selectedMachine()?.id === m.id"></span>
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+    <!-- Notice -->
+    <div class="ai-new-session__notice">
+      <app-icon name="clock" size="sm" />
+      <span>مدة صلاحية الجلسة 4 ساعات من وقت البدء، وتكون متاحة للاطلاع في أي وقت بعد ذلك.</span>
+    </div>
+
+    <!-- Actions -->
+    <div class="ai-new-session__actions">
+      <app-button
+        variant="ghost"
+        label="إلغاء"
+        (pressed)="onCancel()"
+      />
+      <app-button
+        variant="primary"
+        label="بدء المحادثة"
+        [disabled]="!selectedMachine()"
+        [loading]="isStarting()"
+        (pressed)="onConfirm()"
+      />
+    </div>
+  </div>
+</app-shared-modal>

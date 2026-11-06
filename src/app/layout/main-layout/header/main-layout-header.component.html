@@ -13,6 +13,17 @@
   </div>
 
   <div class="layout-header__end">
+    <!-- AI Assistant Quick Launch -->
+    <button
+      type="button"
+      class="layout-header__icon-btn layout-header__icon-btn--ai"
+      aria-label="مساعد الذكاء الاصطناعي"
+      (click)="toggleAiAssistant()"
+      title="مساعد الذكاء الاصطناعي (Simplex AI Assistant)"
+    >
+      <app-icon name="zap" size="md" />
+    </button>
+
     <!-- Chat -->
     <a class="layout-header__icon-btn" aria-label="الدردشة" routerLink="/chat">
       <app-icon name="chat" size="md" />

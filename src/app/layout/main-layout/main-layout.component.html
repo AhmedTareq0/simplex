@@ -14,4 +14,8 @@
       </div>
     </div>
   </main>
+
+  @if (canUseAiAssistant()) {
+    <app-ai-assistant-widget />
+  }
 </div>

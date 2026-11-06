@@ -8,3 +8,8 @@ export * from './shared-table/shared-table.component';
 export * from './shared-input/shared-input.component';
 export * from './shared-confirmation/shared-confirmation.component';
 export * from './shared-datepicker/shared-datepicker.component';
+export * from './ai-assistant/ai-assistant-widget.component';
+export * from './ai-assistant/services/ai-assistant.service';
+export * from './ai-assistant/components/ai-sidebar/ai-sidebar.component';
+export * from './ai-assistant/components/ai-chat-box/ai-chat-box.component';
+export * from './ai-assistant/components/ai-new-session-modal/ai-new-session-modal.component';

@@ -1,0 +1,36 @@
+<!-- Floating Action Launcher Trigger Button -->
+<div class="ai-widget-launcher" dir="rtl">
+  <button
+    type="button"
+    class="ai-widget-launcher__btn"
+    [class.ai-widget-launcher__btn--active]="isSidebarOpen()"
+    (click)="toggleSidebar()"
+    title="مساعد الذكاء الاصطناعي (Simplex AI Assistant)"
+    aria-label="مساعد الذكاء الاصطناعي"
+  >
+    <div class="ai-widget-launcher__icon-wrap">
+      <app-icon name="zap" size="md" />
+    </div>
+    <span class="ai-widget-launcher__label">مساعد الـ AI</span>
+  </button>
+</div>
+
+<!-- WhatsApp-Style Sidebar Drawer -->
+<app-ai-sidebar
+  [isOpen]="isSidebarOpen()"
+  (closeSidebar)="closeSidebar()"
+/>
+
+<!-- New Session Machine Selection Modal -->
+<app-ai-new-session-modal
+  [visible]="isNewSessionModalOpen()"
+  (visibleChange)="onModalVisibleChange($event)"
+/>
+
+<!-- Facebook-Style Floating Docked Chat Box -->
+<app-ai-chat-box
+  [isOpen]="isChatOpen()"
+  [isMinimized]="isChatMinimized()"
+  (closeChat)="closeChat()"
+  (minimizeChat)="minimizeChat()"
+/>

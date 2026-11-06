@@ -1,0 +1,53 @@
+.ai-widget-launcher {
+  position: fixed;
+  bottom: 2rem;
+  inset-inline-end: 2rem;
+  z-index: 1045;
+  font-family: var(--font-body);
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem 0.625rem 0.75rem;
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 2rem;
+    box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4), 0 2px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5), 0 2px 8px rgba(0, 0, 0, 0.15);
+      background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    &--active {
+      background: #0f172a;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.4);
+    }
+  }
+
+  &__icon-wrap {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+  }
+
+  &__label {
+    letter-spacing: -0.01em;
+  }
+}

@@ -65,17 +65,43 @@ export class AuthLocalService {
   readonly isLoggedIn = computed(() => !!this._token());
 
   // Role Helpers
-  readonly userType = computed(() => this.currentUser()?.user_type);
-  readonly employeeRole = computed(() => this.currentUser()?.employee_role);
+  readonly userType = computed(() => (this.currentUser()?.user_type || '').toLowerCase().trim());
+  readonly employeeRole = computed(() => {
+    const u = this.currentUser() as any;
+    return (u?.employee_role || u?.role || u?.employee?.role || u?.job_title || '').toLowerCase().trim();
+  });
 
-  isSuperAdmin = computed(() => this.employeeRole() === 'superadmin' || this.userType() === 'superadmin');
-  isCustomerSupport = computed(() => this.employeeRole() === 'customer_support' || this.employeeRole() === 'customer_care');
-  isEngineer = computed(() => this.employeeRole() === 'engineer');
+  isSuperAdmin = computed(() => {
+    const r = this.employeeRole();
+    const t = this.userType();
+    return r === 'superadmin' || r === 'admin' || t === 'superadmin' || t === 'admin';
+  });
+
+  isCustomerSupport = computed(() => {
+    const r = this.employeeRole();
+    const dept = (this.currentUser()?.department || (this.currentUser() as any)?.employee?.department || '').toLowerCase();
+    return (
+      r === 'customer_support' ||
+      r === 'customer_care' ||
+      r === 'support' ||
+      r.includes('care') ||
+      r.includes('support') ||
+      dept.includes('care') ||
+      dept.includes('support')
+    );
+  });
+
+  isEngineer = computed(() => {
+    const r = this.employeeRole();
+    return r === 'engineer' || r.includes('engineer');
+  });
 
   readonly role = computed<AppRole | null>(() => {
     if (this.isSuperAdmin()) return 'superadmin';
     if (this.isCustomerSupport()) return 'customer_support';
     if (this.isEngineer()) return 'engineer';
+    // Fallback: If logged into the support portal, treat as customer support so UI tabs are not empty
+    if (this.isLoggedIn()) return 'customer_support';
     return null;
   });
 

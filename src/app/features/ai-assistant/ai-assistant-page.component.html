@@ -1,0 +1,409 @@
+<div class="ai-page-layout" [class.ai-page-layout--chat-open]="activeConversation()" dir="rtl">
+
+  <!-- WhatsApp-style Sidebar List -->
+  <aside class="ai-page-sidebar">
+    <!-- Top Bar -->
+    <div class="ai-page-sidebar__header">
+      <div class="ai-page-sidebar__header-info">
+        <div class="ai-page-sidebar__badge">
+          <app-icon name="zap" size="md" />
+        </div>
+        <div>
+          <h2 class="ai-page-sidebar__title">مساعد الذكاء الاصطناعي</h2>
+          <p class="ai-page-sidebar__sub">جلسات استفسارات الماكينات</p>
+        </div>
+      </div>
+      <button
+        type="button"
+        class="ai-page-sidebar__new-btn"
+        (click)="openNewSessionModal()"
+        title="بدء جلسة جديدة"
+      >
+        <app-icon name="plus" size="sm" />
+        <span>جلسة جديدة</span>
+      </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="ai-page-sidebar__search">
+      <div class="ai-page-sidebar__search-inner">
+        <app-icon name="search" size="sm" class="ai-page-sidebar__search-icon" />
+        <input
+          type="text"
+          placeholder="بحث في المحادثات أو اسم الماكينة..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          class="ai-page-sidebar__search-input"
+        />
+        @if (searchQuery()) {
+          <button (click)="searchQuery.set('')" class="ai-page-sidebar__search-clear">
+            <app-icon name="close" size="sm" />
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Conversations List -->
+    <div class="ai-page-sidebar__list">
+      @if (filteredConversations().length === 0) {
+        <div class="ai-page-sidebar__empty">
+          <div class="ai-page-sidebar__empty-icon">
+            <app-icon name="zap" size="lg" />
+          </div>
+          <h3>لا توجد جلسات حالياً</h3>
+          <p>ابدأ استفساراً جديداً عن أي ماكينة مع مساعد الذكاء الاصطناعي للحصول على تشخيص فوري ودقيق.</p>
+          <button type="button" class="ai-page-sidebar__empty-btn" (click)="openNewSessionModal()">
+            <app-icon name="plus" size="sm" />
+            <span>بدء جلسة جديدة</span>
+          </button>
+        </div>
+      } @else {
+        @for (conv of filteredConversations(); track conv.id) {
+          <div
+            class="ai-page-sidebar__item"
+            [class.ai-page-sidebar__item--active]="activeConversation()?.id === conv.id"
+            (click)="selectConversation(conv)"
+          >
+            <div class="ai-page-sidebar__avatar-wrap">
+              @if (conv.machine_image) {
+                <img [src]="conv.machine_image" [alt]="conv.machine_name" class="ai-page-sidebar__avatar-img" />
+              } @else {
+                <div class="ai-page-sidebar__avatar-placeholder">
+                  <app-icon name="table" size="md" />
+                </div>
+              }
+              <span
+                class="ai-page-sidebar__status-dot"
+                [class.ai-page-sidebar__status-dot--active]="!checkIsExpired(conv.expires_at)"
+                [class.ai-page-sidebar__status-dot--expired]="checkIsExpired(conv.expires_at)"
+              ></span>
+            </div>
+
+            <div class="ai-page-sidebar__item-content">
+              <!-- Row 1: Title or Inline Edit -->
+              <div class="ai-page-sidebar__item-row">
+                @if (editingConvId() === conv.id) {
+                  <div class="ai-page-sidebar__inline-edit" (click)="$event.stopPropagation()">
+                    <input
+                      type="text"
+                      [ngModel]="editingTitle()"
+                      (ngModelChange)="editingTitle.set($event)"
+                      (keydown.enter)="saveEditing(conv.id, $event)"
+                      (keydown.escape)="cancelEditing($event)"
+                      class="ai-page-sidebar__inline-input"
+                      autofocus
+                    />
+                    <button (click)="saveEditing(conv.id, $event)" class="ai-page-sidebar__inline-btn ai-page-sidebar__inline-btn--save" title="حفظ">
+                      <app-icon name="check" size="sm" />
+                    </button>
+                    <button (click)="cancelEditing($event)" class="ai-page-sidebar__inline-btn ai-page-sidebar__inline-btn--cancel" title="إلغاء">
+                      <app-icon name="close" size="sm" />
+                    </button>
+                  </div>
+                } @else {
+                  <h4 class="ai-page-sidebar__item-title">{{ conv.title }}</h4>
+                  <span class="ai-page-sidebar__item-time">{{ formatTime(conv.last_message_at || conv.created_at) }}</span>
+                }
+              </div>
+
+              <!-- Row 2: Machine badge & 4h TTL -->
+              <div class="ai-page-sidebar__item-row ai-page-sidebar__item-row--meta">
+                <span class="ai-page-sidebar__machine-tag">
+                  <app-icon name="table" size="sm" />
+                  <span>{{ conv.machine_name }}</span>
+                </span>
+
+                <span
+                  class="ai-page-sidebar__ttl-badge"
+                  [class.ai-page-sidebar__ttl-badge--active]="!checkIsExpired(conv.expires_at)"
+                  [class.ai-page-sidebar__ttl-badge--expired]="checkIsExpired(conv.expires_at)"
+                >
+                  <app-icon name="clock" size="sm" />
+                  <span>{{ formatTimeLeft(conv.expires_at) }}</span>
+                </span>
+              </div>
+
+              <!-- Row 3: Snippet & Actions -->
+              <div class="ai-page-sidebar__item-row ai-page-sidebar__item-row--footer">
+                <p class="ai-page-sidebar__item-snippet">{{ conv.last_message || 'لا توجد رسائل بعد' }}</p>
+
+                <div class="ai-page-sidebar__item-actions">
+                  <button
+                    type="button"
+                    class="ai-page-sidebar__item-action-btn"
+                    (click)="startEditing(conv, $event)"
+                    title="تعديل اسم المحادثة"
+                  >
+                    <app-icon name="pencil" size="sm" />
+                  </button>
+                  <button
+                    type="button"
+                    class="ai-page-sidebar__item-action-btn ai-page-sidebar__item-action-btn--delete"
+                    (click)="deleteConversation(conv.id, $event)"
+                    title="حذف من السجل المحلي"
+                  >
+                    <app-icon name="trash" size="sm" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  </aside>
+
+  <!-- Main Chat Conversation Panel -->
+  <main class="ai-page-main">
+    @if (activeConversation(); as conv) {
+      <!-- Chat Header -->
+      <header class="ai-page-main__header">
+        <div class="ai-page-main__header-user">
+          <button type="button" class="ai-page-main__back-btn" (click)="backToList()" aria-label="العودة">
+            <app-icon name="chevronLeft" size="md" />
+          </button>
+
+          <div class="ai-page-main__avatar">
+            @if (conv.machine_image) {
+              <img [src]="conv.machine_image" [alt]="conv.machine_name" />
+            } @else {
+              <div class="ai-page-main__avatar-placeholder">
+                <app-icon name="zap" size="md" />
+              </div>
+            }
+            <span
+              class="ai-page-main__status-dot"
+              [class.ai-page-main__status-dot--active]="!isExpired()"
+              [class.ai-page-main__status-dot--expired]="isExpired()"
+            ></span>
+          </div>
+
+          <div class="ai-page-main__header-info">
+            <h3 class="ai-page-main__title">{{ conv.title }}</h3>
+            <div class="ai-page-main__sub">
+              <span class="ai-page-main__machine-name">الماكينة: {{ conv.machine_name }}</span>
+              <span class="ai-page-main__sep">•</span>
+              <span class="ai-page-main__ttl" [class.ai-page-main__ttl--expired]="isExpired()">
+                {{ timeLeft() }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ai-page-main__header-actions">
+          @if (!isExpired()) {
+            <button
+              type="button"
+              class="ai-page-main__end-btn"
+              (click)="endSession(conv.id)"
+              title="إنهاء الجلسة فوراً"
+            >
+              <app-icon name="xCircle" size="sm" />
+              <span>إنهاء الجلسة</span>
+            </button>
+          }
+        </div>
+      </header>
+
+      <!-- Message History Stream -->
+      <div class="ai-page-main__body" #messagesScroll>
+        @if (isLoadingMessages()) {
+          <div class="ai-page-main__loading">
+            <app-icon name="spinner" size="lg" />
+            <span>جارِ تحميل سجل الرسائل...</span>
+          </div>
+        } @else {
+          <!-- Machine Welcome Card -->
+          <div class="ai-page-main__intro">
+            <div class="ai-page-main__intro-icon">
+              <app-icon name="zap" size="lg" />
+            </div>
+            <h4>جلسة تشخيص الماكينة: {{ conv.machine_name }}</h4>
+            <p>مرحباً بك في المساعد الذكي لخدمة العملاء. هذه الجلسة مخصصة للاستفسار عن مواصفات، أعطال، وتذاكر هذه الماكينة.</p>
+            <div class="ai-page-main__intro-badge">
+              <app-icon name="clock" size="sm" />
+              <span>صلاحية الجلسة: 4 ساعات للحفاظ على سرعة وكفاءة استجابة الذكاء الاصطناعي</span>
+            </div>
+          </div>
+
+          <!-- Messages List -->
+          <div class="ai-page-main__messages-list">
+            @for (msg of messages(); track msg.id) {
+              <div
+                class="ai-page-main__msg-row"
+                [class.ai-page-main__msg-row--user]="msg.role === 'user'"
+                [class.ai-page-main__msg-row--ai]="msg.role === 'ai'"
+                [class.ai-page-main__msg-row--system]="msg.role === 'system'"
+              >
+                @if (msg.role === 'ai') {
+                  <div class="ai-page-main__msg-avatar">
+                    <app-icon name="zap" size="sm" />
+                  </div>
+                }
+
+                <div
+                  class="ai-page-main__bubble"
+                  [class.ai-page-main__bubble--user]="msg.role === 'user'"
+                  [class.ai-page-main__bubble--ai]="msg.role === 'ai'"
+                  [class.ai-page-main__bubble--system]="msg.role === 'system'"
+                >
+                  <!-- Attachment -->
+                  @if (msg.attachment_url) {
+                    <div class="ai-page-main__attachment">
+                      @if (msg.attachment_type?.startsWith('image/') || msg.attachment_url.match(/\.(jpeg|jpg|gif|png|webp)/i)) {
+                        <img [src]="msg.attachment_url" alt="مرفق" class="ai-page-main__attachment-img" />
+                      } @else {
+                        <a [href]="msg.attachment_url" target="_blank" rel="noopener" class="ai-page-main__attachment-link">
+                          <app-icon name="fileAlt" size="sm" />
+                          <span>عرض المرفق</span>
+                        </a>
+                      }
+                    </div>
+                  }
+
+                  <!-- Content -->
+                  <div class="ai-page-main__text">{{ msg.content }}</div>
+
+                  <!-- Time -->
+                  <div class="ai-page-main__msg-meta">
+                    <span class="ai-page-main__msg-time">{{ formatTime(msg.timestamp) }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- AI Thinking Indicator -->
+            @if (isAiThinking()) {
+              <div class="ai-page-main__msg-row ai-page-main__msg-row--ai">
+                <div class="ai-page-main__msg-avatar">
+                  <app-icon name="zap" size="sm" />
+                </div>
+                <div class="ai-page-main__bubble ai-page-main__bubble--ai ai-page-main__bubble--thinking">
+                  <div class="ai-page-main__typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <span class="ai-page-main__thinking-text">المساعد الذكي يحلل البيانات ويكتب الرد...</span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Expired Banner -->
+      @if (isExpired()) {
+        <div class="ai-page-main__expired-bar">
+          <app-icon name="lock" size="md" />
+          <div class="ai-page-main__expired-text">
+            <strong>انتهت صلاحية هذه الجلسة (4 ساعات)</strong>
+            <span>يمكنك استعراض ومراجعة سجل الرسائل أعلاه، ولا يمكن إرسال رسائل جديدة في هذه الجلسة المنتهية.</span>
+          </div>
+          <button
+            type="button"
+            class="ai-page-main__expired-btn"
+            (click)="startNewForSameMachine(conv.machine_id, conv.machine_name)"
+          >
+            بدء جلسة جديدة لنفس الماكينة
+          </button>
+        </div>
+      }
+
+      <!-- Bottom Chat Input Bar -->
+      @if (!isExpired()) {
+        <footer class="ai-page-main__footer">
+          <!-- Pending Selected File preview -->
+          @if (selectedFile(); as file) {
+            <div class="ai-page-main__pending-file">
+              <div class="ai-page-main__pending-file-info">
+                <app-icon name="fileAlt" size="sm" />
+                <span class="ai-page-main__pending-file-name">{{ file.name }}</span>
+              </div>
+              <button type="button" class="ai-page-main__pending-file-remove" (click)="removeFile()" title="إزالة">
+                <app-icon name="close" size="sm" />
+              </button>
+            </div>
+          }
+
+          <div class="ai-page-main__input-row">
+            <!-- File input hidden -->
+            <input
+              type="file"
+              #fileInput
+              (change)="onFileSelected($event)"
+              class="ai-page-main__file-hidden"
+              accept="image/*,.pdf,.doc,.docx"
+            />
+
+            <button
+              type="button"
+              class="ai-page-main__attach-btn"
+              (click)="fileInput.click()"
+              title="إرفاق ملف أو صورة"
+            >
+              <app-icon name="camera" size="md" />
+            </button>
+
+            <input
+              type="text"
+              class="ai-page-main__input"
+              placeholder="اكتب استفسارك هنا للمساعد الذكي..."
+              [ngModel]="inputText()"
+              (ngModelChange)="inputText.set($event)"
+              (keydown)="onKeyDown($event)"
+              [disabled]="isAiThinking()"
+            />
+
+            <button
+              type="button"
+              class="ai-page-main__send-btn"
+              (click)="sendMessage()"
+              [disabled]="(!inputText().trim() && !selectedFile()) || isAiThinking()"
+              title="إرسال"
+            >
+              <app-icon name="chevronLeft" size="md" />
+            </button>
+          </div>
+        </footer>
+      }
+    } @else {
+      <!-- Empty State when no conversation is selected -->
+      <div class="ai-page-main__empty">
+        <div class="ai-page-main__empty-card">
+          <div class="ai-page-main__empty-icon">
+            <app-icon name="zap" size="lg" />
+          </div>
+          <h2>مساعد الذكاء الاصطناعي لخدمة العملاء</h2>
+          <p>
+            يمكنك اختيار محادثة سابقة من القائمة، أو بدء جلسة استفسار جديدة مخصصة لماكينة معينة لمساعدة العملاء بسرعة ودقة فائقة.
+          </p>
+          <div class="ai-page-main__empty-features">
+            <div class="ai-page-main__feature-item">
+              <app-icon name="table" size="md" />
+              <span>مربوط ببيانات الماكينات ومواصفاتها</span>
+            </div>
+            <div class="ai-page-main__feature-item">
+              <app-icon name="clock" size="md" />
+              <span>جلسات ذكية بذاكرة 4 ساعات لأعلى أداء</span>
+            </div>
+            <div class="ai-page-main__feature-item">
+              <app-icon name="lock" size="md" />
+              <span>حفظ دائم لسجل الرسائل للمراجعة</span>
+            </div>
+          </div>
+          <button type="button" class="ai-page-main__empty-btn" (click)="openNewSessionModal()">
+            <app-icon name="plus" size="md" />
+            <span>بدء جلسة جديدة الآن</span>
+          </button>
+        </div>
+      </div>
+    }
+  </main>
+
+  <!-- Modal for Machine Selection -->
+  <app-ai-new-session-modal
+    [visible]="isModalOpen()"
+    (visibleChange)="onModalVisibleChange($event)"
+  />
+</div>
